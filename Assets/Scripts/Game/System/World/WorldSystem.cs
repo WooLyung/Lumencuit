@@ -18,34 +18,59 @@ namespace Lumencuit
 
         public void AddListener(IEntityEventListener listener) => listeners.Add(listener);
 
-        public bool CreateEntity(Entity entity, int x, int y)
+        public bool IsInside(int x, int y) => worldGrid.IsInside(x, y);
+        public bool HasEntityAt(int x, int y) => worldGrid.HasEntityAt(x, y);
+        public Entity GetEntityAt(int x, int y) => worldGrid.GetEntityAt(x, y);
+
+        public bool TryGetEntityAt(int x, int y, out Entity entity)
         {
-            if (!worldGrid.IsInside(x, y))
-                return false;
-            if (worldGrid.HasEntityAt(x, y))
-                return false;
-            worldGrid.SetEntityAt(entity, x, y);
-
-            IEntityEventListener.EntityCreateEvent e = new IEntityEventListener.EntityCreateEvent(entity, new Vector2Int(x, y));
-            foreach (IEntityEventListener listener in listeners)
-                listener.OnEntityCreate(e);
-
-            return true;
+            if (HasEntityAt(x, y))
+            {
+                entity = GetEntityAt(x, y);
+                return true;
+            }
+            entity = null;
+            return false;
         }
 
-        public bool RemoveEntity(int x, int y)
+        public EntityRequestResult TryCreateEntity(Entity entity, int x, int y)
         {
             if (!worldGrid.IsInside(x, y))
-                return false;
-            if (!worldGrid.HasEntityAt(x, y))
-                return false;
+                return EntityRequestResult.OutOfGrid;
+            if (worldGrid.HasEntityAt(x, y))
+                return EntityRequestResult.AlreadyExist;
 
-            IEntityEventListener.EntityRemoveEvent e = new IEntityEventListener.EntityRemoveEvent(worldGrid.GetEntityAt(x, y), new Vector2Int(x, y));
-            foreach (IEntityEventListener listener in listeners)
-                listener.OnEntityRemove(e);
+            worldGrid.SetEntityAt(entity, x, y);
+            NotifyEntityCreated(entity, new Vector2Int(x, y));
+
+            return EntityRequestResult.Success;
+        }
+
+        public EntityRequestResult TryRemoveEntity(int x, int y)
+        {
+            if (!worldGrid.IsInside(x, y))
+                return EntityRequestResult.OutOfGrid;
+            if (!worldGrid.HasEntityAt(x, y))
+                return EntityRequestResult.IsEmpty;
 
             worldGrid.RemoveEntityAt(x, y);
-            return true;
+            NotifyEntityRemoved(worldGrid.GetEntityAt(x, y), new Vector2Int(x, y));
+
+            return EntityRequestResult.Success;
+        }
+
+        private void NotifyEntityCreated(Entity entity, Vector2Int pos)
+        {
+            IEntityEventListener.EntityCreatedEvent e = new IEntityEventListener.EntityCreatedEvent(entity, pos);
+            foreach (IEntityEventListener listener in listeners)
+                listener.OnEntityCreated(e);
+        }
+
+        private void NotifyEntityRemoved(Entity entity, Vector2Int pos)
+        {
+            IEntityEventListener.EntityRemovedEvent e = new IEntityEventListener.EntityRemovedEvent(entity, pos);
+            foreach (IEntityEventListener listener in listeners)
+                listener.OnEntityRemoved(e);
         }
     }
 }

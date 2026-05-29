@@ -1,18 +1,11 @@
-using Unity.VisualScripting;
-
 namespace Lumencuit
 {
     /// <summary>
     /// 유니티의 입력을 가공하여 제공하는 시스템입니다.
+    /// 구동 환경에 따라 서로 다른 입력을 정의합니다.
     /// </summary>
-    public sealed class InputSystem
+    public abstract class InputSystem
     {
-        public InputSystem()
-        {
-        }
-
-        public void Update()
-        {
-        }
+        public abstract void Update();
     }
 }

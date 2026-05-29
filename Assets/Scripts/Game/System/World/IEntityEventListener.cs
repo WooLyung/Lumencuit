@@ -7,24 +7,24 @@ namespace Lumencuit
     /// </summary>
     public interface IEntityEventListener
     {
-        public class EntityCreateEvent
+        public class EntityCreatedEvent
         {
             public readonly Entity Entity;
             public readonly Vector2Int Pos;
 
-            public EntityCreateEvent(Entity entity, Vector2Int pos)
+            public EntityCreatedEvent(Entity entity, Vector2Int pos)
             {
                 Entity = entity;
                 Pos = pos;
             }
         }
 
-        public class EntityRemoveEvent
+        public class EntityRemovedEvent
         {
             public readonly Entity Entity;
             public readonly Vector2Int Pos;
 
-            public EntityRemoveEvent(Entity entity, Vector2Int pos)
+            public EntityRemovedEvent(Entity entity, Vector2Int pos)
             {
                 Entity = entity;
                 Pos = pos;
@@ -34,11 +34,11 @@ namespace Lumencuit
         /// <summary>
         /// 엔티티가 생성될 때 호출됩니다.
         /// </summary>
-        public void OnEntityCreate(EntityCreateEvent e);
+        public void OnEntityCreated(EntityCreatedEvent e);
 
         /// <summary>
         /// 엔티티가 삭제될 때 호출됩니다.
         /// </summary>
-        public void OnEntityRemove(EntityRemoveEvent e);
+        public void OnEntityRemoved(EntityRemovedEvent e);
     }
 }

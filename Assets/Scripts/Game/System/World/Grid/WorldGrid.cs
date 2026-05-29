@@ -19,6 +19,7 @@ namespace Lumencuit
         public bool IsInside(int x, int y) => x >= 0 && x < Width && y >= 0 && y < Height;
         public bool HasEntityAt(int x, int y) => IsInside(x, y) && grid[x, y] != null;
         public Entity GetEntityAt(int x, int y) => IsInside(x, y) ? grid[x, y] : null;
+
         public void SetEntityAt(Entity entity, int x, int y)
         {
             if (IsInside(x, y))

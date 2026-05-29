@@ -10,12 +10,19 @@ namespace Lumencuit
             worldSystem.AddListener(this);
         }
 
-        public void OnEntityCreate(IEntityEventListener.EntityCreateEvent e)
+        private void FlowAll()
         {
+
         }
 
-        public void OnEntityRemove(IEntityEventListener.EntityRemoveEvent e)
+        public void OnEntityCreated(IEntityEventListener.EntityCreatedEvent e)
         {
+            FlowAll();
+        }
+
+        public void OnEntityRemoved(IEntityEventListener.EntityRemovedEvent e)
+        {
+            FlowAll();
         }
     }
 }

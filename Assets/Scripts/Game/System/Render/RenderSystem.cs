@@ -15,12 +15,12 @@ namespace Lumencuit
             this.root = root;
         }
 
-        public void OnEntityCreate(IEntityEventListener.EntityCreateEvent e)
+        public void OnEntityCreated(IEntityEventListener.EntityCreatedEvent e)
         {
             Debug.Log(e.Entity.Element.Id);
         }
 
-        public void OnEntityRemove(IEntityEventListener.EntityRemoveEvent e)
+        public void OnEntityRemoved(IEntityEventListener.EntityRemovedEvent e)
         {
         }
     }

@@ -17,13 +17,18 @@ namespace Lumencuit
         private InputSystem inputSystem;
         private RenderSystem renderSystem;
 
-        // 유니티 생명주기 메소드
         private void Awake()
         {
             worldSystem = new();
             simulationSystem = new(worldSystem);
-            inputSystem = new();
             renderSystem = new(worldSystem, root);
+#if UNITY_ANDROID || UNITY_IOS
+            inputSystem = new NullInputSystem();
+#elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_EDITOR
+            inputSystem = new PCInputSystem();
+#else
+            inputSystem = new NullInputSystem();
+#endif
         }
 
         private void Start()
