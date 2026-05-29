@@ -6,13 +6,14 @@ namespace Lumencuit
     /// <summary>
     /// And 회로 요소입니다.
     /// </summary>
-    public class AndGate : CircuitElement
+    public sealed class AndGate : CircuitElement
     {
         public override string Id => "AndGate";
+        public override int TurbidityDelta => 1;
         public override int InSignalCount => 2;
         public override int OutSignalCount => 1;
 
-        public override Signal Flow(IEnumerable<Signal> inputs)
+        public override Signal Flow(IReadOnlyList<Signal> inputs)
         {
             if (inputs.Count() == 0)
                 return Signal.Black;

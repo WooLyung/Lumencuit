@@ -1,22 +1,22 @@
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Lumencuit
 {
     /// <summary>
-    /// Or 회로 요소입니다.
+    /// Xor 회로 요소입니다.
     /// </summary>
-    public class OrGate : CircuitElement
+    public sealed class XorGate : CircuitElement
     {
-        public override string Id => "OrGate";
+        public override string Id => "XorGate";
+        public override int TurbidityDelta => 1;
         public override int InSignalCount => 2;
         public override int OutSignalCount => 1;
 
-        public override Signal Flow(IEnumerable<Signal> inputs)
+        public override Signal Flow(IReadOnlyList<Signal> inputs)
         {
             Signal output = Signal.Black;
             foreach (Signal input in inputs)
-                output |= input;
+                output ^= input;
             return output;
         }
     }

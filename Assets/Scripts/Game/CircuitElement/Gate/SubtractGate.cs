@@ -6,13 +6,14 @@ namespace Lumencuit
     /// <summary>
     /// Subtract 회로 요소입니다.
     /// </summary>
-    public class SubtractGate : CircuitElement
+    public sealed class SubtractGate : CircuitElement
     {
         public override string Id => "SubtractGate";
+        public override int TurbidityDelta => 1;
         public override int InSignalCount => 2;
         public override int OutSignalCount => 1;
 
-        public override Signal Flow(IEnumerable<Signal> inputs)
+        public override Signal Flow(IReadOnlyList<Signal> inputs)
         {
             if (inputs.Count() == 0)
                 return Signal.Black;

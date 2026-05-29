@@ -5,8 +5,11 @@ namespace Lumencuit
     /// </summary>
     public sealed class WorldSystem
     {
+        private readonly WorldGrid worldGrid;
+
         public WorldSystem()
         {
+            worldGrid = new(10, 10);
         }
     }
 }

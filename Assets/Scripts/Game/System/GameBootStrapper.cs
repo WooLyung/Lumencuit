@@ -20,15 +20,19 @@ namespace Lumencuit
         // 유니티 생명주기 메소드
         private void Awake()
         {
-            gameWorld = new WorldSystem();
-            simulationSystem = new SimulationSystem();
-            inputSystem = new InputSystem();
-            renderSystem = new RenderSystem();
+            gameWorld = new();
+            simulationSystem = new();
+            inputSystem = new();
+            renderSystem = new();
         }
 
         private void Start()
         {
+        }
 
+        private void Update()
+        {
+            inputSystem.Update();
         }
     }
 }

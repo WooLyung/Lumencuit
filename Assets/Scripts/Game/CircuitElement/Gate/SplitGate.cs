@@ -3,11 +3,11 @@ using System.Collections.Generic;
 namespace Lumencuit
 {
     /// <summary>
-    /// 신호를 전달하는 회로 요소입니다.
+    /// 한 신호를 두 갈래로 나누는 게이트입니다.
     /// </summary>
-    public sealed class Wire : CircuitElement
+    public sealed class SplitGate : CircuitElement
     {
-        public override string Id => "Wire";
+        public override string Id => "SplitGate";
         public override int TurbidityDelta => 0;
         public override int InSignalCount => 1;
         public override int OutSignalCount => 1;

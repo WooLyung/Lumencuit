@@ -1,3 +1,5 @@
+using Unity.VisualScripting;
+
 namespace Lumencuit
 {
     /// <summary>
@@ -6,6 +8,10 @@ namespace Lumencuit
     public sealed class InputSystem
     {
         public InputSystem()
+        {
+        }
+
+        public void Update()
         {
         }
     }

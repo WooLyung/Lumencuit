@@ -3,19 +3,17 @@ using System.Collections.Generic;
 namespace Lumencuit
 {
     /// <summary>
-    /// 신호를 전달하는 회로 요소입니다.
+    /// 신호가 도달하는 목적지입니다.
     /// </summary>
-    public sealed class Wire : CircuitElement
+    public sealed class Lamp : CircuitElement
     {
-        public override string Id => "Wire";
+        public override string Id => "Lamp";
         public override int TurbidityDelta => 0;
         public override int InSignalCount => 1;
-        public override int OutSignalCount => 1;
+        public override int OutSignalCount => 0;
 
         public override Signal Flow(IReadOnlyList<Signal> inputs)
         {
-            foreach (Signal input in inputs)
-                return input;
             return Signal.Black;
         }
     }
