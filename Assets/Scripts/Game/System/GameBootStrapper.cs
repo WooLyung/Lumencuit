@@ -18,7 +18,7 @@ namespace Lumencuit
         private RenderSystem renderSystem;
 
         // 유니티 생명주기 메소드
-        public void Awake()
+        private void Awake()
         {
             gameWorld = new WorldSystem();
             simulationSystem = new SimulationSystem();
@@ -26,7 +26,7 @@ namespace Lumencuit
             renderSystem = new RenderSystem();
         }
 
-        public void Start()
+        private void Start()
         {
 
         }
