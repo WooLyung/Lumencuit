@@ -333,6 +333,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbd5cb14bc2114448a62f4c9de8546be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameBootStrapper
+  root: {fileID: 2073237930}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0

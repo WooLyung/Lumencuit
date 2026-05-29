@@ -7,10 +7,16 @@ namespace Lumencuit
     /// </summary>
     public sealed class SplitGate : CircuitElement
     {
+        private static CircuitElement instance;
         public override string Id => "SplitGate";
         public override int TurbidityDelta => 0;
         public override int InSignalCount => 1;
         public override int OutSignalCount => 1;
+
+
+        private SplitGate() { }
+
+        public static CircuitElement Instance => instance ??= new SplitGate();
 
         public override Signal Flow(IReadOnlyList<Signal> inputs)
         {

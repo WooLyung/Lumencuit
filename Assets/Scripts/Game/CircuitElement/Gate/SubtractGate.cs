@@ -8,10 +8,15 @@ namespace Lumencuit
     /// </summary>
     public sealed class SubtractGate : CircuitElement
     {
+        private static CircuitElement instance;
         public override string Id => "SubtractGate";
         public override int TurbidityDelta => 1;
         public override int InSignalCount => 2;
         public override int OutSignalCount => 1;
+
+        private SubtractGate() { }
+
+        public static CircuitElement Instance => instance ??= new SubtractGate();
 
         public override Signal Flow(IReadOnlyList<Signal> inputs)
         {

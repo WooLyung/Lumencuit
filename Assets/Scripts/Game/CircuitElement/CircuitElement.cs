@@ -3,7 +3,8 @@ using System.Collections.Generic;
 namespace Lumencuit
 {
     /// <summary>
-    /// 게이트와 선, 조명을 포함하는 추상 클래스입니다.
+    /// 게이트, 조명, 소스 등의 회로 요소의 연산을 정의합니다.
+    /// 자식 클래스는 싱글톤 패턴으로 정의합니다.
     /// </summary>
     public abstract class CircuitElement
     {

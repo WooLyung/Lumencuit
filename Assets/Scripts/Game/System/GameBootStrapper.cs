@@ -9,10 +9,10 @@ namespace Lumencuit
     public sealed class GameBootStrapper : MonoBehaviour
     {
         // 인스펙터 노출 변수
-        [SerializeField] private readonly GameObject root;
+        [SerializeField] private Transform root;
 
         // 시스템 변수
-        private WorldSystem gameWorld;
+        private WorldSystem worldSystem;
         private SimulationSystem simulationSystem;
         private InputSystem inputSystem;
         private RenderSystem renderSystem;
@@ -20,14 +20,17 @@ namespace Lumencuit
         // 유니티 생명주기 메소드
         private void Awake()
         {
-            gameWorld = new();
-            simulationSystem = new();
+            worldSystem = new();
+            simulationSystem = new(worldSystem);
             inputSystem = new();
-            renderSystem = new();
+            renderSystem = new(worldSystem, root);
         }
 
         private void Start()
         {
+            worldSystem.CreateEntity(new Entity(Source.Instance, Signal.Red), 0, 0);
+            worldSystem.CreateEntity(new Entity(Wire.Instance), 1, 0);
+            worldSystem.CreateEntity(new Entity(Lamp.Instance), 2, 0);
         }
 
         private void Update()

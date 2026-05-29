@@ -7,10 +7,15 @@ namespace Lumencuit
     /// </summary>
     public sealed class LampBridge : CircuitElement
     {
+        private static CircuitElement instance;
         public override string Id => "LampBridge";
         public override int TurbidityDelta => 0;
         public override int InSignalCount => 1;
         public override int OutSignalCount => 1;
+
+        private LampBridge() { }
+
+        public static CircuitElement Instance => instance ??= new LampBridge();
 
         public override Signal Flow(IReadOnlyList<Signal> inputs)
         {

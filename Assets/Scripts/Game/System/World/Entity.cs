@@ -10,16 +10,16 @@ namespace Lumencuit
         /// <summary>
         /// 회로 요소의 각 면의 입출력 여부를 나타냅니다.
         /// </summary>
-        public enum Side { Input, Output, None };
+        public enum PortType { Input, Output, None };
 
         /// <summary>
         /// 회로 요소의 네 면의 입출력 여부를 나타냅니다.
         /// </summary>
-        public struct Sides
+        public struct Ports
         {
-            public Side Left, Right, Up, Down;
+            public PortType Left, Right, Up, Down;
 
-            public Sides(Side left, Side right, Side up, Side down)
+            public Ports(PortType left, PortType right, PortType up, PortType down)
             {
                 Left = left;
                 Right = right;
@@ -27,40 +27,40 @@ namespace Lumencuit
                 Down = down;
             }
 
-            public static readonly Sides None = new(Side.None, Side.None, Side.None, Side.None);
+            public static readonly Ports None = new(PortType.None, PortType.None, PortType.None, PortType.None);
         }
 
-        private readonly CircuitElement element;
+        public readonly CircuitElement Element;
         private Signal signal = Signal.Black;
-        private Sides sides = Sides.None;
+        private Ports sides = Ports.None;
 
         public Entity(CircuitElement element)
         {
-            this.element = element;
+            Element = element;
         }
 
         public Entity(CircuitElement element, Signal signal)
         {
-            this.element = element;
+            Element = element;
             this.signal = signal;
         }
 
-        public Entity(CircuitElement element, Signal signal, Sides sides)
+        public Entity(CircuitElement element, Signal signal, Ports sides)
         {
-            this.element = element;
+            Element = element;
             this.signal = signal;
             this.sides = sides;
         }
 
-        public Side LeftIO { get => sides.Left; set => sides.Left = value; }
-        public Side RightIO { get => sides.Right; set => sides.Right = value; }
-        public Side UpIO { get => sides.Up; set => sides.Up = value; }
-        public Side DownIO { get => sides.Down; set => sides.Down = value; }
+        public PortType LeftPort { get => sides.Left; set => sides.Left = value; }
+        public PortType RightPort { get => sides.Right; set => sides.Right = value; }
+        public PortType UpPort { get => sides.Up; set => sides.Up = value; }
+        public PortType DownPort { get => sides.Down; set => sides.Down = value; }
         public Signal CurrSignal => signal;
 
         public Signal Flow(IReadOnlyList<Signal> inputs)
         {
-            return signal = element.Flow(inputs);
+            return signal = Element.Flow(inputs);
         }
     }
 }
