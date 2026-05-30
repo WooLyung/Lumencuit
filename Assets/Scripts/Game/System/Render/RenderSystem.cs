@@ -8,14 +8,14 @@ namespace Lumencuit
     public sealed class RenderSystem : IEntityEventListener
     {
         private readonly WorldSystem worldSystem;
-        private readonly RenderPrefabRegistry prefabs;
-        private readonly Transform root;
+        private readonly RenderPrefab prefabs;
+        private readonly Views views;
 
-        public RenderSystem(WorldSystem worldSystem, RenderPrefabRegistry prefabs, Transform root)
+        public RenderSystem(WorldSystem worldSystem, RenderPrefab prefabs, Views views)
         {
             this.worldSystem = worldSystem;
             this.prefabs = prefabs;
-            this.root = root;
+            this.views = views;
             worldSystem.AddListener(this);
 
             RenderGrid();
@@ -30,15 +30,19 @@ namespace Lumencuit
                     if (!worldSystem.IsEnabledTile(x, y))
                         continue;
 
-                    GameObject tile = Object.Instantiate(prefabs.Tile, root);
+                    GameObject tile = Object.Instantiate(prefabs.Tile, views.GridMesh);
                     tile.transform.position = new Vector3(x, y, 0);
+
+                    GameObject gridCollider = Object.Instantiate(prefabs.GridCollider, views.GridColliders);
+                    gridCollider.transform.position = new Vector3(x, y, 0);
+                    gridCollider.name = $"GridCollider[{x}][{y}]";
+                    gridCollider.GetComponent<GridTilePos>().Pos = new Vector2Int(x, y);
                 }
             }
         }
 
         public void OnEntityCreated(IEntityEventListener.EntityCreatedEvent e)
         {
-            Debug.Log(e.Entity.Element.Id);
         }
 
         public void OnEntityRemoved(IEntityEventListener.EntityRemovedEvent e)

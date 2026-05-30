@@ -7,10 +7,12 @@ namespace Lumencuit
     /// 렌더 시스템이 생성할 프리팹 집합입니다.
     /// </summary>
     [Serializable]
-    public sealed class RenderPrefabRegistry
+    public sealed class RenderPrefab
     {
         [SerializeField] private GameObject tile;
+        [SerializeField] private GameObject gridCollider;
 
         public GameObject Tile => tile;
+        public GameObject GridCollider => gridCollider;
     }
 }
