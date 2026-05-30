@@ -8,12 +8,14 @@ namespace Lumencuit
     /// </summary>
     public sealed class WorldSystem
     {
+        private readonly StageData stageData;
         private readonly WorldGrid worldGrid;
         private readonly List<IEntityEventListener> listeners = new();
 
-        public WorldSystem()
+        public WorldSystem(StageData stageData)
         {
-            worldGrid = new(10, 10);
+            this.stageData = stageData;
+            worldGrid = new(stageData.Width, stageData.Height);
         }
 
         public void AddListener(IEntityEventListener listener) => listeners.Add(listener);

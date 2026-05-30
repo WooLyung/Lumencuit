@@ -5,9 +5,12 @@ namespace Lumencuit
     /// </summary>
     public sealed class SimulationSystem : IEntityEventListener
     {
-        public SimulationSystem(WorldSystem worldSystem)
+        private readonly StageData stageData;
+
+        public SimulationSystem(WorldSystem worldSystem, StageData stageData)
         {
             worldSystem.AddListener(this);
+            this.stageData = stageData;
         }
 
         private void FlowAll()

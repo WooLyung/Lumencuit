@@ -19,8 +19,14 @@ namespace Lumencuit
 
         private void Awake()
         {
-            worldSystem = new();
-            simulationSystem = new(worldSystem);
+            StageContext context = GameObject.Find("StageContext")?.GetComponent<StageContext>();
+            if (context == null)
+                return;
+            Destroy(context.gameObject);
+            StageData stageData = context.SelectedStage;
+
+            worldSystem = new(stageData);
+            simulationSystem = new(worldSystem, stageData);
             renderSystem = new(worldSystem, root);
 #if UNITY_ANDROID || UNITY_IOS
             inputSystem = new NullInputSystem();
@@ -33,9 +39,6 @@ namespace Lumencuit
 
         private void Start()
         {
-            worldSystem.CreateEntity(new Entity(Source.Instance, Signal.Red), 0, 0);
-            worldSystem.CreateEntity(new Entity(Wire.Instance), 1, 0);
-            worldSystem.CreateEntity(new Entity(Lamp.Instance), 2, 0);
         }
 
         private void Update()
