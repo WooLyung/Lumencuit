@@ -12,6 +12,12 @@ namespace Lumencuit.Editor
     {
         private const int CellSize = 24;
         private const int CellGap = 2;
+        private SerializedProperty entityBlueprintsProperty;
+
+        private void OnEnable()
+        {
+            entityBlueprintsProperty = serializedObject.FindProperty("Blueprints");
+        }
 
         public override void OnInspectorGUI()
         {
@@ -21,12 +27,13 @@ namespace Lumencuit.Editor
             stageData.StageName = EditorGUILayout.TextField("Stage Name", stageData.StageName);
             stageData.Width = EditorGUILayout.IntField("Width", stageData.Width);
             stageData.Height = EditorGUILayout.IntField("Height", stageData.Height);
+            EditorGUILayout.PropertyField(entityBlueprintsProperty, true);
 
             stageData.ResizeTiles();
             EditorGUILayout.Space(10);
             EditorGUILayout.LabelField("Tile Layout", EditorStyles.boldLabel);
-
             DrawTileGrid(stageData);
+
             if (EditorGUI.EndChangeCheck())
                 EditorUtility.SetDirty(stageData);
         }

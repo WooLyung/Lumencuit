@@ -1,10 +1,20 @@
-﻿namespace Lumencuit
+﻿using static Lumencuit.Signal;
+
+namespace Lumencuit
 {
     /// <summary>
     /// 회로의 신호를 나타내는 구조체입니다.
     /// </summary>
     public readonly struct Signal
     {
+        /// <summary>
+        /// 신호의 색을 나타내는 열거형입니다.
+        /// </summary>
+        public enum SignalColor
+        {
+            Red, Green, Blue, Yellow, Cyan, Magenta, Black, White
+        }
+
         private readonly bool r, g, b;
 
         private Signal(bool r, bool g, bool b)
@@ -32,5 +42,46 @@
         public static Signal operator |(Signal a, Signal b) => new(a.r || b.r, a.g || b.g, a.b || b.b);
         public static Signal operator -(Signal a, Signal b) => new(a.r && !b.r, a.g && !b.g, a.b && !b.b);
         public static Signal operator ^(Signal a, Signal b) => new(a.r != b.r, a.g != b.g, a.b != b.b);
+
+        public SignalColor Color
+        {
+            get
+            {
+                if (r && !g && !b)
+                    return SignalColor.Red;
+                if (!r && g && !b)
+                    return SignalColor.Green;
+                if (!r && !g && b)
+                    return SignalColor.Blue;
+                if (r && g && !b)
+                    return SignalColor.Yellow;
+                if (!r && g && b)
+                    return SignalColor.Cyan;
+                if (r && !g && b)
+                    return SignalColor.Magenta;
+                if (r && g && b)
+                    return SignalColor.White;
+                return SignalColor.Black;
+            }
+        }
+    }
+
+    public static class SignalColorFunction
+    {
+        public static Signal ToSignal(this SignalColor color)
+        {
+            return color switch
+            {
+                SignalColor.Black => Black,
+                SignalColor.Red => Red,
+                SignalColor.Green => Green,
+                SignalColor.Blue => Blue,
+                SignalColor.Yellow => Yellow,
+                SignalColor.Cyan => Cyan,
+                SignalColor.Magenta => Magenta,
+                SignalColor.White => White,
+                _ => Black
+            };
+        }
     }
 }

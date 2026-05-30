@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using static Lumencuit.CircuitElement;
 
 namespace Lumencuit
 {
@@ -9,9 +10,15 @@ namespace Lumencuit
     public abstract class CircuitElement
     {
         /// <summary>
-        /// 내부적으로 사용되는 식별자입니다.
+        /// 회로 요소의 종류를 정의하는 열거형입니다.
         /// </summary>
-        public abstract string Id { get; }
+        public enum CircuitElementType
+        {
+            Lamp, LampBridge, Source, Wire,
+            AndGate, NotGate, OrGate, SplitGate, SubtractGate, XorGate
+        }
+
+        public abstract CircuitElementType Type { get; }
 
         /// <summary>
         /// 신호가 회로 요소를 지남에 따른 탁도 변화량입니다.
@@ -35,9 +42,29 @@ namespace Lumencuit
         /// 현재 연결된 입력 신호입니다.
         /// </param>
         /// <returns>
-        /// 계산된 출력 신호입니다.
-        /// 입력이 부족한 경우 Black 신호를 출력합니다.
+        /// 계산된 출력 신호입니다. 입력이 부족한 경우 Black 신호를 출력합니다.
         /// </returns>
         public abstract Signal Flow(IReadOnlyList<Signal> inputs);
+    }
+
+    public static class CircuitElementTypeFunction
+    {
+        public static CircuitElement ToElement(this CircuitElementType type)
+        {
+            return type switch
+            {
+                CircuitElementType.Lamp => Lamp.Instance,
+                CircuitElementType.LampBridge => Lamp.Instance,
+                CircuitElementType.Source => Lamp.Instance,
+                CircuitElementType.Wire => Lamp.Instance,
+                CircuitElementType.AndGate => Lamp.Instance,
+                CircuitElementType.NotGate => Lamp.Instance,
+                CircuitElementType.OrGate => Lamp.Instance,
+                CircuitElementType.SplitGate => Lamp.Instance,
+                CircuitElementType.SubtractGate => Lamp.Instance,
+                CircuitElementType.XorGate => Lamp.Instance,
+                _ => null
+            };
+        }
     }
 }

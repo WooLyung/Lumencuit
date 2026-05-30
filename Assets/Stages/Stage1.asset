@@ -15,4 +15,5 @@ MonoBehaviour:
   StageName: Stage 1
   Width: 4
   Height: 4
-  enabledTiles: 01000000000101000001000100000100
+  Blueprints: []
+  enabledTiles: 01010000000101000001010100000101

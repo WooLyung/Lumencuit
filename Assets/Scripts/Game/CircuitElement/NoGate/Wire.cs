@@ -8,7 +8,7 @@ namespace Lumencuit
     public sealed class Wire : CircuitElement
     {
         private static CircuitElement instance;
-        public override string Id => "Wire";
+        public override CircuitElementType Type => CircuitElementType.Wire;
         public override int TurbidityDelta => 0;
         public override int InSignalCount => 1;
         public override int OutSignalCount => 1;

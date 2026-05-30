@@ -8,7 +8,7 @@ namespace Lumencuit
     public sealed class XorGate : CircuitElement
     {
         private static CircuitElement instance;
-        public override string Id => "XorGate";
+        public override CircuitElementType Type => CircuitElementType.XorGate;
         public override int TurbidityDelta => 1;
         public override int InSignalCount => 2;
         public override int OutSignalCount => 1;

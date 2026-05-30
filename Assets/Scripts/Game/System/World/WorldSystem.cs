@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Lumencuit
 {
     /// <summary>
-    /// 게이트를 포함한 장치들을 생성, 삭제, 관리하는 시스템입니다.
+    /// 회로 요소 엔티티를 생성, 삭제, 관리하는 시스템입니다.
     /// </summary>
     public sealed class WorldSystem
     {
@@ -56,8 +56,9 @@ namespace Lumencuit
             if (!worldGrid.HasEntityAt(x, y))
                 return EntityRequestResult.IsEmpty;
 
+            Entity entity = worldGrid.GetEntityAt(x, y);
             worldGrid.RemoveEntityAt(x, y);
-            NotifyEntityRemoved(worldGrid.GetEntityAt(x, y), new Vector2Int(x, y));
+            NotifyEntityRemoved(entity, new Vector2Int(x, y));
 
             return EntityRequestResult.Success;
         }

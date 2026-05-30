@@ -9,7 +9,7 @@ namespace Lumencuit
     public sealed class AndGate : CircuitElement
     {
         private static CircuitElement instance;
-        public override string Id => "AndGate";
+        public override CircuitElementType Type => CircuitElementType.AndGate;
         public override int TurbidityDelta => 1;
         public override int InSignalCount => 2;
         public override int OutSignalCount => 1;

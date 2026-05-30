@@ -8,7 +8,7 @@ namespace Lumencuit
     public sealed class NotGate : CircuitElement
     {
         private static CircuitElement instance;
-        public override string Id => "NotGate";
+        public override CircuitElementType Type => CircuitElementType.NotGate;
         public override int TurbidityDelta => 1;
         public override int InSignalCount => 1;
         public override int OutSignalCount => 1;
