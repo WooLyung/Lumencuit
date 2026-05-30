@@ -8,18 +8,19 @@ namespace Lumencuit
     /// </summary>
     public sealed class WorldSystem
     {
-        private readonly StageData stageData;
         private readonly WorldGrid worldGrid;
         private readonly List<IEntityEventListener> listeners = new();
 
         public WorldSystem(StageData stageData)
         {
-            this.stageData = stageData;
-            worldGrid = new(stageData.Width, stageData.Height);
+            worldGrid = new(stageData);
         }
 
         public void AddListener(IEntityEventListener listener) => listeners.Add(listener);
 
+        public int Width => worldGrid.Width;
+        public int Height => worldGrid.Height;
+        public bool IsEnabledTile(int x, int y) => worldGrid.IsEnabledTile(x, y);
         public bool IsInside(int x, int y) => worldGrid.IsInside(x, y);
         public bool HasEntityAt(int x, int y) => worldGrid.HasEntityAt(x, y);
         public Entity GetEntityAt(int x, int y) => worldGrid.GetEntityAt(x, y);
@@ -37,8 +38,8 @@ namespace Lumencuit
 
         public EntityRequestResult TryCreateEntity(Entity entity, int x, int y)
         {
-            if (!worldGrid.IsInside(x, y))
-                return EntityRequestResult.OutOfGrid;
+            if (!worldGrid.IsEnabledTile(x, y))
+                return EntityRequestResult.InvalidTile;
             if (worldGrid.HasEntityAt(x, y))
                 return EntityRequestResult.AlreadyExist;
 
@@ -50,8 +51,8 @@ namespace Lumencuit
 
         public EntityRequestResult TryRemoveEntity(int x, int y)
         {
-            if (!worldGrid.IsInside(x, y))
-                return EntityRequestResult.OutOfGrid;
+            if (!worldGrid.IsEnabledTile(x, y))
+                return EntityRequestResult.InvalidTile;
             if (!worldGrid.HasEntityAt(x, y))
                 return EntityRequestResult.IsEmpty;
 

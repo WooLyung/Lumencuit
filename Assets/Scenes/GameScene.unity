@@ -334,6 +334,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameBootStrapper
   root: {fileID: 2073237930}
+  prefabs:
+    tile: {fileID: 6130651401286859068, guid: 8789e5a01aacd1c44afc21053f73ff6d, type: 3}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0

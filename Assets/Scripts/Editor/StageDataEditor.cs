@@ -22,9 +22,6 @@ namespace Lumencuit.Editor
             stageData.Width = EditorGUILayout.IntField("Width", stageData.Width);
             stageData.Height = EditorGUILayout.IntField("Height", stageData.Height);
 
-            stageData.Width = Mathf.Max(1, stageData.Width);
-            stageData.Height = Mathf.Max(1, stageData.Height);
-
             stageData.ResizeTiles();
             EditorGUILayout.Space(10);
             EditorGUILayout.LabelField("Tile Layout", EditorStyles.boldLabel);

@@ -13,7 +13,7 @@
         }
 
         public static readonly EntityRequestResult Success = new EntityRequestResult("Success");
-        public static readonly EntityRequestResult OutOfGrid = new EntityRequestResult("OutOfGrid");
+        public static readonly EntityRequestResult InvalidTile = new EntityRequestResult("InvalidTile");
         public static readonly EntityRequestResult AlreadyExist = new EntityRequestResult("AlreadyExist");
         public static readonly EntityRequestResult IsEmpty = new EntityRequestResult("IsEmpty");
     }

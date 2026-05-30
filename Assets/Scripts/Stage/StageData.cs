@@ -9,27 +9,58 @@ namespace Lumencuit
     public sealed class StageData : ScriptableObject
     {
         public string StageName;
-        [Min(1)] public int Width = 5;
-        [Min(1)] public int Height = 5;
-        [SerializeField] private bool[,] enabledTiles = new bool[1, 1];
+
+        [Min(1)] public int Width = 1;
+        [Min(1)] public int Height = 1;
+
+        [SerializeField] private bool[] enabledTiles = new bool[1];
 
         public bool IsEnabledTile(int x, int y)
         {
-            if (x < 0 || x >= Width || y < 0 || y >= Height)
+            if (!IsInside(x, y))
                 return false;
-            return enabledTiles[x, y];
+
+            ResizeTiles();
+            return enabledTiles[GetIndex(x, y)];
         }
 
         public void SetEnabledTile(int x, int y, bool value)
         {
-            enabledTiles[x, y] = value;
+            if (!IsInside(x, y))
+                return;
+
+            ResizeTiles();
+            enabledTiles[GetIndex(x, y)] = value;
         }
 
         public void ResizeTiles()
         {
-            int size = Width * Height;
-            if (enabledTiles == null || enabledTiles.Length != Width * Height)
-                enabledTiles = new bool[Width, Height];
+            int newSize = Width * Height;
+
+            if (enabledTiles != null && enabledTiles.Length == newSize)
+                return;
+
+            bool[] oldTiles = enabledTiles;
+            bool[] newTiles = new bool[newSize];
+
+            if (oldTiles != null)
+            {
+                int copyLength = Mathf.Min(oldTiles.Length, newTiles.Length);
+                for (int i = 0; i < copyLength; i++)
+                    newTiles[i] = oldTiles[i];
+            }
+
+            enabledTiles = newTiles;
+        }
+
+        private bool IsInside(int x, int y)
+        {
+            return x >= 0 && x < Width && y >= 0 && y < Height;
+        }
+
+        private int GetIndex(int x, int y)
+        {
+            return y * Width + x;
         }
     }
 }
