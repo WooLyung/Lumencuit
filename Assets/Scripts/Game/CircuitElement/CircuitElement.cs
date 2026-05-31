@@ -54,15 +54,15 @@ namespace Lumencuit
             return type switch
             {
                 CircuitElementType.Lamp => Lamp.Instance,
-                CircuitElementType.LampBridge => Lamp.Instance,
-                CircuitElementType.Source => Lamp.Instance,
-                CircuitElementType.Wire => Lamp.Instance,
-                CircuitElementType.AndGate => Lamp.Instance,
-                CircuitElementType.NotGate => Lamp.Instance,
-                CircuitElementType.OrGate => Lamp.Instance,
-                CircuitElementType.SplitGate => Lamp.Instance,
-                CircuitElementType.SubtractGate => Lamp.Instance,
-                CircuitElementType.XorGate => Lamp.Instance,
+                CircuitElementType.LampBridge => LampBridge.Instance,
+                CircuitElementType.Source => Source.Instance,
+                CircuitElementType.Wire => Wire.Instance,
+                CircuitElementType.AndGate => AndGate.Instance,
+                CircuitElementType.NotGate => NotGate.Instance,
+                CircuitElementType.OrGate => OrGate.Instance,
+                CircuitElementType.SplitGate => SplitGate.Instance,
+                CircuitElementType.SubtractGate => SubtractGate.Instance,
+                CircuitElementType.XorGate => XorGate.Instance,
                 _ => null
             };
         }

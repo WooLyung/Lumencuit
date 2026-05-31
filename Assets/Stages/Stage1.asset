@@ -22,6 +22,6 @@ MonoBehaviour:
     count: 2
   - blueprint:
       type: 0
-      signalColor: 6
+      signalColor: 1
     count: 2
   enabledTiles: 01010000000101000001010100000101

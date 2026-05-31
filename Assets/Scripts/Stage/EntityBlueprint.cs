@@ -46,12 +46,12 @@ namespace Lumencuit
         public static bool operator ==(EntityBlueprint a, EntityBlueprint b)
         {
             if (ReferenceEquals(a, b))
-                return true;
+                return true; 
             if (a is null && b is null)
                 return true;
             if (a is null || b is null)
                 return false;
-            return a.Type == b.Type && a.SignalColor == b.SignalColor;
+            return a.Type == b.Type && (a.Type != CircuitElementType.Source || a.SignalColor == b.SignalColor);
         }
 
         public static bool operator !=(EntityBlueprint a, EntityBlueprint b)
