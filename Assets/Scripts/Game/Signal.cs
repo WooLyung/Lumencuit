@@ -1,4 +1,5 @@
-﻿using static Lumencuit.Signal;
+﻿using UnityEngine;
+using static Lumencuit.Signal;
 
 namespace Lumencuit
 {
@@ -64,6 +65,11 @@ namespace Lumencuit
                 return SignalColor.Black;
             }
         }
+
+        public Color ToColor()
+        {
+            return Color.ToColor();
+        }
     }
 
     public static class SignalColorFunction
@@ -81,6 +87,22 @@ namespace Lumencuit
                 SignalColor.Magenta => Magenta,
                 SignalColor.White => White,
                 _ => Black
+            };
+        }
+
+        public static Color ToColor(this SignalColor color)
+        {
+            return color switch
+            {
+                SignalColor.Black => Color.black,
+                SignalColor.Red => Color.red,
+                SignalColor.Green => Color.green,
+                SignalColor.Blue => Color.blue,
+                SignalColor.Yellow => Color.yellow,
+                SignalColor.Cyan => Color.cyan,
+                SignalColor.Magenta => Color.magenta,
+                SignalColor.White => Color.white,
+                _ => Color.black
             };
         }
     }

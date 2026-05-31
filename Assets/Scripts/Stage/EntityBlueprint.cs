@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 using static Lumencuit.CircuitElement;
 using static Lumencuit.Signal;
@@ -40,7 +39,7 @@ namespace Lumencuit
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(type, signalColor, Type, SignalColor);
+            return HashCode.Combine(type, signalColor);
         }
 
         public static bool operator ==(EntityBlueprint a, EntityBlueprint b)

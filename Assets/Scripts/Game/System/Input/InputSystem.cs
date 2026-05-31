@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Lumencuit
@@ -8,8 +9,17 @@ namespace Lumencuit
     /// </summary>
     public abstract class InputSystem
     {
+        public enum InputState
+        {
+            Drag, None
+        }
+        
         protected WorldSystem worldSystem;
         private EntityBlueprint selectedBlueprint = null;
+        private InputState currInputState = InputState.None;
+        private List<Vector2Int> path = new();
+
+        public InputState CurrInputState => currInputState;
 
         public InputSystem(WorldSystem worldSystem)
         {
@@ -27,8 +37,65 @@ namespace Lumencuit
         {
             if (selectedBlueprint == null)
                 return;
-            worldSystem.TryCreateEntityByBlueprint(selectedBlueprint, x, y);
+            worldSystem.TryCreateEntity(selectedBlueprint, x, y);
             selectedBlueprint = null;
+        }
+
+        protected void StartPath(int x, int y)
+        {
+            if (currInputState != InputState.None)
+                return;
+
+            Entity entity = worldSystem.GetEntityAt(x, y);
+            if (entity == null)
+                return;
+            if (entity.OutPortCount >= entity.Element.OutSignalCount)
+                return;
+
+            currInputState = InputState.Drag;
+            path.Clear();
+            path.Add(new Vector2Int(x, y));
+        }
+
+        protected void NextPath(int x, int y)
+        {
+            if (currInputState != InputState.Drag)
+                return;
+
+            Vector2Int next = new Vector2Int(x, y);
+            if (path.Count == 0)
+            {
+                path.Add(next);
+                return;
+            }
+
+            Vector2Int last = path[^1];
+            if (last == next)
+                return;
+
+            int existingIndex = path.IndexOf(next);
+            if (existingIndex >= 0)
+            {
+                path.RemoveRange(existingIndex + 1, path.Count - existingIndex - 1);
+                return;
+            }
+
+            path.Add(next);
+        }
+
+        protected void EndPath()
+        {
+            if (currInputState != InputState.Drag)
+            {
+                currInputState = InputState.None;
+                return;
+            }
+
+            if (path.Count >= 2)
+                worldSystem.TryCreateWire(path);
+
+            path.Clear();
+            currInputState = InputState.None;
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Lumencuit
     public sealed class PCInputSystem : InputSystem
     {
         private readonly Camera camera;
+        private Vector2Int preTarget = new Vector2Int(-1, -1);
 
         public PCInputSystem(WorldSystem worldSystem, Camera camera) : base(worldSystem)
         {
@@ -18,13 +19,32 @@ namespace Lumencuit
         
         public override void Update()
         {
-            MouseClick();
-            KeyboardClick();
+            Mouse();
+            Keyboard();
         }
 
-        private void KeyboardClick()
+        private bool TryGetTargetPos(out Vector2Int pos)
         {
-            Keyboard keyboard = Keyboard.current;
+            Mouse mouse = UnityEngine.InputSystem.Mouse.current;
+            pos = Vector2Int.zero;
+
+            if (mouse == null)
+                return false;
+
+            Vector2 mousePosition = mouse.position.ReadValue();
+            Ray ray = camera.ScreenPointToRay(mousePosition);
+            if (!Physics.Raycast(ray, out RaycastHit hit))
+                return false;
+            if (!hit.collider.TryGetComponent(out GridTilePos gridTilePos))
+                return false;
+
+            pos = gridTilePos.Pos;
+            return true;
+        }
+
+        private void Keyboard()
+        {
+            Keyboard keyboard = UnityEngine.InputSystem.Keyboard.current;
             if (keyboard == null)
                 return;
 
@@ -34,25 +54,40 @@ namespace Lumencuit
                 SelectBlueprint(new EntityBlueprint(CircuitElement.CircuitElementType.Lamp, Signal.SignalColor.Black));
         }
 
-        private void MouseClick()
+        private void Mouse()
         {
-            Mouse mouse = Mouse.current;
-            if (mouse == null)
-                return;
-
-            if (!mouse.leftButton.wasPressedThisFrame)
-                return;
+            Mouse mouse = UnityEngine.InputSystem.Mouse.current;
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                EndPath();
                 return;
+            }
+            if (!TryGetTargetPos(out Vector2Int pos))
+            {
+                EndPath();
+                return;
+            }
+            Entity entity = worldSystem.GetEntityAt(pos.x, pos.y);
 
-            Vector2 mousePosition = mouse.position.ReadValue();
-            Ray ray = camera.ScreenPointToRay(mousePosition);
-            if (!Physics.Raycast(ray, out RaycastHit hit))
-                return;
-            if (!hit.collider.TryGetComponent(out GridTilePos gridTilePos))
-                return;
+            if (mouse.leftButton.wasPressedThisFrame)
+            {
+                if (entity == null)
+                    PlaceBlueprint(pos.x, pos.y);
+                else if (entity.OutPortCount < entity.Element.OutSignalCount)
+                    StartPath(pos.x, pos.y);
+            }
+            else if (mouse.leftButton.wasReleasedThisFrame)
+                EndPath();
+            else if (mouse.leftButton.isPressed)
+            {
+                if (preTarget != pos)
+                    NextPath(pos.x, pos.y);
+            }
 
-            PlaceBlueprint(gridTilePos.Pos.x, gridTilePos.Pos.y);
+            if (mouse.rightButton.wasPressedThisFrame)
+                worldSystem.TryRemoveEntity(pos.x, pos.y);
+
+            preTarget = pos;
         }
     }
 }

@@ -13,9 +13,13 @@
         }
 
         public static readonly EntityRequestResult Success = new EntityRequestResult("Success");
+        public static readonly EntityRequestResult Fail = new EntityRequestResult("Fail");
+        public static readonly EntityRequestResult NeedWire = new EntityRequestResult("NeedWire");
         public static readonly EntityRequestResult InvalidTile = new EntityRequestResult("InvalidTile");
+        public static readonly EntityRequestResult InvalidPath = new EntityRequestResult("InvalidPath");
         public static readonly EntityRequestResult AlreadyExist = new EntityRequestResult("AlreadyExist");
         public static readonly EntityRequestResult IsEmpty = new EntityRequestResult("IsEmpty");
         public static readonly EntityRequestResult UnavailableBlueprint = new EntityRequestResult("UnavailableBlueprint");
+        public static readonly EntityRequestResult UnavailablePort = new EntityRequestResult("UnavailablePort");
     }
 }

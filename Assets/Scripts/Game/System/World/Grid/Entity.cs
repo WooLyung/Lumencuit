@@ -30,24 +30,20 @@ namespace Lumencuit
             public static readonly Ports None = new(PortType.None, PortType.None, PortType.None, PortType.None);
         }
 
+        public readonly EntityBlueprint MadeBy;
         public readonly CircuitElement Element;
         private Signal signal = Signal.Black;
         private Ports sides = Ports.None;
 
-        public Entity(CircuitElement element)
+        public Entity(EntityBlueprint madeBy)
         {
-            Element = element;
+            MadeBy = madeBy;
+            Element = madeBy.Type.ToElement();
+            signal = madeBy.SignalColor.ToSignal();
         }
 
-        public Entity(CircuitElement element, Signal signal)
+        public Entity(EntityBlueprint madeBy, Signal signal, Ports sides) : this(madeBy)
         {
-            Element = element;
-            this.signal = signal;
-        }
-
-        public Entity(CircuitElement element, Signal signal, Ports sides)
-        {
-            Element = element;
             this.signal = signal;
             this.sides = sides;
         }
@@ -56,6 +52,8 @@ namespace Lumencuit
         public PortType RightPort { get => sides.Right; set => sides.Right = value; }
         public PortType UpPort { get => sides.Up; set => sides.Up = value; }
         public PortType DownPort { get => sides.Down; set => sides.Down = value; }
+        public int InPortCount => (LeftPort == PortType.Input ? 1 : 0) + (DownPort == PortType.Input ? 1 : 0) + (RightPort == PortType.Input ? 1 : 0) + (UpPort == PortType.Input ? 1 : 0);
+        public int OutPortCount => (LeftPort == PortType.Output ? 1 : 0) + (DownPort == PortType.Output ? 1 : 0) + (RightPort == PortType.Output ? 1 : 0) + (UpPort == PortType.Output ? 1 : 0); 
         public Signal CurrSignal => signal;
 
         public Signal Flow(IReadOnlyList<Signal> inputs)

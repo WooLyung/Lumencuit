@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Lumencuit
@@ -41,38 +40,19 @@ namespace Lumencuit
             return false;
         }
 
-        public EntityRequestResult TryCreateEntityByBlueprint(EntityBlueprint blueprint, int x, int y)
+        public EntityRequestResult TryCreateEntity(EntityBlueprint blueprint, int x, int y)
         {
             if (!worldGrid.IsEnabledTile(x, y))
                 return EntityRequestResult.InvalidTile;
             if (worldGrid.HasEntityAt(x, y))
                 return EntityRequestResult.AlreadyExist;
-            if (!blueprints.Any(blueprintStack => blueprintStack.Blueprint == blueprint && blueprintStack.Count > 0))
+
+            EntityBlueprintStack stack = blueprints.FirstOrDefault(stack => stack.Blueprint == blueprint && stack.Count > 0);
+            if (stack == null)
                 return EntityRequestResult.UnavailableBlueprint;
-            
-            for (int i = 0; i < blueprints.Count; i++)
-            {
-                if (blueprints[i].Blueprint == blueprint && blueprints[i].Count > 0)
-                {
-                    blueprints[i].Count--;
-                    break;
-                }
-            }
+            stack.Count--;
 
-            Entity entity = new Entity(blueprint.Type.ToElement(), blueprint.SignalColor.ToSignal());
-            worldGrid.SetEntityAt(entity, x, y);
-            NotifyEntityCreated(entity, new Vector2Int(x, y));
-
-            return EntityRequestResult.Success;
-        }
-
-        public EntityRequestResult TryCreateEntity(Entity entity, int x, int y)
-        {
-            if (!worldGrid.IsEnabledTile(x, y))
-                return EntityRequestResult.InvalidTile;
-            if (worldGrid.HasEntityAt(x, y))
-                return EntityRequestResult.AlreadyExist;
-
+            Entity entity = new Entity(blueprint.Clone());
             worldGrid.SetEntityAt(entity, x, y);
             NotifyEntityCreated(entity, new Vector2Int(x, y));
 
@@ -83,12 +63,134 @@ namespace Lumencuit
         {
             if (!worldGrid.IsEnabledTile(x, y))
                 return EntityRequestResult.InvalidTile;
+
             if (!worldGrid.HasEntityAt(x, y))
                 return EntityRequestResult.IsEmpty;
 
+            Vector2Int pos = new Vector2Int(x, y);
             Entity entity = worldGrid.GetEntityAt(x, y);
+
+            if (IsWire(entity))
+            {
+                if (TryRemoveWireNetwork(pos))
+                    return EntityRequestResult.Success;
+                return EntityRequestResult.Fail;
+            }
+
+            EntityBlueprintStack stack = blueprints.FirstOrDefault(stack => stack.Blueprint == entity.MadeBy);
+            if (stack != null)
+                stack.Count++;
+
+            RemoveAllConnectedWireNetworks(new Vector2Int(x, y));
             worldGrid.RemoveEntityAt(x, y);
-            NotifyEntityRemoved(entity, new Vector2Int(x, y));
+            NotifyEntityRemoved(entity, pos);
+            return EntityRequestResult.Success;
+        }
+
+        private void RemoveAllConnectedWireNetworks(Vector2Int pos)
+        {
+            if (!TryGetEntityAt(pos.x, pos.y, out Entity entity))
+                return;
+            if (IsWire(entity))
+                return;
+
+            if (entity.LeftPort != Entity.PortType.None)
+                TryRemoveWireNetwork(pos + Vector2Int.left);
+            if (entity.RightPort != Entity.PortType.None)
+                TryRemoveWireNetwork(pos + Vector2Int.right);
+            if (entity.UpPort != Entity.PortType.None)
+                TryRemoveWireNetwork(pos + Vector2Int.up);
+            if (entity.DownPort != Entity.PortType.None)
+                TryRemoveWireNetwork(pos + Vector2Int.down);
+        }
+
+        private void SetPort(Entity entity, Vector2Int dir, Entity.PortType portType)
+        {
+            if (dir == Vector2Int.left)
+                entity.LeftPort = portType;
+            else if (dir == Vector2Int.right)
+                entity.RightPort = portType;
+            else if (dir == Vector2Int.up)
+                entity.UpPort = portType;
+            else if (dir == Vector2Int.down)
+                entity.DownPort = portType;
+        }
+
+        private void SetPort(ref Entity.Ports ports, Vector2Int dir, Entity.PortType portType)
+        {
+            if (dir == Vector2Int.left)
+                ports.Left = portType;
+            else if (dir == Vector2Int.right)
+                ports.Right = portType;
+            else if (dir == Vector2Int.up)
+                ports.Up = portType;
+            else if (dir == Vector2Int.down)
+                ports.Down = portType;
+        }
+
+        /// <summary>
+        /// 제공된 경로로 선 생성을 시도합니다. 입출력 좌표를 포함합니다.
+        /// </summary>
+        /// <param name="path">선을 연결할 전체 경로</param>
+        public EntityRequestResult TryCreateWire(List<Vector2Int> path)
+        {
+            if (path.Count < 3)
+                return EntityRequestResult.NeedWire;
+
+            Vector2Int startPos = path[0];
+            Vector2Int endPos = path[^1];
+
+            if (!worldGrid.IsEnabledTile(startPos.x, startPos.y) || !worldGrid.IsEnabledTile(endPos.x, endPos.y))
+                return EntityRequestResult.InvalidTile;
+            if (!worldGrid.HasEntityAt(startPos.x, startPos.y) || !worldGrid.HasEntityAt(endPos.x, endPos.y))
+                return EntityRequestResult.IsEmpty;
+
+            Entity startEntity = worldGrid.GetEntityAt(startPos.x, startPos.y);
+            Entity endEntity = worldGrid.GetEntityAt(endPos.x, endPos.y);
+
+            if (startEntity.OutPortCount >= startEntity.Element.OutSignalCount)
+                return EntityRequestResult.UnavailablePort;
+            if (endEntity.InPortCount >= endEntity.Element.InSignalCount)
+                return EntityRequestResult.UnavailablePort;
+
+            for (int i = 1; i < path.Count; i++)
+            {
+                Vector2Int prev = path[i - 1];
+                Vector2Int curr = path[i];
+
+                if (Mathf.Abs(prev.x - curr.x) + Mathf.Abs(prev.y - curr.y) != 1)
+                    return EntityRequestResult.InvalidPath;
+                if (!worldGrid.IsEnabledTile(curr.x, curr.y))
+                    return EntityRequestResult.InvalidPath;
+            }
+
+            for (int i = 1; i < path.Count - 1; i++)
+            {
+                Vector2Int pos = path[i];
+                if (worldGrid.HasEntityAt(pos.x, pos.y))
+                    return EntityRequestResult.AlreadyExist;
+            }
+
+            SetPort(startEntity, path[1] - startPos, Entity.PortType.Output);
+            SetPort(endEntity, path[^2] - endPos, Entity.PortType.Input);
+            NotifyEntityPortUpdated(startEntity, startPos);
+            NotifyEntityPortUpdated(endEntity, endPos);
+
+            EntityBlueprint wireBlueprint = new EntityBlueprint(CircuitElement.CircuitElementType.Wire, Signal.SignalColor.Black);
+            for (int i = 1; i < path.Count - 1; i++)
+            {
+                Vector2Int pos = path[i];
+                Vector2Int prev = path[i - 1];
+                Vector2Int next = path[i + 1];
+
+                Entity.Ports ports = Entity.Ports.None;
+                SetPort(ref ports, prev - pos, Entity.PortType.Input);
+                SetPort(ref ports, next - pos, Entity.PortType.Output);
+
+                Entity wireEntity = new Entity(wireBlueprint.Clone(), Signal.Black, ports);
+                worldGrid.SetEntityAt(wireEntity, pos.x, pos.y);
+                NotifyEntityCreated(wireEntity, pos);
+            }
 
             return EntityRequestResult.Success;
         }
@@ -105,6 +207,169 @@ namespace Lumencuit
             IEntityEventListener.EntityRemovedEvent e = new IEntityEventListener.EntityRemovedEvent(entity, pos);
             foreach (IEntityEventListener listener in listeners)
                 listener.OnEntityRemoved(e);
+        }
+
+        private void NotifyEntityPortUpdated(Entity entity, Vector2Int pos)
+        {
+            IEntityEventListener.EntityPortUpdatedEvent e = new IEntityEventListener.EntityPortUpdatedEvent(entity, pos);
+            foreach (IEntityEventListener listener in listeners)
+                listener.OnEntityPortUpdated(e);
+        }
+
+        /// <summary>
+        /// 선과 연결된 모든 선 네트워크를 제거하고, 연결된 회로 요소의 포트 연결을 끊습니다.
+        /// </summary>
+        /// <param name="pos">네트워크에 속한 선의 위치</param>
+        private bool TryRemoveWireNetwork(Vector2Int pos)
+        {
+            List<Vector2Int> wirePositions = CollectConnectedWires(pos);
+            if (wirePositions == null)
+                return false;
+
+            // 네트워크에 연결된 회로 요소의 포트 끊기
+            Vector2Int start = wirePositions.First();
+            if (TryGetEntityAt(start.x, start.y, out Entity startWire))
+            {
+                Vector2Int? dir = GetWireInDir(startWire);
+                if (dir != null)
+                {
+                    Vector2Int elementPos = (Vector2Int)dir + start;
+                    if (TryGetEntityAt(elementPos.x, elementPos.y, out Entity element))
+                    {
+                        SetPortByDir(element, -(Vector2Int)dir, Entity.PortType.None);
+                        NotifyEntityPortUpdated(element, elementPos);
+                    }
+                }
+            }
+
+            Vector2Int end = wirePositions.Last();
+            if (TryGetEntityAt(end.x, end.y, out Entity endWire))
+            {
+                Vector2Int? dir = GetWireOutDir(endWire);
+                if (dir != null)
+                {
+                    Vector2Int elementPos = (Vector2Int)dir + end;
+                    if (TryGetEntityAt(elementPos.x, elementPos.y, out Entity element))
+                    {
+                        SetPortByDir(element, -(Vector2Int)dir, Entity.PortType.None);
+                        NotifyEntityPortUpdated(element, elementPos);
+                    }
+                }
+            }
+
+            // 네트워크의 모든 선 제거
+            foreach (Vector2Int wirePos in wirePositions)
+            {
+                if (!worldGrid.HasEntityAt(wirePos.x, wirePos.y))
+                    continue;
+                Entity wire = worldGrid.GetEntityAt(wirePos.x, wirePos.y);
+                worldGrid.RemoveEntityAt(wirePos.x, wirePos.y);
+                NotifyEntityRemoved(wire, wirePos);
+            }
+
+            return true;
+        }
+
+        private bool IsWire(Entity entity)
+        {
+            return entity.Element.Type == CircuitElement.CircuitElementType.Wire;
+        }
+
+        private Vector2Int? GetWireInDir(Entity wire)
+        {
+            if (wire.LeftPort == Entity.PortType.Input)
+                return Vector2Int.left;
+            if (wire.RightPort == Entity.PortType.Input)
+                return Vector2Int.right;
+            if (wire.UpPort == Entity.PortType.Input)
+                return Vector2Int.up;
+            if (wire.DownPort == Entity.PortType.Input)
+                return Vector2Int.down;
+            return null;
+        }
+
+        private Vector2Int? GetWireOutDir(Entity wire)
+        {
+            if (wire.LeftPort == Entity.PortType.Output)
+                return Vector2Int.left;
+            if (wire.RightPort == Entity.PortType.Output)
+                return Vector2Int.right;
+            if (wire.UpPort == Entity.PortType.Output)
+                return Vector2Int.up;
+            if (wire.DownPort == Entity.PortType.Output)
+                return Vector2Int.down;
+            return null;
+        }
+
+        private Vector2Int? GetWireIn(Entity wire, Vector2Int pos)
+        {
+            Vector2Int? dir = GetWireInDir(wire);
+            if (dir == null)
+                return null;
+            return pos + dir;
+        }
+
+        private Vector2Int? GetWireOut(Entity wire, Vector2Int pos)
+        {
+            Vector2Int? dir = GetWireOutDir(wire);
+            if (dir == null)
+                return null;
+            return pos + dir;
+        }
+
+        private void SetPortByDir(Entity entity, Vector2Int dir, Entity.PortType portType)
+        {
+            if (dir == Vector2Int.left)
+                entity.LeftPort = portType;
+            else if (dir == Vector2Int.right)
+                entity.RightPort = portType;
+            else if (dir == Vector2Int.up)
+                entity.UpPort = portType;
+            else if (dir == Vector2Int.down)
+                entity.DownPort = portType;
+        }
+
+        /// <summary>
+        /// 선과 연결된 모든 선 네트워크의 좌표를 순서에 맞춰 반환합니다.
+        /// </summary>
+        /// <param name="pos">네트워크에 속한 선의 위치</param>
+        private List<Vector2Int> CollectConnectedWires(Vector2Int pos)
+        {
+            List<Vector2Int> wires = new();
+            Vector2Int curr = pos;
+
+            while (true)
+            {
+                if (!TryGetEntityAt(curr.x, curr.y, out Entity entity))
+                    return null;
+                if (!IsWire(entity))
+                {
+                    Vector2Int? next = GetWireOut(entity, curr);
+                    if (next == null)
+                        return null;
+                    curr = (Vector2Int)next;
+                    break;
+                }
+                Vector2Int? pre = GetWireIn(entity, curr);
+                if (pre == null)
+                    return null;
+                curr = (Vector2Int)pre;
+            }
+
+            while (true)
+            {
+                if (!TryGetEntityAt(curr.x, curr.y, out Entity entity))
+                    return null;
+                if (!IsWire(entity))
+                    break;
+                wires.Add(curr);
+                Vector2Int? next = GetWireOut(entity, curr);
+                if (next == null)
+                    return null;
+                curr = (Vector2Int)next;
+            }
+
+            return wires;
         }
     }
 }

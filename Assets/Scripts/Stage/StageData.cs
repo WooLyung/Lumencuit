@@ -21,8 +21,6 @@ namespace Lumencuit
         {
             if (!IsInside(x, y))
                 return false;
-
-            ResizeTiles();
             return enabledTiles[GetIndex(x, y)];
         }
 
@@ -30,8 +28,6 @@ namespace Lumencuit
         {
             if (!IsInside(x, y))
                 return;
-
-            ResizeTiles();
             enabledTiles[GetIndex(x, y)] = value;
         }
 

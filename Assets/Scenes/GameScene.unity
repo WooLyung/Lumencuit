@@ -334,7 +334,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbd5cb14bc2114448a62f4c9de8546be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameBootStrapper
-  views: {fileID: 2073237931}
+  viewRoot: {fileID: 2073237931}
   renderRegistry: {fileID: 498263447}
 --- !u!1 &395831409
 GameObject:
@@ -541,6 +541,9 @@ MonoBehaviour:
   prefabs:
     tile: {fileID: 6130651401286859068, guid: 8789e5a01aacd1c44afc21053f73ff6d, type: 3}
     gridCollider: {fileID: 2561611650363071091, guid: 70cf239bfe80fb64ab0db647f1bddaa3, type: 3}
+    lamp: {fileID: 3804965436788688523, guid: e7807ee096137b44d97be8c8eac967f0, type: 3}
+    source: {fileID: 3804965436788688523, guid: a91934c7f7759064885415d3e2d85967, type: 3}
+    wire: {fileID: 3804965436788688523, guid: fa77ab57ec7377b4bbb32ab72d2344b7, type: 3}
 --- !u!1 &959619865
 GameObject:
   m_ObjectHideFlags: 0
@@ -679,7 +682,7 @@ GameObject:
   - component: {fileID: 2073237930}
   - component: {fileID: 2073237931}
   m_Layer: 0
-  m_Name: Views
+  m_Name: ViewRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -711,7 +714,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2073237929}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: acce48af87dbaf24aaafc8bc3e96c735, type: 3}
+  m_Script: {fileID: 11500000, guid: 9015b333efde8b9439012baca6dd5e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Lumencuit.Views
   gridMesh: {fileID: 395831410}

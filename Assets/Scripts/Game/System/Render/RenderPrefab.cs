@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using static Lumencuit.CircuitElement;
 
 namespace Lumencuit
 {
@@ -12,7 +13,22 @@ namespace Lumencuit
         [SerializeField] private GameObject tile;
         [SerializeField] private GameObject gridCollider;
 
+        [SerializeField] private GameObject lamp;
+        [SerializeField] private GameObject source;
+        [SerializeField] private GameObject wire;
+
         public GameObject Tile => tile;
         public GameObject GridCollider => gridCollider;
+
+        public GameObject GetCircuitElement(CircuitElementType type)
+        {
+            return type switch
+            {
+                CircuitElementType.Lamp => lamp,
+                CircuitElementType.Source => source,
+                CircuitElementType.Wire => wire,
+                _ => null
+            };
+        }
     }
 }

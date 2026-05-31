@@ -1,6 +1,3 @@
-using UnityEditor.ShaderGraph.Internal;
-using UnityEngine.Rendering;
-
 namespace Lumencuit
 {
     /// <summary>

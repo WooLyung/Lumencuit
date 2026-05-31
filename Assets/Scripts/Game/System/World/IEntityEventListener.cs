@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 namespace Lumencuit
 {
@@ -31,6 +32,18 @@ namespace Lumencuit
             }
         }
 
+        public class EntityPortUpdatedEvent
+        {
+            public readonly Entity Entity;
+            public readonly Vector2Int Pos;
+
+            public EntityPortUpdatedEvent(Entity entity, Vector2Int pos)
+            {
+                Entity = entity;
+                Pos = pos;
+            }
+        }
+
         /// <summary>
         /// 엔티티가 생성될 때 호출됩니다.
         /// </summary>
@@ -40,5 +53,10 @@ namespace Lumencuit
         /// 엔티티가 삭제될 때 호출됩니다.
         /// </summary>
         public void OnEntityRemoved(EntityRemovedEvent e);
+
+        /// <summary>
+        /// 엔티티 포트에 변화가 생겼을 때 호출됩니다.
+        /// </summary>
+        public void OnEntityPortUpdated(EntityPortUpdatedEvent e);
     }
 }

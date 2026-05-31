@@ -9,7 +9,7 @@ namespace Lumencuit
     public sealed class GameBootStrapper : MonoBehaviour
     {
         // 인스펙터 노출 변수
-        [SerializeField] private Views views;
+        [SerializeField] private ViewRoot viewRoot;
         [SerializeField] private RenderRegistry renderRegistry;
 
         // 시스템 변수
@@ -28,7 +28,7 @@ namespace Lumencuit
 
             worldSystem = new(stageData);
             simulationSystem = new(worldSystem, stageData);
-            renderSystem = new(worldSystem, renderRegistry.Prefabs, views);
+            renderSystem = new(worldSystem, renderRegistry.Prefabs, viewRoot);
 #if UNITY_ANDROID || UNITY_IOS
             inputSystem = new NullInputSystem(worldSystem);
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_EDITOR

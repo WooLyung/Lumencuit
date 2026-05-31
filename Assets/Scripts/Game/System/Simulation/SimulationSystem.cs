@@ -15,17 +15,18 @@ namespace Lumencuit
 
         private void FlowAll()
         {
-
         }
 
         public void OnEntityCreated(IEntityEventListener.EntityCreatedEvent e)
         {
-            FlowAll();
         }
 
         public void OnEntityRemoved(IEntityEventListener.EntityRemovedEvent e)
         {
-            FlowAll();
+        }
+
+        public void OnEntityPortUpdated(IEntityEventListener.EntityPortUpdatedEvent e)
+        {
         }
     }
 }
