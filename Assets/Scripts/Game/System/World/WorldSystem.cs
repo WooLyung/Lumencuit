@@ -70,7 +70,7 @@ namespace Lumencuit
             Vector2Int pos = new Vector2Int(x, y);
             Entity entity = worldGrid.GetEntityAt(x, y);
 
-            if (IsWire(entity))
+            if (WireHelper.IsWire(entity))
             {
                 if (TryRemoveWireNetwork(pos))
                     return EntityRequestResult.Success;
@@ -91,7 +91,7 @@ namespace Lumencuit
         {
             if (!TryGetEntityAt(pos.x, pos.y, out Entity entity))
                 return;
-            if (IsWire(entity))
+            if (WireHelper.IsWire(entity))
                 return;
 
             if (entity.LeftPort != Entity.PortType.None)
@@ -195,6 +195,103 @@ namespace Lumencuit
             return EntityRequestResult.Success;
         }
 
+        /// <summary>
+        /// 선과 연결된 모든 선 네트워크를 제거하고, 연결된 회로 요소의 포트 연결을 끊습니다.
+        /// </summary>
+        /// <param name="pos">네트워크에 속한 선의 위치</param>
+        private bool TryRemoveWireNetwork(Vector2Int pos)
+        {
+            List<Vector2Int> wirePositions = CollectConnectedWires(pos);
+            if (wirePositions == null)
+                return false;
+
+            // 네트워크에 연결된 회로 요소의 포트 끊기
+            Vector2Int start = wirePositions.First();
+            if (TryGetEntityAt(start.x, start.y, out Entity startWire))
+            {
+                Vector2Int? dir = WireHelper.GetWireInDir(startWire);
+                if (dir != null)
+                {
+                    Vector2Int elementPos = (Vector2Int)dir + start;
+                    if (TryGetEntityAt(elementPos.x, elementPos.y, out Entity element))
+                    {
+                        SetPort(element, -(Vector2Int)dir, Entity.PortType.None);
+                        NotifyEntityPortUpdated(element, elementPos);
+                    }
+                }
+            }
+
+            Vector2Int end = wirePositions.Last();
+            if (TryGetEntityAt(end.x, end.y, out Entity endWire))
+            {
+                Vector2Int? dir = WireHelper.GetWireOutDir(endWire);
+                if (dir != null)
+                {
+                    Vector2Int elementPos = (Vector2Int)dir + end;
+                    if (TryGetEntityAt(elementPos.x, elementPos.y, out Entity element))
+                    {
+                        SetPort(element, -(Vector2Int)dir, Entity.PortType.None);
+                        NotifyEntityPortUpdated(element, elementPos);
+                    }
+                }
+            }
+
+            // 네트워크의 모든 선 제거
+            foreach (Vector2Int wirePos in wirePositions)
+            {
+                if (!worldGrid.HasEntityAt(wirePos.x, wirePos.y))
+                    continue;
+                Entity wire = worldGrid.GetEntityAt(wirePos.x, wirePos.y);
+                worldGrid.RemoveEntityAt(wirePos.x, wirePos.y);
+                NotifyEntityRemoved(wire, wirePos);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 선과 연결된 모든 선 네트워크의 좌표를 순서에 맞춰 반환합니다.
+        /// </summary>
+        /// <param name="pos">네트워크에 속한 선의 위치</param>
+        private List<Vector2Int> CollectConnectedWires(Vector2Int pos)
+        {
+            List<Vector2Int> wires = new();
+            Vector2Int curr = pos;
+
+            while (true)
+            {
+                if (!TryGetEntityAt(curr.x, curr.y, out Entity entity))
+                    return null;
+                if (!WireHelper.IsWire(entity))
+                {
+                    Vector2Int? next = WireHelper.GetWireOut(entity, curr);
+                    if (next == null)
+                        return null;
+                    curr = (Vector2Int)next;
+                    break;
+                }
+                Vector2Int? pre = WireHelper.GetWireIn(entity, curr);
+                if (pre == null)
+                    return null;
+                curr = (Vector2Int)pre;
+            }
+
+            while (true)
+            {
+                if (!TryGetEntityAt(curr.x, curr.y, out Entity entity))
+                    return null;
+                if (!WireHelper.IsWire(entity))
+                    break;
+                wires.Add(curr);
+                Vector2Int? next = WireHelper.GetWireOut(entity, curr);
+                if (next == null)
+                    return null;
+                curr = (Vector2Int)next;
+            }
+
+            return wires;
+        }
+
         private void NotifyEntityCreated(Entity entity, Vector2Int pos)
         {
             IEntityEventListener.EntityCreatedEvent e = new IEntityEventListener.EntityCreatedEvent(entity, pos);
@@ -214,162 +311,6 @@ namespace Lumencuit
             IEntityEventListener.EntityPortUpdatedEvent e = new IEntityEventListener.EntityPortUpdatedEvent(entity, pos);
             foreach (IEntityEventListener listener in listeners)
                 listener.OnEntityPortUpdated(e);
-        }
-
-        /// <summary>
-        /// 선과 연결된 모든 선 네트워크를 제거하고, 연결된 회로 요소의 포트 연결을 끊습니다.
-        /// </summary>
-        /// <param name="pos">네트워크에 속한 선의 위치</param>
-        private bool TryRemoveWireNetwork(Vector2Int pos)
-        {
-            List<Vector2Int> wirePositions = CollectConnectedWires(pos);
-            if (wirePositions == null)
-                return false;
-
-            // 네트워크에 연결된 회로 요소의 포트 끊기
-            Vector2Int start = wirePositions.First();
-            if (TryGetEntityAt(start.x, start.y, out Entity startWire))
-            {
-                Vector2Int? dir = GetWireInDir(startWire);
-                if (dir != null)
-                {
-                    Vector2Int elementPos = (Vector2Int)dir + start;
-                    if (TryGetEntityAt(elementPos.x, elementPos.y, out Entity element))
-                    {
-                        SetPortByDir(element, -(Vector2Int)dir, Entity.PortType.None);
-                        NotifyEntityPortUpdated(element, elementPos);
-                    }
-                }
-            }
-
-            Vector2Int end = wirePositions.Last();
-            if (TryGetEntityAt(end.x, end.y, out Entity endWire))
-            {
-                Vector2Int? dir = GetWireOutDir(endWire);
-                if (dir != null)
-                {
-                    Vector2Int elementPos = (Vector2Int)dir + end;
-                    if (TryGetEntityAt(elementPos.x, elementPos.y, out Entity element))
-                    {
-                        SetPortByDir(element, -(Vector2Int)dir, Entity.PortType.None);
-                        NotifyEntityPortUpdated(element, elementPos);
-                    }
-                }
-            }
-
-            // 네트워크의 모든 선 제거
-            foreach (Vector2Int wirePos in wirePositions)
-            {
-                if (!worldGrid.HasEntityAt(wirePos.x, wirePos.y))
-                    continue;
-                Entity wire = worldGrid.GetEntityAt(wirePos.x, wirePos.y);
-                worldGrid.RemoveEntityAt(wirePos.x, wirePos.y);
-                NotifyEntityRemoved(wire, wirePos);
-            }
-
-            return true;
-        }
-
-        private bool IsWire(Entity entity)
-        {
-            return entity.Element.Type == CircuitElement.CircuitElementType.Wire;
-        }
-
-        private Vector2Int? GetWireInDir(Entity wire)
-        {
-            if (wire.LeftPort == Entity.PortType.Input)
-                return Vector2Int.left;
-            if (wire.RightPort == Entity.PortType.Input)
-                return Vector2Int.right;
-            if (wire.UpPort == Entity.PortType.Input)
-                return Vector2Int.up;
-            if (wire.DownPort == Entity.PortType.Input)
-                return Vector2Int.down;
-            return null;
-        }
-
-        private Vector2Int? GetWireOutDir(Entity wire)
-        {
-            if (wire.LeftPort == Entity.PortType.Output)
-                return Vector2Int.left;
-            if (wire.RightPort == Entity.PortType.Output)
-                return Vector2Int.right;
-            if (wire.UpPort == Entity.PortType.Output)
-                return Vector2Int.up;
-            if (wire.DownPort == Entity.PortType.Output)
-                return Vector2Int.down;
-            return null;
-        }
-
-        private Vector2Int? GetWireIn(Entity wire, Vector2Int pos)
-        {
-            Vector2Int? dir = GetWireInDir(wire);
-            if (dir == null)
-                return null;
-            return pos + dir;
-        }
-
-        private Vector2Int? GetWireOut(Entity wire, Vector2Int pos)
-        {
-            Vector2Int? dir = GetWireOutDir(wire);
-            if (dir == null)
-                return null;
-            return pos + dir;
-        }
-
-        private void SetPortByDir(Entity entity, Vector2Int dir, Entity.PortType portType)
-        {
-            if (dir == Vector2Int.left)
-                entity.LeftPort = portType;
-            else if (dir == Vector2Int.right)
-                entity.RightPort = portType;
-            else if (dir == Vector2Int.up)
-                entity.UpPort = portType;
-            else if (dir == Vector2Int.down)
-                entity.DownPort = portType;
-        }
-
-        /// <summary>
-        /// 선과 연결된 모든 선 네트워크의 좌표를 순서에 맞춰 반환합니다.
-        /// </summary>
-        /// <param name="pos">네트워크에 속한 선의 위치</param>
-        private List<Vector2Int> CollectConnectedWires(Vector2Int pos)
-        {
-            List<Vector2Int> wires = new();
-            Vector2Int curr = pos;
-
-            while (true)
-            {
-                if (!TryGetEntityAt(curr.x, curr.y, out Entity entity))
-                    return null;
-                if (!IsWire(entity))
-                {
-                    Vector2Int? next = GetWireOut(entity, curr);
-                    if (next == null)
-                        return null;
-                    curr = (Vector2Int)next;
-                    break;
-                }
-                Vector2Int? pre = GetWireIn(entity, curr);
-                if (pre == null)
-                    return null;
-                curr = (Vector2Int)pre;
-            }
-
-            while (true)
-            {
-                if (!TryGetEntityAt(curr.x, curr.y, out Entity entity))
-                    return null;
-                if (!IsWire(entity))
-                    break;
-                wires.Add(curr);
-                Vector2Int? next = GetWireOut(entity, curr);
-                if (next == null)
-                    return null;
-                curr = (Vector2Int)next;
-            }
-
-            return wires;
         }
     }
 }
