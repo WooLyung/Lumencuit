@@ -43,6 +43,7 @@ namespace Lumencuit
 
         public void OnEntityCreated(IEntityEventListener.EntityCreatedEvent e)
         {
+            Debug.Log((e.Entity.Element.Type, e.Pos.x, e.Pos.y));
         }
 
         public void OnEntityRemoved(IEntityEventListener.EntityRemovedEvent e)

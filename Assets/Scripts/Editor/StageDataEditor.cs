@@ -30,10 +30,12 @@ namespace Lumencuit.Editor
             EditorGUILayout.PropertyField(entityBlueprintsProperty, true);
 
             stageData.ResizeTiles();
+
             EditorGUILayout.Space(10);
             EditorGUILayout.LabelField("Tile Layout", EditorStyles.boldLabel);
             DrawTileGrid(stageData);
 
+            serializedObject.ApplyModifiedProperties();
             if (EditorGUI.EndChangeCheck())
                 EditorUtility.SetDirty(stageData);
         }

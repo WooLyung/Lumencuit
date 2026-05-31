@@ -30,11 +30,11 @@ namespace Lumencuit
             simulationSystem = new(worldSystem, stageData);
             renderSystem = new(worldSystem, renderRegistry.Prefabs, views);
 #if UNITY_ANDROID || UNITY_IOS
-            inputSystem = new NullInputSystem();
+            inputSystem = new NullInputSystem(worldSystem);
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_EDITOR
-            inputSystem = new PCInputSystem(Camera.main);
+            inputSystem = new PCInputSystem(worldSystem, Camera.main);
 #else
-            inputSystem = new NullInputSystem();
+            inputSystem = new NullInputSystem(worldSystem);
 #endif
         }
 

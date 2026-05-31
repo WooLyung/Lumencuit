@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Lumencuit
@@ -9,11 +11,14 @@ namespace Lumencuit
     public sealed class WorldSystem
     {
         private readonly WorldGrid worldGrid;
+        private readonly List<EntityBlueprintStack> blueprints = new();
         private readonly List<IEntityEventListener> listeners = new();
 
         public WorldSystem(StageData stageData)
         {
             worldGrid = new(stageData);
+            foreach (EntityBlueprintStack blueprint in stageData.Blueprints)
+                blueprints.Add(blueprint.Clone());
         }
 
         public void AddListener(IEntityEventListener listener) => listeners.Add(listener);
@@ -34,6 +39,31 @@ namespace Lumencuit
             }
             entity = null;
             return false;
+        }
+
+        public EntityRequestResult TryCreateEntityByBlueprint(EntityBlueprint blueprint, int x, int y)
+        {
+            if (!worldGrid.IsEnabledTile(x, y))
+                return EntityRequestResult.InvalidTile;
+            if (worldGrid.HasEntityAt(x, y))
+                return EntityRequestResult.AlreadyExist;
+            if (!blueprints.Any(blueprintStack => blueprintStack.Blueprint == blueprint && blueprintStack.Count > 0))
+                return EntityRequestResult.UnavailableBlueprint;
+            
+            for (int i = 0; i < blueprints.Count; i++)
+            {
+                if (blueprints[i].Blueprint == blueprint && blueprints[i].Count > 0)
+                {
+                    blueprints[i].Count--;
+                    break;
+                }
+            }
+
+            Entity entity = new Entity(blueprint.Type.ToElement(), blueprint.SignalColor.ToSignal());
+            worldGrid.SetEntityAt(entity, x, y);
+            NotifyEntityCreated(entity, new Vector2Int(x, y));
+
+            return EntityRequestResult.Success;
         }
 
         public EntityRequestResult TryCreateEntity(Entity entity, int x, int y)

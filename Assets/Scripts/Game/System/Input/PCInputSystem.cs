@@ -11,15 +11,32 @@ namespace Lumencuit
     {
         private readonly Camera camera;
 
-        public PCInputSystem(Camera camera)
+        public PCInputSystem(WorldSystem worldSystem, Camera camera) : base(worldSystem)
         {
             this.camera = camera;
         }
         
         public override void Update()
         {
-            Mouse mouse = Mouse.current;
+            MouseClick();
+            KeyboardClick();
+        }
 
+        private void KeyboardClick()
+        {
+            Keyboard keyboard = Keyboard.current;
+            if (keyboard == null)
+                return;
+
+            if (keyboard.digit1Key.wasPressedThisFrame)
+                SelectBlueprint(new EntityBlueprint(CircuitElement.CircuitElementType.Source, Signal.SignalColor.Red));
+            if (keyboard.digit2Key.wasPressedThisFrame)
+                SelectBlueprint(new EntityBlueprint(CircuitElement.CircuitElementType.Lamp, Signal.SignalColor.Black));
+        }
+
+        private void MouseClick()
+        {
+            Mouse mouse = Mouse.current;
             if (mouse == null)
                 return;
 
@@ -35,7 +52,7 @@ namespace Lumencuit
             if (!hit.collider.TryGetComponent(out GridTilePos gridTilePos))
                 return;
 
-            Debug.Log(gridTilePos.Pos);
+            PlaceBlueprint(gridTilePos.Pos.x, gridTilePos.Pos.y);
         }
     }
 }

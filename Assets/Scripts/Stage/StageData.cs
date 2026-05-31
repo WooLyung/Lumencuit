@@ -13,7 +13,7 @@ namespace Lumencuit
 
         [Min(1)] public int Width = 1;
         [Min(1)] public int Height = 1;
-        public List<EntityBlueprint> Blueprints = new();
+        public List<EntityBlueprintStack> Blueprints = new();
 
         [SerializeField] private bool[] enabledTiles = new bool[1];
 

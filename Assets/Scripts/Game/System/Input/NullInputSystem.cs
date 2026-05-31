@@ -5,6 +5,10 @@ namespace Lumencuit
     /// </summary>
     public sealed class NullInputSystem : InputSystem
     {
+        public NullInputSystem(WorldSystem worldSystem) : base(worldSystem)
+        {
+        }
+
         public override void Update()
         {
         }

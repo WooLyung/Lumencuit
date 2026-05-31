@@ -6,6 +6,27 @@ namespace Lumencuit
     /// </summary>
     public abstract class InputSystem
     {
+        protected WorldSystem worldSystem;
+        private EntityBlueprint selectedBlueprint = null;
+
+        public InputSystem(WorldSystem worldSystem)
+        {
+            this.worldSystem = worldSystem;
+        }
+
         public abstract void Update();
+
+        protected void SelectBlueprint(EntityBlueprint blueprint)
+        {
+            selectedBlueprint = blueprint;
+        }
+
+        protected void PlaceBlueprint(int x, int y)
+        {
+            if (selectedBlueprint == null)
+                return;
+            worldSystem.TryCreateEntityByBlueprint(selectedBlueprint, x, y);
+            selectedBlueprint = null;
+        }
     }
 }

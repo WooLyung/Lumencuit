@@ -16,5 +16,6 @@
         public static readonly EntityRequestResult InvalidTile = new EntityRequestResult("InvalidTile");
         public static readonly EntityRequestResult AlreadyExist = new EntityRequestResult("AlreadyExist");
         public static readonly EntityRequestResult IsEmpty = new EntityRequestResult("IsEmpty");
+        public static readonly EntityRequestResult UnavailableBlueprint = new EntityRequestResult("UnavailableBlueprint");
     }
 }
