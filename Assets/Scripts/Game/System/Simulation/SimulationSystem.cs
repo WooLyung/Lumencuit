@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static Lumencuit.Signal;
@@ -159,13 +158,20 @@ namespace Lumencuit
             }
         }
 
-        private CircuitResult IsCircuitComplete(WorldGrid worldGrid)
+        private CircuitResult IsCircuitComplete(WorldGrid worldGrid, List<EntityBlueprintStack> blueprints)
         {
+            // 설치되지 않은 블루프린트
+            foreach (EntityBlueprintStack blueprint in blueprints)
+                if (blueprint.Count > 0)
+                    return CircuitResult.IncompleteCircuit;
+
+            // 연결되지 않은 포트
             for (int x = 0; x < worldGrid.Width; x++)
                 for (int y = 0; y < worldGrid.Height; y++)
                     if (worldGrid.TryGetEntityAt(x, y, out Entity entity))
                         if (entity.Element.InSignalCount != entity.InPortCount || entity.Element.OutSignalCount != entity.OutPortCount)
-                            return CircuitResult.Success;
+                            return CircuitResult.IncompleteCircuit;
+
             return CircuitResult.Success;
         }
 
@@ -199,6 +205,7 @@ namespace Lumencuit
 
             // worldGrid는 복사본으로, 기존 월드 시스템에 영향을 주지 않습니다.
             WorldGrid worldGrid = e.WorldGridClone;
+            List<EntityBlueprintStack> blueprints = e.BlueprintsClone;
 
             // 그리드 전체 신호 계산
             FlowAll(worldGrid, out bool cantReach);
@@ -211,7 +218,7 @@ namespace Lumencuit
             }
 
             // 회로 완성 검사
-            CircuitResult result = IsCircuitComplete(worldGrid);
+            CircuitResult result = IsCircuitComplete(worldGrid, blueprints);
             if (result != CircuitResult.Success)
             {
                 AlertResult(result);

@@ -322,7 +322,11 @@ namespace Lumencuit
 
         private void NotifyGridUpdated()
         {
-            IEntityEventListener.GridUpdatedEvent e = new IEntityEventListener.GridUpdatedEvent(worldGrid.Clone());
+            List<EntityBlueprintStack> blueprintsClone = new();
+            foreach (EntityBlueprintStack blueprint in blueprints)
+                blueprintsClone.Add(blueprint.Clone());
+
+            IEntityEventListener.GridUpdatedEvent e = new IEntityEventListener.GridUpdatedEvent(worldGrid.Clone(), blueprintsClone);
             foreach (IEntityEventListener listener in listeners)
                 listener.OnGridUpdated(e);
         }

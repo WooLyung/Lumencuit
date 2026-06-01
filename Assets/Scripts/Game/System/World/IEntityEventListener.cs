@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using NUnit.Framework;
+using System.Collections.Generic;
+using UnityEngine;
 using static UnityEditor.PlayerSettings;
 
 namespace Lumencuit
@@ -47,10 +49,12 @@ namespace Lumencuit
         public class GridUpdatedEvent
         {
             public readonly WorldGrid WorldGridClone;
+            public readonly List<EntityBlueprintStack> BlueprintsClone;
 
-            public GridUpdatedEvent(WorldGrid worldGridClone)
+            public GridUpdatedEvent(WorldGrid worldGridClone, List<EntityBlueprintStack> blueprintsClone)
             {
                 WorldGridClone = worldGridClone;
+                BlueprintsClone = blueprintsClone;
             }
         }
 
