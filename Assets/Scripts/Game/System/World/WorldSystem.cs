@@ -18,6 +18,9 @@ namespace Lumencuit
             worldGrid = new(stageData);
             foreach (EntityBlueprintStack blueprint in stageData.Blueprints)
                 blueprints.Add(blueprint.Clone());
+
+            // [임시] 카메라 위치 변경
+            Camera.main.transform.position = new Vector3((stageData.Width - 1) / 2f, (stageData.Height - 1) / 2f, Camera.main.transform.position.z);
         }
 
         public void AddListener(IEntityEventListener listener) => listeners.Add(listener);
@@ -55,6 +58,7 @@ namespace Lumencuit
             Entity entity = new Entity(blueprint.Clone());
             worldGrid.SetEntityAt(entity, x, y);
             NotifyEntityCreated(entity, new Vector2Int(x, y));
+            NotifyGridUpdated();
 
             return EntityRequestResult.Success;
         }
@@ -84,6 +88,7 @@ namespace Lumencuit
             RemoveAllConnectedWireNetworks(new Vector2Int(x, y));
             worldGrid.RemoveEntityAt(x, y);
             NotifyEntityRemoved(entity, pos);
+            NotifyGridUpdated();
             return EntityRequestResult.Success;
         }
 
@@ -192,6 +197,7 @@ namespace Lumencuit
                 NotifyEntityCreated(wireEntity, pos);
             }
 
+            NotifyGridUpdated();
             return EntityRequestResult.Success;
         }
 
@@ -246,6 +252,7 @@ namespace Lumencuit
                 NotifyEntityRemoved(wire, wirePos);
             }
 
+            NotifyGridUpdated();
             return true;
         }
 
@@ -311,6 +318,13 @@ namespace Lumencuit
             IEntityEventListener.EntityPortUpdatedEvent e = new IEntityEventListener.EntityPortUpdatedEvent(entity, pos);
             foreach (IEntityEventListener listener in listeners)
                 listener.OnEntityPortUpdated(e);
+        }
+
+        private void NotifyGridUpdated()
+        {
+            IEntityEventListener.GridUpdatedEvent e = new IEntityEventListener.GridUpdatedEvent(worldGrid.Clone());
+            foreach (IEntityEventListener listener in listeners)
+                listener.OnGridUpdated(e);
         }
     }
 }

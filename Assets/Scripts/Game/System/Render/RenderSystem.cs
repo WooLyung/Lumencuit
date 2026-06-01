@@ -7,7 +7,7 @@ namespace Lumencuit
     /// <summary>
     /// 월드 및 시뮬레이션과 독립적으로 작동하는 렌더링 시스템입니다.
     /// </summary>
-    public sealed class RenderSystem : IEntityEventListener
+    public sealed class RenderSystem : IEntityEventListener, ISignalEventListener
     {
         /// <summary>
         /// 렌더링을 위해 생성된 게임 오브젝트와 정보입니다.
@@ -29,12 +29,13 @@ namespace Lumencuit
         private readonly ViewRoot viewRoot;
         private readonly Dictionary<Vector2Int, View> views = new();
 
-        public RenderSystem(WorldSystem worldSystem, RenderPrefab prefabs, ViewRoot viewRoot)
+        public RenderSystem(WorldSystem worldSystem, SimulationSystem simulationSystem, RenderPrefab prefabs, ViewRoot viewRoot)
         {
             this.worldSystem = worldSystem;
             this.prefabs = prefabs;
             this.viewRoot = viewRoot;
             worldSystem.AddListener(this);
+            simulationSystem.AddListener(this);
 
             RenderGrid();
         }
@@ -72,6 +73,7 @@ namespace Lumencuit
                 ViewObject viewObject = view.GetComponent<ViewObject>();
                 viewObject.PortUpdate(e.Entity);
                 viewObject.SetColor(e.Entity.MadeBy.SignalColor.ToColor());
+                viewObject.SetPortColor(Signal.SignalColor.Black.ToColor());
 
                 views.Add(e.Pos, new View(view, viewObject));
             }
@@ -89,7 +91,22 @@ namespace Lumencuit
         public void OnEntityPortUpdated(IEntityEventListener.EntityPortUpdatedEvent e)
         {
             if (views.TryGetValue(e.Pos, out View view))
+            {
                 view.ViewObject.PortUpdate(e.Entity);
+                view.ViewObject.SetPortColor(Signal.SignalColor.Black.ToColor());
+            }
+        }
+
+        public void OnSignalUpdated(ISignalEventListener.SignalUpdatedEvent e)
+        {
+            if (views.TryGetValue(e.Pos, out View view))
+                view.ViewObject.SetColor(e.Entity.CurrSignal.ToColor());
+        }
+
+        public void OnPortSignalUpdated(ISignalEventListener.PortSignalUpdatedEvent e)
+        {
+            if (views.TryGetValue(e.Pos, out View view))
+                view.ViewObject.SetPortColor(e.Dir, e.Signal.ToColor());
         }
     }
 }

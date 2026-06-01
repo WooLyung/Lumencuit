@@ -36,6 +36,11 @@ namespace Lumencuit
         public abstract int OutSignalCount { get; }
 
         /// <summary>
+        /// 입력 포트의 순서를 지정합니다.
+        /// </summary>
+        public abstract bool RequiresOrderedInputs { get; }
+
+        /// <summary>
         /// 현재 연결된 입력 신호를 기반으로 출력 신호를 계산합니다.
         /// </summary>
         /// <param name="inputs">

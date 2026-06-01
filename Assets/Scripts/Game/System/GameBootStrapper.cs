@@ -28,7 +28,7 @@ namespace Lumencuit
 
             worldSystem = new(stageData);
             simulationSystem = new(worldSystem, stageData);
-            renderSystem = new(worldSystem, renderRegistry.Prefabs, viewRoot);
+            renderSystem = new(worldSystem, simulationSystem, renderRegistry.Prefabs, viewRoot);
 #if UNITY_ANDROID || UNITY_IOS
             inputSystem = new NullInputSystem(worldSystem);
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_EDITOR

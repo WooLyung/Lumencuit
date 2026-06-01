@@ -544,6 +544,11 @@ MonoBehaviour:
     lamp: {fileID: 3804965436788688523, guid: e7807ee096137b44d97be8c8eac967f0, type: 3}
     source: {fileID: 3804965436788688523, guid: a91934c7f7759064885415d3e2d85967, type: 3}
     wire: {fileID: 3804965436788688523, guid: fa77ab57ec7377b4bbb32ab72d2344b7, type: 3}
+    andGate: {fileID: 3804965436788688523, guid: 8bac1696f414bf54b9912b74799d2d07, type: 3}
+    notGate: {fileID: 3804965436788688523, guid: cf4de822a8c35fa4db0796a478b6cca0, type: 3}
+    orGate: {fileID: 3804965436788688523, guid: 0dfeaeff43b7adf49975a0d28a0453a3, type: 3}
+    splitGate: {fileID: 3804965436788688523, guid: 51a21f5acde660849b8914741d1718c8, type: 3}
+    xorGate: {fileID: 3804965436788688523, guid: 0a939d3a3ee49da44918513920bb6c17, type: 3}
 --- !u!1 &959619865
 GameObject:
   m_ObjectHideFlags: 0

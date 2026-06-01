@@ -60,5 +60,10 @@ namespace Lumencuit
         {
             return signal = Element.Flow(inputs);
         }
+
+        public Entity Clone()
+        {
+            return new Entity(MadeBy, signal, sides);
+        }
     }
 }

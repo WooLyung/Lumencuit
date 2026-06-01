@@ -13,6 +13,7 @@ namespace Lumencuit
         public override int TurbidityDelta => 1;
         public override int InSignalCount => 2;
         public override int OutSignalCount => 1;
+        public override bool RequiresOrderedInputs => false;
 
         private AndGate() { }
 

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Stage1
   m_EditorClassIdentifier: Assembly-CSharp::Lumencuit.StageData
   StageName: Stage 1
-  Width: 4
-  Height: 4
+  Width: 5
+  Height: 5
   Blueprints:
   - blueprint:
       type: 2
@@ -22,6 +22,14 @@ MonoBehaviour:
     count: 2
   - blueprint:
       type: 0
-      signalColor: 1
+      signalColor: 6
     count: 2
-  enabledTiles: 01010000000101000001010100000101
+  - blueprint:
+      type: 6
+      signalColor: 6
+    count: 2
+  - blueprint:
+      type: 2
+      signalColor: 2
+    count: 1
+  enabledTiles: 01010000000101010101010101010101010101010000000101

@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 
 namespace Lumencuit
@@ -15,6 +14,18 @@ namespace Lumencuit
         public override void SetColor(Color color)
         {
             center.color = color;
+        }
+
+        public override void SetPortColor(Vector2Int dir, Color color)
+        {
+            if (dir == Vector2Int.left)
+                leftPort.color = color;
+            else if (dir == Vector2Int.right)
+                rightPort.color = color;
+            else if (dir == Vector2Int.up)
+                upPort.color = color;
+            else if (dir == Vector2Int.down)
+                downPort.color = color;
         }
 
         public override void PortUpdate(Entity entity)

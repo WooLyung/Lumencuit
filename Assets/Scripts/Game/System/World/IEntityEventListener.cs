@@ -44,19 +44,34 @@ namespace Lumencuit
             }
         }
 
+        public class GridUpdatedEvent
+        {
+            public readonly WorldGrid WorldGridClone;
+
+            public GridUpdatedEvent(WorldGrid worldGridClone)
+            {
+                WorldGridClone = worldGridClone;
+            }
+        }
+
         /// <summary>
         /// 엔티티가 생성될 때 호출됩니다.
         /// </summary>
-        public void OnEntityCreated(EntityCreatedEvent e);
+        public void OnEntityCreated(EntityCreatedEvent e) { }
 
         /// <summary>
         /// 엔티티가 삭제될 때 호출됩니다.
         /// </summary>
-        public void OnEntityRemoved(EntityRemovedEvent e);
+        public void OnEntityRemoved(EntityRemovedEvent e) { }
 
         /// <summary>
         /// 엔티티 포트에 변화가 생겼을 때 호출됩니다.
         /// </summary>
-        public void OnEntityPortUpdated(EntityPortUpdatedEvent e);
+        public void OnEntityPortUpdated(EntityPortUpdatedEvent e) { }
+
+        /// <summary>
+        /// 그리드의 변경이 끝난 후 호출됩니다.
+        /// </summary>
+        public void OnGridUpdated(GridUpdatedEvent e) { }
     }
 }

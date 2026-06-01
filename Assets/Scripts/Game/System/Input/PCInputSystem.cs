@@ -51,7 +51,11 @@ namespace Lumencuit
             if (keyboard.digit1Key.wasPressedThisFrame)
                 SelectBlueprint(new EntityBlueprint(CircuitElement.CircuitElementType.Source, Signal.SignalColor.Red));
             if (keyboard.digit2Key.wasPressedThisFrame)
+                SelectBlueprint(new EntityBlueprint(CircuitElement.CircuitElementType.Source, Signal.SignalColor.Blue));
+            if (keyboard.digit3Key.wasPressedThisFrame)
                 SelectBlueprint(new EntityBlueprint(CircuitElement.CircuitElementType.Lamp, Signal.SignalColor.Black));
+            if (keyboard.digit4Key.wasPressedThisFrame)
+                SelectBlueprint(new EntityBlueprint(CircuitElement.CircuitElementType.OrGate, Signal.SignalColor.Black));
         }
 
         private void Mouse()

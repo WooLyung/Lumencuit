@@ -12,6 +12,7 @@ namespace Lumencuit
         public override int TurbidityDelta => 0;
         public override int InSignalCount => 1;
         public override int OutSignalCount => 0;
+        public override bool RequiresOrderedInputs => false;
 
         private Lamp() { }
 
@@ -19,6 +20,8 @@ namespace Lumencuit
 
         public override Signal Flow(IReadOnlyList<Signal> inputs)
         {
+            foreach (Signal input in inputs)
+                return input;
             return Signal.Black;
         }
     }
