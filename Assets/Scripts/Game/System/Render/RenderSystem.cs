@@ -1,13 +1,15 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEditor.Rendering;
 using UnityEngine;
+using static Lumencuit.ISimulationEventListener;
 
 namespace Lumencuit
 {
     /// <summary>
     /// 월드 및 시뮬레이션과 독립적으로 작동하는 렌더링 시스템입니다.
     /// </summary>
-    public sealed class RenderSystem : IEntityEventListener, ISignalEventListener
+    public sealed class RenderSystem : IEntityEventListener, ISimulationEventListener
     {
         /// <summary>
         /// 렌더링을 위해 생성된 게임 오브젝트와 정보입니다.
@@ -27,15 +29,30 @@ namespace Lumencuit
         private readonly WorldSystem worldSystem;
         private readonly RenderPrefab prefabs;
         private readonly ViewRoot viewRoot;
+        private readonly StageData stageData;
         private readonly Dictionary<Vector2Int, View> views = new();
 
-        public RenderSystem(WorldSystem worldSystem, SimulationSystem simulationSystem, RenderPrefab prefabs, ViewRoot viewRoot)
+        public RenderSystem(WorldSystem worldSystem, SimulationSystem simulationSystem, RenderPrefab prefabs, ViewRoot viewRoot, StageData stageData)
         {
             this.worldSystem = worldSystem;
             this.prefabs = prefabs;
             this.viewRoot = viewRoot;
+            this.stageData = stageData;
+
             worldSystem.AddListener(this);
             simulationSystem.AddListener(this);
+
+            var gui = GameObject.Find("StageData").GetComponent<TextMeshProUGUI>();
+            gui.text += "<Blueprints>\n";
+            foreach (EntityBlueprintStack entityBlueprintStack in stageData.Blueprints)
+                if (entityBlueprintStack.Blueprint.Type == CircuitElement.CircuitElementType.Source)
+                    gui.text += $"- {entityBlueprintStack.Blueprint.Type}[{entityBlueprintStack.Blueprint.SignalColor}] * {entityBlueprintStack.Count}\n";
+                else
+                    gui.text += $"- {entityBlueprintStack.Blueprint.Type} * {entityBlueprintStack.Count}\n";
+
+            gui.text += "\n<Goals>\n";
+            foreach (StageData.StageGoal goal in stageData.Goals)
+                gui.text += $"- {goal.SignalColor} * {goal.Count}\n";
 
             RenderGrid();
         }
@@ -97,16 +114,31 @@ namespace Lumencuit
             }
         }
 
-        public void OnSignalUpdated(ISignalEventListener.SignalUpdatedEvent e)
+        public void OnSignalUpdated(ISimulationEventListener.SignalUpdatedEvent e)
         {
             if (views.TryGetValue(e.Pos, out View view))
                 view.ViewObject.SetColor(e.Entity.CurrSignal.ToColor());
         }
 
-        public void OnPortSignalUpdated(ISignalEventListener.PortSignalUpdatedEvent e)
+        public void OnPortSignalUpdated(ISimulationEventListener.PortSignalUpdatedEvent e)
         {
             if (views.TryGetValue(e.Pos, out View view))
                 view.ViewObject.SetPortColor(e.Dir, e.Signal.ToColor());
+        }
+
+        public void OnCircuitResultEvent(CircuitResultEvent e)
+        {
+            CircuitResult result = e.Result;
+            var gui = GameObject.Find("CircuitResult").GetComponent<TextMeshProUGUI>();
+
+            if (result == CircuitResult.Fail)
+                gui.text = "목표와 다른 회로 구성";
+            else if (result == CircuitResult.IncompleteCircuit)
+                gui.text = "완성되지 않은 회로";
+            else if (result == CircuitResult.CantReach)
+                gui.text = "도달 불가능하거나\n사이클인 요소가 있음";
+            else if (result == CircuitResult.Success)
+                gui.text = "성공!";
         }
     }
 }

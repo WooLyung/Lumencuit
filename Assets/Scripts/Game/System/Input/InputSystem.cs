@@ -46,6 +46,7 @@ namespace Lumencuit
             if (currInputState != InputState.None)
                 return;
 
+            selectedBlueprint = null;
             Entity entity = worldSystem.GetEntityAt(x, y);
             if (entity == null)
                 return;
@@ -62,6 +63,7 @@ namespace Lumencuit
             if (currInputState != InputState.Drag)
                 return;
 
+            selectedBlueprint = null;
             Vector2Int next = new Vector2Int(x, y);
             if (path.Count == 0)
             {
@@ -85,13 +87,14 @@ namespace Lumencuit
 
         protected void EndPath()
         {
+            selectedBlueprint = null;
             if (currInputState != InputState.Drag)
             {
                 currInputState = InputState.None;
                 return;
             }
 
-            if (path.Count >= 2)
+            if (path.Count >= 3)
                 worldSystem.TryCreateWire(path);
 
             path.Clear();

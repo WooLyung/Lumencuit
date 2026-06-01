@@ -41,6 +41,15 @@ namespace Lumencuit
         public bool HasEntityAt(int x, int y) => IsEnabledTile(x, y) && grid[x, y] != null;
         public Entity GetEntityAt(int x, int y) => IsEnabledTile(x, y) ? grid[x, y] : null;
 
+        public bool TryGetEntityAt(int x, int y, out Entity entity)
+        {
+            entity = null;
+            if (!HasEntityAt(x, y))
+                return false;
+            entity = grid[x, y];
+            return true;
+        }
+
         public IEnumerable<Vector2Int> GetAllSourcePositions()
         {
             for (int x = 0; x < Width; x++)
@@ -50,6 +59,20 @@ namespace Lumencuit
                     if (!HasEntityAt(x, y))
                         continue;
                     if (grid[x, y].Element.Type == CircuitElement.CircuitElementType.Source)
+                        yield return new Vector2Int(x, y);
+                }
+            }
+        }
+
+        public IEnumerable<Vector2Int> GetAllGoalPositions()
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    if (!HasEntityAt(x, y))
+                        continue;
+                    if (grid[x, y].Element.IsGoal)
                         yield return new Vector2Int(x, y);
                 }
             }

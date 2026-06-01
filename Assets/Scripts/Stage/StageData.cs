@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,11 +10,25 @@ namespace Lumencuit
     [CreateAssetMenu(fileName = "StageData", menuName = "Lumencuit/Stage Data")]
     public sealed class StageData : ScriptableObject
     {
+        /// <summary>
+        /// 스테이지의 램프에 도달해야 하는 최종 목록입니다.
+        /// </summary>
+        [Serializable]
+        public class StageGoal
+        {
+            [SerializeField] private Signal.SignalColor signalColor;
+            [SerializeField] private int count;
+
+            public Signal.SignalColor SignalColor => signalColor;
+            public int Count => count;
+        }
+
         public string StageName;
 
         [Min(1)] public int Width = 1;
         [Min(1)] public int Height = 1;
         public List<EntityBlueprintStack> Blueprints = new();
+        public List<StageGoal> Goals = new();
 
         [SerializeField] private bool[] enabledTiles = new bool[1];
 

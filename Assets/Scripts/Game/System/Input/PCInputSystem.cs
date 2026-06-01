@@ -10,11 +10,13 @@ namespace Lumencuit
     public sealed class PCInputSystem : InputSystem
     {
         private readonly Camera camera;
+        private readonly StageData stageData;
         private Vector2Int preTarget = new Vector2Int(-1, -1);
 
-        public PCInputSystem(WorldSystem worldSystem, Camera camera) : base(worldSystem)
+        public PCInputSystem(WorldSystem worldSystem, Camera camera, StageData stageData) : base(worldSystem)
         {
             this.camera = camera;
+            this.stageData = stageData;
         }
         
         public override void Update()
@@ -48,14 +50,24 @@ namespace Lumencuit
             if (keyboard == null)
                 return;
 
-            if (keyboard.digit1Key.wasPressedThisFrame)
-                SelectBlueprint(new EntityBlueprint(CircuitElement.CircuitElementType.Source, Signal.SignalColor.Red));
-            if (keyboard.digit2Key.wasPressedThisFrame)
-                SelectBlueprint(new EntityBlueprint(CircuitElement.CircuitElementType.Source, Signal.SignalColor.Blue));
-            if (keyboard.digit3Key.wasPressedThisFrame)
-                SelectBlueprint(new EntityBlueprint(CircuitElement.CircuitElementType.Lamp, Signal.SignalColor.Black));
-            if (keyboard.digit4Key.wasPressedThisFrame)
-                SelectBlueprint(new EntityBlueprint(CircuitElement.CircuitElementType.OrGate, Signal.SignalColor.Black));
+            if (keyboard.digit1Key.wasPressedThisFrame && stageData.Blueprints.Count >= 0)
+                SelectBlueprint(stageData.Blueprints[0].Blueprint);
+            if (keyboard.digit2Key.wasPressedThisFrame && stageData.Blueprints.Count >= 1)
+                SelectBlueprint(stageData.Blueprints[1].Blueprint);
+            if (keyboard.digit3Key.wasPressedThisFrame && stageData.Blueprints.Count >= 2)
+                SelectBlueprint(stageData.Blueprints[2].Blueprint);
+            if (keyboard.digit4Key.wasPressedThisFrame && stageData.Blueprints.Count >= 3)
+                SelectBlueprint(stageData.Blueprints[3].Blueprint);
+            if (keyboard.digit5Key.wasPressedThisFrame && stageData.Blueprints.Count >= 4)
+                SelectBlueprint(stageData.Blueprints[4].Blueprint);
+            if (keyboard.digit6Key.wasPressedThisFrame && stageData.Blueprints.Count >= 5)
+                SelectBlueprint(stageData.Blueprints[5].Blueprint);
+            if (keyboard.digit7Key.wasPressedThisFrame && stageData.Blueprints.Count >= 6)
+                SelectBlueprint(stageData.Blueprints[6].Blueprint);
+            if (keyboard.digit8Key.wasPressedThisFrame && stageData.Blueprints.Count >= 7)
+                SelectBlueprint(stageData.Blueprints[7].Blueprint);
+            if (keyboard.digit9Key.wasPressedThisFrame && stageData.Blueprints.Count >= 8)
+                SelectBlueprint(stageData.Blueprints[8].Blueprint);
         }
 
         private void Mouse()
@@ -81,7 +93,9 @@ namespace Lumencuit
                     StartPath(pos.x, pos.y);
             }
             else if (mouse.leftButton.wasReleasedThisFrame)
+            {
                 EndPath();
+            }
             else if (mouse.leftButton.isPressed)
             {
                 if (preTarget != pos)

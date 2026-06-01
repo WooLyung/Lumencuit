@@ -1,5 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Lumencuit.Signal;
 
 namespace Lumencuit
 {
@@ -21,7 +23,7 @@ namespace Lumencuit
 
 
         private readonly StageData stageData;
-        private readonly List<ISignalEventListener> listeners = new();
+        private readonly List<ISimulationEventListener> listeners = new();
 
         public SimulationSystem(WorldSystem worldSystem, StageData stageData)
         {
@@ -29,16 +31,17 @@ namespace Lumencuit
             this.stageData = stageData;
         }
 
-        public void AddListener(ISignalEventListener listener) => listeners.Add(listener);
+        public void AddListener(ISimulationEventListener listener) => listeners.Add(listener);
 
         /// <summary>
         /// 그리드의 복사본을 이용해 전체 신호를 계산합니다.
         /// </summary>
-        private void FlowAll(WorldGrid worldGrid)
+        private void FlowAll(WorldGrid worldGrid, out bool cantReach)
         {
             SignalSet[,] signals = new SignalSet[worldGrid.Width, worldGrid.Height];
             int[,] remainedIn = new int[worldGrid.Width, worldGrid.Height];
             Queue<Vector2Int> queue = new();
+            cantReach = false;
 
             // 신호 계산 후 큐에 넣기
             void AddQueue(Vector2Int next)
@@ -67,11 +70,8 @@ namespace Lumencuit
                 for (int y = 0; y < worldGrid.Height; y++)
                 {
                     signals[x, y] = new SignalSet();
-                    if (worldGrid.HasEntityAt(x, y))
-                    {
-                        Entity entity = worldGrid.GetEntityAt(x, y);
+                    if (worldGrid.TryGetEntityAt(x, y, out Entity entity))
                         remainedIn[x, y] = entity.InPortCount;
-                    }
                 }
             }
 
@@ -124,10 +124,9 @@ namespace Lumencuit
             {
                 for (int y = 0; y < worldGrid.Height; y++)
                 {
-                    if (worldGrid.HasEntityAt(x, y))
+                    if (worldGrid.TryGetEntityAt(x, y, out Entity entity))
                     {
                         SignalSet signalSet = signals[x, y];
-                        Entity entity = worldGrid.GetEntityAt(x, y);
                         Vector2Int pos = new Vector2Int(x, y);
 
                         NotifySignalUpdated(entity, pos);
@@ -142,25 +141,113 @@ namespace Lumencuit
                     }
                 }
             }
+
+            // 사이클 검사
+            for (int x = 0; x < worldGrid.Width; x++)
+            {
+                for (int y = 0; y < worldGrid.Height; y++)
+                {
+                    if (worldGrid.TryGetEntityAt(x, y, out Entity entity))
+                    {
+                        if (remainedIn[x, y] != 0)
+                        {
+                            cantReach = true;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        private CircuitResult IsCircuitComplete(WorldGrid worldGrid)
+        {
+            for (int x = 0; x < worldGrid.Width; x++)
+                for (int y = 0; y < worldGrid.Height; y++)
+                    if (worldGrid.TryGetEntityAt(x, y, out Entity entity))
+                        if (entity.Element.InSignalCount != entity.InPortCount || entity.Element.OutSignalCount != entity.OutPortCount)
+                            return CircuitResult.Success;
+            return CircuitResult.Success;
+        }
+
+        private CircuitResult CheckClearStage(WorldGrid worldGrid)
+        {
+            Dictionary<SignalColor, int> goalCounts = new();
+            foreach (StageData.StageGoal goal in stageData.Goals)
+                goalCounts[goal.SignalColor] = goal.Count;
+
+            foreach (Vector2Int pos in worldGrid.GetAllGoalPositions())
+            {
+                Entity goal = worldGrid.GetEntityAt(pos.x, pos.y);
+                if (!goalCounts.TryGetValue(goal.CurrSignal.Color, out int count) || count <= 0)
+                    return CircuitResult.Fail;
+                goalCounts[goal.CurrSignal.Color]--;
+            }
+
+            foreach (int count in goalCounts.Values)
+                if (count != 0)
+                    return CircuitResult.Fail;
+
+            return CircuitResult.Success;
         }
 
         public void OnGridUpdated(IEntityEventListener.GridUpdatedEvent e)
         {
-            FlowAll(e.WorldGridClone);
+            void AlertResult(CircuitResult result)
+            {
+                NotifyCircuitResult(result);
+            }
+
+            // worldGrid는 복사본으로, 기존 월드 시스템에 영향을 주지 않습니다.
+            WorldGrid worldGrid = e.WorldGridClone;
+
+            // 그리드 전체 신호 계산
+            FlowAll(worldGrid, out bool cantReach);
+            
+            // 사이클 혹은 도달 가능성 검사
+            if (cantReach)
+            {
+                AlertResult(CircuitResult.CantReach);
+                return;
+            }
+
+            // 회로 완성 검사
+            CircuitResult result = IsCircuitComplete(worldGrid);
+            if (result != CircuitResult.Success)
+            {
+                AlertResult(result);
+                return;
+            }
+
+            // 목표 달성 검사
+            result = CheckClearStage(worldGrid);
+            if (result != CircuitResult.Success)
+            {
+                AlertResult(result);
+                return;
+            }
+
+            AlertResult(result);
         }
 
         private void NotifySignalUpdated(Entity entity, Vector2Int pos)
         {
-            ISignalEventListener.SignalUpdatedEvent e = new ISignalEventListener.SignalUpdatedEvent(entity, pos);
-            foreach (ISignalEventListener listener in listeners)
+            ISimulationEventListener.SignalUpdatedEvent e = new ISimulationEventListener.SignalUpdatedEvent(entity, pos);
+            foreach (ISimulationEventListener listener in listeners)
                 listener.OnSignalUpdated(e);
         }
 
         private void NotifyPortSignalUpdated(Entity entity, Vector2Int dir, Vector2Int pos, Signal signal)
         {
-            ISignalEventListener.PortSignalUpdatedEvent e = new ISignalEventListener.PortSignalUpdatedEvent(entity, dir, pos, signal);
-            foreach (ISignalEventListener listener in listeners)
+            ISimulationEventListener.PortSignalUpdatedEvent e = new ISimulationEventListener.PortSignalUpdatedEvent(entity, dir, pos, signal);
+            foreach (ISimulationEventListener listener in listeners)
                 listener.OnPortSignalUpdated(e);
+        }
+
+        private void NotifyCircuitResult(CircuitResult result)
+        {
+            ISimulationEventListener.CircuitResultEvent e = new ISimulationEventListener.CircuitResultEvent(result);
+            foreach (ISimulationEventListener listener in listeners)
+                listener.OnCircuitResultEvent(e);
         }
     }
 }

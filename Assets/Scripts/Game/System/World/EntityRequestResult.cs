@@ -1,4 +1,6 @@
-﻿namespace Lumencuit
+﻿using System;
+
+namespace Lumencuit
 {
     /// <summary>
     /// WorldGrid의 엔티티 요청에 대한 결과를 나타냅니다.
@@ -21,5 +23,18 @@
         public static readonly EntityRequestResult IsEmpty = new EntityRequestResult("IsEmpty");
         public static readonly EntityRequestResult UnavailableBlueprint = new EntityRequestResult("UnavailableBlueprint");
         public static readonly EntityRequestResult UnavailablePort = new EntityRequestResult("UnavailablePort");
+
+        public static bool operator ==(EntityRequestResult a, EntityRequestResult b) => a.Result == b.Result;
+        public static bool operator !=(EntityRequestResult a, EntityRequestResult b) => a.Result != b.Result;
+
+        public override bool Equals(object obj)
+        {
+            return obj is EntityRequestResult result && Result == result.Result;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Result);
+        }
     }
 }

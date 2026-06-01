@@ -41,6 +41,11 @@ namespace Lumencuit
         public abstract bool RequiresOrderedInputs { get; }
 
         /// <summary>
+        /// 최종 목표(램프)인지 지정합니다.
+        /// </summary>
+        public virtual bool IsGoal => false;
+
+        /// <summary>
         /// 현재 연결된 입력 신호를 기반으로 출력 신호를 계산합니다.
         /// </summary>
         /// <param name="inputs">
