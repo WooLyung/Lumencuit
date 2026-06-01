@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f10df99362435f4ca4d61c2fdb3cc79, type: 3}
+  m_Name: Stage4
+  m_EditorClassIdentifier: Assembly-CSharp::Lumencuit.StageData
+  StageName: Stage 4
+  Width: 5
+  Height: 5
+  Blueprints:
+  - blueprint:
+      type: 2
+      signalColor: 0
+    count: 1
+  - blueprint:
+      type: 2
+      signalColor: 1
+    count: 1
+  - blueprint:
+      type: 5
+      signalColor: 6
+    count: 1
+  - blueprint:
+      type: 9
+      signalColor: 6
+    count: 1
+  - blueprint:
+      type: 7
+      signalColor: 6
+    count: 1
+  - blueprint:
+      type: 0
+      signalColor: 6
+    count: 2
+  Goals:
+  - signalColor: 4
+    count: 1
+  - signalColor: 2
+    count: 1
+  enabledTiles: 00010101000101010101010101010101010101010001010100

@@ -14,6 +14,7 @@ namespace Lumencuit
         [SerializeField] private GameObject gridCollider;
 
         [SerializeField] private GameObject lamp;
+        [SerializeField] private GameObject lampBridge;
         [SerializeField] private GameObject source;
         [SerializeField] private GameObject wire;
 
@@ -31,6 +32,7 @@ namespace Lumencuit
             return type switch
             {
                 CircuitElementType.Lamp => lamp,
+                CircuitElementType.LampBridge => lampBridge,
                 CircuitElementType.Source => source,
                 CircuitElementType.Wire => wire,
                 CircuitElementType.AndGate => andGate,

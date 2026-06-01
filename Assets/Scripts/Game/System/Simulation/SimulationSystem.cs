@@ -163,7 +163,7 @@ namespace Lumencuit
             // 설치되지 않은 블루프린트
             foreach (EntityBlueprintStack blueprint in blueprints)
                 if (blueprint.Count > 0)
-                    return CircuitResult.IncompleteCircuit;
+                    return CircuitResult.UnplacedBlueprint;
 
             // 연결되지 않은 포트
             for (int x = 0; x < worldGrid.Width; x++)
