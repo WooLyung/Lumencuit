@@ -1,0 +1,4 @@
+<Texts>
+    <Text key="Success">성공</Text>
+    <Text key="Fail">실패 {0}</Text>
+</Texts>
