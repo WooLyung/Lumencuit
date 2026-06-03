@@ -11,11 +11,13 @@ namespace Lumencuit
         {
             public readonly Entity Entity;
             public readonly Vector2Int Pos;
+            public readonly Signal Signal;
 
-            public SignalUpdatedEvent(Entity entity, Vector2Int pos)
+            public SignalUpdatedEvent(Entity entity, Vector2Int pos, Signal signal)
             {
                 Entity = entity;
                 Pos = pos;
+                Signal = signal;
             }
         }
 

@@ -12,14 +12,51 @@ namespace Lumencuit
         /// <summary>
         /// 모든 방향을 포함하는 신호 집합입니다.
         /// </summary>
-        private class SignalSet {
-            public Signal Center = Signal.Black;
-            public Signal Left = Signal.Black;
-            public Signal Right = Signal.Black;
-            public Signal Up = Signal.Black;
-            public Signal Down = Signal.Black;
+        private class SignalSet
+        {
+            public Signal Center = Black;
+            public Signal Left = Black;
+            public Signal Right = Black;
+            public Signal Up = Black;
+            public Signal Down = Black;
         };
 
+        /// <summary>
+        /// 시뮬레이션 결과가 저장된 그리드입니다.
+        /// </summary>
+        private class SimulatedGrid
+        {
+            public readonly int Width;
+            public readonly int Height;
+            public readonly Signal[,] Signals;
+            public readonly Signal[,] UpPorts;
+            public readonly Signal[,] DownPorts;
+            public readonly Signal[,] RightPorts;
+            public readonly Signal[,] LeftPorts;
+
+            public SimulatedGrid(int width, int height)
+            {
+                Width = width;
+                Height = height;
+
+                Signals = new Signal[Width, Height];
+                UpPorts = new Signal[Width, Height];
+                DownPorts = new Signal[Width, Height];
+                RightPorts = new Signal[Width, Height];
+                LeftPorts = new Signal[Width, Height];
+                for (int x = 0; x < Width; x++)
+                {
+                    for (int y = 0; y < Height; y++)
+                    {
+                        Signals[x, y] = Black;
+                        UpPorts[x, y] = Black;
+                        DownPorts[x, y] = Black;
+                        RightPorts[x, y] = Black;
+                        LeftPorts[x, y] = Black;
+                    }
+                }
+            }
+        }
 
         private readonly StageData stageData;
         private readonly List<ISimulationEventListener> listeners = new();
@@ -35,15 +72,15 @@ namespace Lumencuit
         /// <summary>
         /// 그리드의 복사본을 이용해 전체 신호를 계산합니다.
         /// </summary>
-        private void FlowAll(WorldGrid worldGrid, out bool cantReach)
+        private void FlowAll(WorldGrid worldGrid, out bool cantReach, out SimulatedGrid simulatedGrid)
         {
-            SignalSet[,] signals = new SignalSet[worldGrid.Width, worldGrid.Height];
+            simulatedGrid = new SimulatedGrid(worldGrid.Width, worldGrid.Height);
             int[,] remainedIn = new int[worldGrid.Width, worldGrid.Height];
             Queue<Vector2Int> queue = new();
             cantReach = false;
 
             // 신호 계산 후 큐에 넣기
-            void AddQueue(Vector2Int next)
+            void AddQueue(Vector2Int next, SimulatedGrid simulatedGrid)
             {
                 Entity entity = worldGrid.GetEntityAt(next.x, next.y);
                 if (entity == null)
@@ -51,34 +88,29 @@ namespace Lumencuit
 
                 List<Signal> inputs = new();
                 if (entity.UpPort == Entity.PortType.Input)
-                    inputs.Add(signals[next.x, next.y].Up);
+                    inputs.Add(simulatedGrid.UpPorts[next.x, next.y]);
                 if (entity.DownPort == Entity.PortType.Input)
-                    inputs.Add(signals[next.x, next.y].Down);
+                    inputs.Add(simulatedGrid.DownPorts[next.x, next.y]);
                 if (entity.RightPort == Entity.PortType.Input)
-                    inputs.Add(signals[next.x, next.y].Right);
+                    inputs.Add(simulatedGrid.RightPorts[next.x, next.y]);
                 if (entity.LeftPort == Entity.PortType.Input)
-                    inputs.Add(signals[next.x, next.y].Left);
+                    inputs.Add(simulatedGrid.LeftPorts[next.x, next.y]);
 
-                signals[next.x, next.y].Center = entity.Flow(inputs);
+                simulatedGrid.Signals[next.x, next.y] = entity.Flow(inputs);
                 queue.Enqueue(next);
             }
 
             // 초기화
             for (int x = 0; x < worldGrid.Width; x++)
-            {
                 for (int y = 0; y < worldGrid.Height; y++)
-                {
-                    signals[x, y] = new SignalSet();
                     if (worldGrid.TryGetEntityAt(x, y, out Entity entity))
                         remainedIn[x, y] = entity.InPortCount;
-                }
-            }
 
             // 모든 소스로부터 계산 시작
             foreach (Vector2Int pos in worldGrid.GetAllSourcePositions())
             {
                 Entity source = worldGrid.GetEntityAt(pos.x, pos.y);
-                signals[pos.x, pos.y].Center = source.CurrSignal;
+                simulatedGrid.Signals[pos.x, pos.y] = (source.Element as Source)?.Signal ?? Black;
                 queue.Enqueue(pos);
             }
 
@@ -91,30 +123,30 @@ namespace Lumencuit
                 if (entity.UpPort == Entity.PortType.Output)
                 {
                     Vector2Int next = front + Vector2Int.up;
-                    signals[front.x, front.y].Up = signals[next.x, next.y].Down = signals[front.x, front.y].Center;
+                    simulatedGrid.UpPorts[front.x, front.y] = simulatedGrid.DownPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
                     if (--remainedIn[next.x, next.y] == 0)
-                        AddQueue(next);
+                        AddQueue(next, simulatedGrid);
                 }
                 if (entity.DownPort == Entity.PortType.Output)
                 {
                     Vector2Int next = front + Vector2Int.down;
-                    signals[front.x, front.y].Down = signals[next.x, next.y].Up = signals[front.x, front.y].Center;
+                    simulatedGrid.DownPorts[front.x, front.y] = simulatedGrid.UpPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
                     if (--remainedIn[next.x, next.y] == 0)
-                        AddQueue(next);
+                        AddQueue(next, simulatedGrid);
                 }
                 if (entity.RightPort == Entity.PortType.Output)
                 {
                     Vector2Int next = front + Vector2Int.right;
-                    signals[front.x, front.y].Right = signals[next.x, next.y].Left = signals[front.x, front.y].Center;
+                    simulatedGrid.RightPorts[front.x, front.y] = simulatedGrid.LeftPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
                     if (--remainedIn[next.x, next.y] == 0)
-                        AddQueue(next);
+                        AddQueue(next, simulatedGrid);
                 }
                 if (entity.LeftPort == Entity.PortType.Output)
                 {
                     Vector2Int next = front + Vector2Int.left;
-                    signals[front.x, front.y].Left = signals[next.x, next.y].Right = signals[front.x, front.y].Center;
+                    simulatedGrid.LeftPorts[front.x, front.y] = simulatedGrid.RightPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
                     if (--remainedIn[next.x, next.y] == 0)
-                        AddQueue(next);
+                        AddQueue(next, simulatedGrid);
                 }
             }
 
@@ -125,18 +157,17 @@ namespace Lumencuit
                 {
                     if (worldGrid.TryGetEntityAt(x, y, out Entity entity))
                     {
-                        SignalSet signalSet = signals[x, y];
                         Vector2Int pos = new Vector2Int(x, y);
 
-                        NotifySignalUpdated(entity, pos);
+                        NotifySignalUpdated(entity, pos, simulatedGrid.Signals[x, y]);
                         if (entity.UpPort != Entity.PortType.None)
-                            NotifyPortSignalUpdated(entity, Vector2Int.up, pos, signalSet.Up);
+                            NotifyPortSignalUpdated(entity, Vector2Int.up, pos, simulatedGrid.UpPorts[x, y]);
                         if (entity.DownPort != Entity.PortType.None)
-                            NotifyPortSignalUpdated(entity, Vector2Int.down, pos, signalSet.Down);
+                            NotifyPortSignalUpdated(entity, Vector2Int.down, pos, simulatedGrid.DownPorts[x, y]);
                         if (entity.RightPort != Entity.PortType.None)
-                            NotifyPortSignalUpdated(entity, Vector2Int.right, pos, signalSet.Right);
+                            NotifyPortSignalUpdated(entity, Vector2Int.right, pos, simulatedGrid.RightPorts[x, y]);
                         if (entity.LeftPort != Entity.PortType.None)
-                            NotifyPortSignalUpdated(entity, Vector2Int.left, pos, signalSet.Left);
+                            NotifyPortSignalUpdated(entity, Vector2Int.left, pos, simulatedGrid.LeftPorts[x, y]);
                     }
                 }
             }
@@ -175,7 +206,7 @@ namespace Lumencuit
             return CircuitResult.Success;
         }
 
-        private CircuitResult CheckClearStage(WorldGrid worldGrid)
+        private CircuitResult CheckClearStage(WorldGrid worldGrid, SimulatedGrid simulatedGrid)
         {
             Dictionary<SignalColor, int> goalCounts = new();
             foreach (StageData.StageGoal goal in stageData.Goals)
@@ -183,10 +214,10 @@ namespace Lumencuit
 
             foreach (Vector2Int pos in worldGrid.GetAllGoalPositions())
             {
-                Entity goal = worldGrid.GetEntityAt(pos.x, pos.y);
-                if (!goalCounts.TryGetValue(goal.CurrSignal.Color, out int count) || count <= 0)
+                SignalColor signal = simulatedGrid.Signals[pos.x, pos.y].Color;
+                if (!goalCounts.TryGetValue(signal, out int count) || count <= 0)
                     return CircuitResult.Fail;
-                goalCounts[goal.CurrSignal.Color]--;
+                goalCounts[signal]--;
             }
 
             foreach (int count in goalCounts.Values)
@@ -208,7 +239,7 @@ namespace Lumencuit
             List<EntityBlueprintStack> blueprints = e.BlueprintsClone;
 
             // 그리드 전체 신호 계산
-            FlowAll(worldGrid, out bool cantReach);
+            FlowAll(worldGrid, out bool cantReach, out SimulatedGrid simulatedGrid);
             
             // 사이클 혹은 도달 가능성 검사
             if (cantReach)
@@ -226,7 +257,7 @@ namespace Lumencuit
             }
 
             // 목표 달성 검사
-            result = CheckClearStage(worldGrid);
+            result = CheckClearStage(worldGrid, simulatedGrid);
             if (result != CircuitResult.Success)
             {
                 AlertResult(result);
@@ -236,9 +267,9 @@ namespace Lumencuit
             AlertResult(result);
         }
 
-        private void NotifySignalUpdated(Entity entity, Vector2Int pos)
+        private void NotifySignalUpdated(Entity entity, Vector2Int pos, Signal signal)
         {
-            ISimulationEventListener.SignalUpdatedEvent e = new ISimulationEventListener.SignalUpdatedEvent(entity, pos);
+            ISimulationEventListener.SignalUpdatedEvent e = new ISimulationEventListener.SignalUpdatedEvent(entity, pos, signal);
             foreach (ISimulationEventListener listener in listeners)
                 listener.OnSignalUpdated(e);
         }

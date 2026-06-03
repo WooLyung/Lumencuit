@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f10df99362435f4ca4d61c2fdb3cc79, type: 3}
+  m_Name: Stage 1
+  m_EditorClassIdentifier: Assembly-CSharp::Lumencuit.StageData
+  StageName: Stage 1
+  Width: 3
+  Height: 3
+  Blueprints:
+  - blueprint:
+      rid: 5301989182464852066
+    count: 1
+  - blueprint:
+      rid: 5301989182464852067
+    count: 1
+  - blueprint:
+      rid: 5301989182464852059
+    count: 1
+  - blueprint:
+      rid: 5301989182464852061
+    count: 1
+  Goals:
+  - signalColor: 5
+    count: 1
+  enabledTiles: 010101010101010101
+  references:
+    version: 2
+    RefIds:
+    - rid: 5301989182464852059
+      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 0
+    - rid: 5301989182464852061
+      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 6
+    - rid: 5301989182464852066
+      type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 2
+        signal:
+          r: 1
+          g: 0
+          b: 0
+    - rid: 5301989182464852067
+      type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 2
+        signal:
+          r: 0
+          g: 0
+          b: 1

@@ -181,7 +181,7 @@ namespace Lumencuit
             NotifyEntityPortUpdated(startEntity, startPos);
             NotifyEntityPortUpdated(endEntity, endPos);
 
-            EntityBlueprint wireBlueprint = new EntityBlueprint(CircuitElement.CircuitElementType.Wire, Signal.SignalColor.Black);
+            EntityBlueprint wireBlueprint = new EntityBlueprint(CircuitElement.CircuitElementType.Wire);
             for (int i = 1; i < path.Count - 1; i++)
             {
                 Vector2Int pos = path[i];
@@ -192,7 +192,7 @@ namespace Lumencuit
                 SetPort(ref ports, prev - pos, Entity.PortType.Input);
                 SetPort(ref ports, next - pos, Entity.PortType.Output);
 
-                Entity wireEntity = new Entity(wireBlueprint.Clone(), Signal.Black, ports);
+                Entity wireEntity = new Entity(wireBlueprint.Clone(), ports);
                 worldGrid.SetEntityAt(wireEntity, pos.x, pos.y);
                 NotifyEntityCreated(wireEntity, pos);
             }

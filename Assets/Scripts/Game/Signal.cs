@@ -7,7 +7,8 @@ namespace Lumencuit
     /// <summary>
     /// 회로의 신호를 나타내는 구조체입니다.
     /// </summary>
-    public readonly struct Signal
+    [Serializable]
+    public struct Signal
     {
         /// <summary>
         /// 신호의 색을 나타내는 열거형입니다.
@@ -17,7 +18,7 @@ namespace Lumencuit
             Red, Green, Blue, Yellow, Cyan, Magenta, Black, White
         }
 
-        private readonly bool r, g, b;
+        [SerializeField] private bool r, g, b;
 
         private Signal(bool r, bool g, bool b)
         {
@@ -44,6 +45,8 @@ namespace Lumencuit
         public static Signal operator |(Signal a, Signal b) => new(a.r || b.r, a.g || b.g, a.b || b.b);
         public static Signal operator -(Signal a, Signal b) => new(a.r && !b.r, a.g && !b.g, a.b && !b.b);
         public static Signal operator ^(Signal a, Signal b) => new(a.r != b.r, a.g != b.g, a.b != b.b);
+        public static bool operator ==(Signal a, Signal b) => a.r == b.r && a.g == b.g && a.b == b.b;
+        public static bool operator !=(Signal a, Signal b) => !(a == b);
 
         public SignalColor Color
         {
@@ -70,6 +73,16 @@ namespace Lumencuit
         public Color ToColor()
         {
             return Color.ToColor();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Signal signal && r == signal.r && g == signal.g && b == signal.b;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(r, g, b);
         }
     }
 

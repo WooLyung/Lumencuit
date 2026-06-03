@@ -44,10 +44,7 @@ namespace Lumencuit
             var gui = GameObject.Find("StageData").GetComponent<TextMeshProUGUI>();
             gui.text += "<Blueprints>\n";
             foreach (EntityBlueprintStack entityBlueprintStack in stageData.Blueprints)
-                if (entityBlueprintStack.Blueprint.Type == CircuitElement.CircuitElementType.Source)
-                    gui.text += $"- {entityBlueprintStack.Blueprint.Type}[{entityBlueprintStack.Blueprint.SignalColor}] * {entityBlueprintStack.Count}\n";
-                else
-                    gui.text += $"- {entityBlueprintStack.Blueprint.Type} * {entityBlueprintStack.Count}\n";
+                gui.text += $"- {entityBlueprintStack.Blueprint.Type} * {entityBlueprintStack.Count}\n";
 
             gui.text += "\n<Goals>\n";
             foreach (StageData.StageGoal goal in stageData.Goals)
@@ -88,7 +85,7 @@ namespace Lumencuit
 
                 ViewObject viewObject = view.GetComponent<ViewObject>();
                 viewObject.PortUpdate(e.Entity);
-                viewObject.SetColor(e.Entity.MadeBy.SignalColor.ToColor());
+                viewObject.SetColor(Color.black);
                 viewObject.SetPortColor(Signal.SignalColor.Black.ToColor());
 
                 views.Add(e.Pos, new View(view, viewObject));
@@ -116,7 +113,7 @@ namespace Lumencuit
         public void OnSignalUpdated(ISimulationEventListener.SignalUpdatedEvent e)
         {
             if (views.TryGetValue(e.Pos, out View view))
-                view.ViewObject.SetColor(e.Entity.CurrSignal.ToColor());
+                view.ViewObject.SetColor(e.Signal.ToColor());
         }
 
         public void OnPortSignalUpdated(ISimulationEventListener.PortSignalUpdatedEvent e)

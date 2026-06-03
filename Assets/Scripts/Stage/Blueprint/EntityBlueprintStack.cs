@@ -9,7 +9,7 @@ namespace Lumencuit
     [Serializable]
     public sealed class EntityBlueprintStack
     {
-        [SerializeField] private EntityBlueprint blueprint;
+        [SerializeReference] private EntityBlueprint blueprint;
         [SerializeField] private int count = 1;
 
         public EntityBlueprint Blueprint => blueprint;

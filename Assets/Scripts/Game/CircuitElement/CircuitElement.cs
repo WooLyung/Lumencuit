@@ -5,7 +5,7 @@ namespace Lumencuit
 {
     /// <summary>
     /// 게이트, 조명, 소스 등의 회로 요소의 연산을 정의합니다.
-    /// 자식 클래스는 싱글톤 패턴으로 정의합니다.
+    /// 소스를 제외한 자식 클래스는 싱글톤 패턴으로 정의합니다.
     /// </summary>
     public abstract class CircuitElement
     {
@@ -65,7 +65,6 @@ namespace Lumencuit
             {
                 CircuitElementType.Lamp => Lamp.Instance,
                 CircuitElementType.LampBridge => LampBridge.Instance,
-                CircuitElementType.Source => Source.Instance,
                 CircuitElementType.Wire => Wire.Instance,
                 CircuitElementType.AndGate => AndGate.Instance,
                 CircuitElementType.NotGate => NotGate.Instance,

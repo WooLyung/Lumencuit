@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Lumencuit
 {
     /// <summary>
-    /// 신호의 시작입니다.
+    /// 신호의 시작입니다. 싱글톤을 사용하지 않습니다.
     /// </summary>
     public sealed class Source : CircuitElement
     {
@@ -14,14 +14,18 @@ namespace Lumencuit
         public override int OutSignalCount => 1;
         public override bool RequiresOrderedInputs => false;
 
-        private Source() { }
+        public readonly Signal Signal;
 
-        public static CircuitElement Instance => instance ??= new Source();
+        private Source(Signal signal) 
+        {
+            Signal = signal;
+        }
 
-        // 소스의 Flow는 호출되지 않습니다.
+        public static CircuitElement Create(Signal signal) => new Source(signal);
+
         public override Signal Flow(IReadOnlyList<Signal> inputs)
         {
-            return Signal.Black;
+            return Signal;
         }
     }
 }
