@@ -86,7 +86,7 @@ namespace Lumencuit
                 stack.Count++;
 
             RemoveAllConnectedWireNetworks(new Vector2Int(x, y));
-            worldGrid.RemoveEntityAt(x, y);
+           worldGrid.RemoveEntityAt(x, y);
             NotifyEntityRemoved(entity, pos);
             NotifyGridUpdated();
             return EntityRequestResult.Success;
@@ -264,6 +264,7 @@ namespace Lumencuit
         {
             List<Vector2Int> wires = new();
             Vector2Int curr = pos;
+            Vector2Int? next = null;
 
             while (true)
             {
@@ -271,7 +272,6 @@ namespace Lumencuit
                     return null;
                 if (!WireHelper.IsWire(entity))
                 {
-                    Vector2Int? next = WireHelper.GetWireOut(entity, curr);
                     if (next == null)
                         return null;
                     curr = (Vector2Int)next;
@@ -280,6 +280,7 @@ namespace Lumencuit
                 Vector2Int? pre = WireHelper.GetWireIn(entity, curr);
                 if (pre == null)
                     return null;
+                next = curr;
                 curr = (Vector2Int)pre;
             }
 
@@ -290,7 +291,7 @@ namespace Lumencuit
                 if (!WireHelper.IsWire(entity))
                     break;
                 wires.Add(curr);
-                Vector2Int? next = WireHelper.GetWireOut(entity, curr);
+                next = WireHelper.GetWireOut(entity, curr);
                 if (next == null)
                     return null;
                 curr = (Vector2Int)next;
