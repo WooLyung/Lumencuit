@@ -15,18 +15,37 @@ MonoBehaviour:
   StageName: Stage 1
   Width: 5
   Height: 5
-  Blueprints:
+  PrePlacedBlueprints:
   - blueprint:
-      rid: 5301989200429580348
-    count: 1
+      rid: 5301989202785992780
+    position: {x: 0, y: 1}
+    ports:
+      Left: 2
+      Right: 2
+      Up: 0
+      Down: 2
+  - blueprint:
+      rid: 5301989202785992776
+    position: {x: 0, y: 3}
+    ports:
+      Left: 2
+      Right: 2
+      Up: 2
+      Down: 1
+  - blueprint:
+      rid: 5301989202785992778
+    position: {x: 0, y: 2}
+    ports:
+      Left: 2
+      Right: 2
+      Up: 0
+      Down: 1
+  Blueprints:
   - blueprint:
       rid: 5301989200429580351
     count: 1
   - blueprint:
-      rid: 5301989198179860552
-    count: 1
-  - blueprint:
-      rid: 5301989198179860553
+      rid: 5301989202785992781
     count: 1
   Goals:
   - signal:
@@ -36,23 +55,27 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 5301989198179860552
-      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
-      data:
-        type: 6
-    - rid: 5301989198179860553
-      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
-      data:
-        type: 0
-    - rid: 5301989200429580348
-      type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
-      data:
-        type: 2
-        signal:
-          mask: 6
     - rid: 5301989200429580351
       type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 2
         signal:
           mask: 48
+    - rid: 5301989202785992776
+      type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 2
+        signal:
+          mask: 6
+    - rid: 5301989202785992778
+      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 3
+    - rid: 5301989202785992780
+      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 6
+    - rid: 5301989202785992781
+      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 0

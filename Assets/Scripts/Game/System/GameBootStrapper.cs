@@ -36,6 +36,8 @@ namespace Lumencuit
 #else
             inputSystem = new NullInputSystem(worldSystem);
 #endif
+
+            worldSystem.InitPrePlacedBlueprint(stageData);
         }
 
         private void Start()

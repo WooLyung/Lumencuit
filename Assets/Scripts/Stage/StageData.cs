@@ -10,23 +10,11 @@ namespace Lumencuit
     [CreateAssetMenu(fileName = "StageData", menuName = "Lumencuit/Stage Data")]
     public sealed class StageData : ScriptableObject
     {
-        /// <summary>
-        /// 스테이지의 램프에 도달해야 하는 최종 목록입니다.
-        /// </summary>
-        [Serializable]
-        public class StageGoal
-        {
-            [SerializeField] private QuantumSignal signal = QuantumSignal.Null;
-            [SerializeField] private int count = 1;
-
-            public QuantumSignal Signal => signal;
-            public int Count => count;
-        }
-
         public string StageName;
 
-        [Min(1)] public int Width = 1;
-        [Min(1)] public int Height = 1;
+        public int Width = 1;
+        public int Height = 1;
+        public List<PrePlacedBlueprint> PrePlacedBlueprints = new();
         public List<EntityBlueprintStack> Blueprints = new();
         public List<StageGoal> Goals = new();
 

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
+using UnityEditor.Overlays;
 using UnityEngine;
 
 namespace Lumencuit
@@ -16,11 +18,18 @@ namespace Lumencuit
         public WorldSystem(StageData stageData)
         {
             worldGrid = new(stageData);
+
             foreach (EntityBlueprintStack blueprint in stageData.Blueprints)
                 blueprints.Add(blueprint.Clone());
 
             // [임시] 카메라 위치 변경
             Camera.main.transform.position = new Vector3((stageData.Width - 1) / 2f, (stageData.Height - 1) / 2f, Camera.main.transform.position.z);
+        }
+
+        public void InitPrePlacedBlueprint(StageData stageData)
+        {
+            foreach (PrePlacedBlueprint ppb in stageData.PrePlacedBlueprints)
+                TryPrePlaceEntity(ppb.Blueprint, ppb.Ports, ppb.Position.x, ppb.Position.y);
         }
 
         public void AddListener(IEntityEventListener listener) => listeners.Add(listener);
@@ -41,6 +50,21 @@ namespace Lumencuit
             }
             entity = null;
             return false;
+        }
+
+        public EntityRequestResult TryPrePlaceEntity(EntityBlueprint blueprint, Entity.Ports ports, int x, int y)
+        {
+            if (!worldGrid.IsEnabledTile(x, y))
+                return EntityRequestResult.InvalidTile;
+            if (worldGrid.HasEntityAt(x, y))
+                return EntityRequestResult.AlreadyExist;
+
+            Entity entity = new Entity(blueprint.Clone(), ports, true);
+            worldGrid.SetEntityAt(entity, x, y);
+            NotifyEntityCreated(entity, new Vector2Int(x, y));
+            NotifyGridUpdated();
+
+            return EntityRequestResult.Success;
         }
 
         public EntityRequestResult TryCreateEntity(EntityBlueprint blueprint, int x, int y)
@@ -74,6 +98,8 @@ namespace Lumencuit
             Vector2Int pos = new Vector2Int(x, y);
             Entity entity = worldGrid.GetEntityAt(x, y);
 
+            if (entity.IsFixed)
+                return EntityRequestResult.IsFixed;
             if (WireHelper.IsWire(entity))
             {
                 if (TryRemoveWireNetwork(pos))

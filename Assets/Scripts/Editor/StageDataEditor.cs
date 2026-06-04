@@ -26,6 +26,7 @@ namespace Lumencuit.Editor
         private int selectedTab = 0;
         private SerializedProperty entityBlueprintsProperty;
         private SerializedProperty goalsProperty;
+        private SerializedProperty prePlacedBlueprintsProperty;
 
         private static int sectionGap = 15;
         private static GUIStyle titleStyle;
@@ -47,6 +48,7 @@ namespace Lumencuit.Editor
         {
             entityBlueprintsProperty = serializedObject.FindProperty("Blueprints");
             goalsProperty = serializedObject.FindProperty("Goals");
+            prePlacedBlueprintsProperty = serializedObject.FindProperty("PrePlacedBlueprints");
         }
 
         public override void OnInspectorGUI()
@@ -59,7 +61,7 @@ namespace Lumencuit.Editor
             switch (selectedTab)
             {
                 case 0:
-                    DrawGridTab(stageData);
+                    DrawGridTab(stageData, prePlacedBlueprintsProperty);
                     break;
                 case 1:
                     DrawBlueprintTab(entityBlueprintsProperty);
@@ -75,19 +77,106 @@ namespace Lumencuit.Editor
         }
 
         /// <summary>
-        /// 스테이지의 그리드와 고정 엔티티를 설정합니다.
+        /// 스테이지의 그리드와 미리 배치된 블루프린트를 설정합니다.
         /// </summary>
-        private static void DrawGridTab(StageData stageData)
+        private static void DrawGridTab(StageData stageData, SerializedProperty prePlacedBlueprintsProperty)
         {
             // 스테이지 프로퍼티
             EditorGUILayout.LabelField("Stage Properties", TitleStyle);
             stageData.StageName = EditorGUILayout.TextField("Stage Name", stageData.StageName);
             stageData.Width = Mathf.Max(1, EditorGUILayout.IntField("Width", stageData.Width));
             stageData.Height = Mathf.Max(1, EditorGUILayout.IntField("Height", stageData.Height));
-            EditorGUILayout.Space(sectionGap);
 
             // 그리드 설정
+            EditorGUILayout.Space(sectionGap);
             EditorGUILayout.LabelField("Tile Layout", TitleStyle);
+            DrawGrid(stageData);
+
+            // 미리 배치된 블루프린트
+            EditorGUILayout.Space(sectionGap);
+            EditorGUILayout.LabelField("Pre-Placed Blueprints", TitleStyle);
+            DrawPrePlacedBlueprints(prePlacedBlueprintsProperty);
+        }
+
+        private static void DrawPrePlacedBlueprints(SerializedProperty prePlacedBlueprintsProperty)
+        {
+            for (int i = 0; i < prePlacedBlueprintsProperty.arraySize; i++)
+            {
+                SerializedProperty itemProperty = prePlacedBlueprintsProperty.GetArrayElementAtIndex(i);
+                SerializedProperty blueprintProperty = itemProperty.FindPropertyRelative("blueprint");
+                SerializedProperty positionProperty = itemProperty.FindPropertyRelative("position");
+                SerializedProperty portsProperty = itemProperty.FindPropertyRelative("ports");
+
+                if (blueprintProperty.managedReferenceValue == null)
+                    blueprintProperty.managedReferenceValue = new EntityBlueprint();
+
+                EditorGUILayout.BeginVertical("box");
+                EditorGUILayout.BeginHorizontal();
+
+                Rect lineRect = GUILayoutUtility.GetRect(1, 18, GUILayout.ExpandWidth(true));
+                float y = lineRect.y + lineRect.height * 0.5f;
+                Handles.color = Color.white;
+                Handles.DrawLine(new Vector3(lineRect.xMin, y), new Vector3(lineRect.xMax, y));
+
+                if (GUILayout.Button("✕", GUILayout.Width(20)))
+                {
+                    prePlacedBlueprintsProperty.DeleteArrayElementAtIndex(i);
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.EndVertical();
+                    break;
+                }
+
+                EditorGUILayout.EndHorizontal();
+
+                DrawBlueprintField(blueprintProperty);
+                EditorGUILayout.PropertyField(positionProperty);
+                DrawPortsField(portsProperty);
+
+                EditorGUILayout.EndVertical();
+            }
+
+            if (GUILayout.Button("Add Pre-Placed Blueprint"))
+            {
+                int index = prePlacedBlueprintsProperty.arraySize;
+                prePlacedBlueprintsProperty.InsertArrayElementAtIndex(index);
+
+                SerializedProperty itemProperty = prePlacedBlueprintsProperty.GetArrayElementAtIndex(index);
+                SerializedProperty blueprintProperty = itemProperty.FindPropertyRelative("blueprint");
+                SerializedProperty positionProperty = itemProperty.FindPropertyRelative("position");
+                SerializedProperty portsProperty = itemProperty.FindPropertyRelative("ports");
+
+                blueprintProperty.managedReferenceValue = new EntityBlueprint();
+                positionProperty.vector2IntValue = Vector2Int.zero;
+
+                SerializedProperty leftProperty = portsProperty.FindPropertyRelative("Left");
+                SerializedProperty rightProperty = portsProperty.FindPropertyRelative("Right");
+                SerializedProperty upProperty = portsProperty.FindPropertyRelative("Up");
+                SerializedProperty downProperty = portsProperty.FindPropertyRelative("Down");
+
+                leftProperty.enumValueIndex = (int)Entity.PortType.None;
+                rightProperty.enumValueIndex = (int)Entity.PortType.None;
+                upProperty.enumValueIndex = (int)Entity.PortType.None;
+                downProperty.enumValueIndex = (int)Entity.PortType.None;
+            }
+        }
+
+        private static void DrawPortsField(SerializedProperty portsProperty)
+        {
+            SerializedProperty leftProperty = portsProperty.FindPropertyRelative("Left");
+            SerializedProperty rightProperty = portsProperty.FindPropertyRelative("Right");
+            SerializedProperty upProperty = portsProperty.FindPropertyRelative("Up");
+            SerializedProperty downProperty = portsProperty.FindPropertyRelative("Down");
+
+            EditorGUILayout.PropertyField(leftProperty);
+            EditorGUILayout.PropertyField(rightProperty);
+            EditorGUILayout.PropertyField(upProperty);
+            EditorGUILayout.PropertyField(downProperty);
+        }
+
+        private static void DrawGrid(StageData stageData)
+        {
+            Color prevBackgroundColor = GUI.backgroundColor;
+
             stageData.ResizeTiles();
             for (int y = stageData.Height - 1; y >= 0; y--)
             {
@@ -108,7 +197,7 @@ namespace Lumencuit.Editor
                 EditorGUILayout.EndHorizontal();
             }
 
-            // 고정 엔티티
+            GUI.backgroundColor = prevBackgroundColor;
         }
 
         private static QuantumSignal DrawQuantumSignalField(string label, QuantumSignal current)

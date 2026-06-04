@@ -209,7 +209,7 @@ namespace Lumencuit
         private CircuitResult CheckClearStage(WorldGrid worldGrid, SimulatedGrid simulatedGrid)
         {
             Dictionary<QuantumSignal, int> goalCounts = new();
-            foreach (StageData.StageGoal goal in stageData.Goals)
+            foreach (StageGoal goal in stageData.Goals)
                 goalCounts[goal.Signal] = goal.Count;
 
             foreach (Vector2Int pos in worldGrid.GetAllGoalPositions())

@@ -53,7 +53,7 @@ namespace Lumencuit
 
 
             gui.text += "\n<Goals>\n";
-            foreach (StageData.StageGoal goal in stageData.Goals)
+            foreach (StageGoal goal in stageData.Goals)
                 gui.text += $"- {goal.Signal} * {goal.Count}\n";
 
             RenderGrid();
