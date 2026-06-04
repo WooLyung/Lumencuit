@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using static Lumencuit.Signal;
 
 namespace Lumencuit
 {
@@ -10,114 +9,68 @@ namespace Lumencuit
     [Serializable]
     public struct Signal
     {
-        /// <summary>
-        /// 신호의 색을 나타내는 열거형입니다.
-        /// </summary>
-        public enum SignalColor
-        {
-            Red, Green, Blue, Yellow, Cyan, Magenta, Black, White
-        }
+        [SerializeField] private byte value;
 
-        [SerializeField] private bool r, g, b;
+        public byte Value => (byte)(value & 0b111);
 
-        private Signal(bool r, bool g, bool b)
+        private Signal(byte value)
         {
-            this.r = r;
-            this.g = g;
-            this.b = b;
+            this.value = (byte)(value & 0b111);
         }
 
         // 색상
-        public static readonly Signal Black = new(false, false, false);
-        public static readonly Signal Red = new(true, false, false);
-        public static readonly Signal Green = new(false, true, false);
-        public static readonly Signal Blue = new(false, false, true);
-        public static readonly Signal Yellow = new(true, true, false);
-        public static readonly Signal Cyan = new(false, true, true);
-        public static readonly Signal Magenta = new(true, false, true);
-        public static readonly Signal White = new(true, true, true);
+        public static readonly Signal Black = new(0b000);
+        public static readonly Signal Red = new(0b001);
+        public static readonly Signal Green = new(0b010);
+        public static readonly Signal Blue = new(0b100);
+        public static readonly Signal Yellow = new(0b011);
+        public static readonly Signal Magenta = new(0b101);
+        public static readonly Signal Cyan = new(0b110);
+        public static readonly Signal White = new(0b111);
 
         // 단항 연산자
-        public static Signal operator ~(Signal a) => new(!a.r, !a.g, !a.b);
+        public static Signal operator ~(Signal a) => new((byte)(0b111 ^ a.value));
 
         // 이항 연산자
-        public static Signal operator &(Signal a, Signal b) => new(a.r && b.r, a.g && b.g, a.b && b.b);
-        public static Signal operator |(Signal a, Signal b) => new(a.r || b.r, a.g || b.g, a.b || b.b);
-        public static Signal operator -(Signal a, Signal b) => new(a.r && !b.r, a.g && !b.g, a.b && !b.b);
-        public static Signal operator ^(Signal a, Signal b) => new(a.r != b.r, a.g != b.g, a.b != b.b);
-        public static bool operator ==(Signal a, Signal b) => a.r == b.r && a.g == b.g && a.b == b.b;
+        public static Signal operator &(Signal a, Signal b) => new((byte)(a.value & b.value));
+        public static Signal operator |(Signal a, Signal b) => new((byte)(a.value | b.value));
+        public static Signal operator -(Signal a, Signal b) => new((byte)(a.Value & ~b.Value & 0b111));
+        public static Signal operator ^(Signal a, Signal b) => new((byte)(a.value ^ b.value));
+        public static bool operator ==(Signal a, Signal b) => a.Value == b.Value;
         public static bool operator !=(Signal a, Signal b) => !(a == b);
 
-        public SignalColor Color
+        public Color Color => value switch
         {
-            get
-            {
-                if (r && !g && !b)
-                    return SignalColor.Red;
-                if (!r && g && !b)
-                    return SignalColor.Green;
-                if (!r && !g && b)
-                    return SignalColor.Blue;
-                if (r && g && !b)
-                    return SignalColor.Yellow;
-                if (!r && g && b)
-                    return SignalColor.Cyan;
-                if (r && !g && b)
-                    return SignalColor.Magenta;
-                if (r && g && b)
-                    return SignalColor.White;
-                return SignalColor.Black;
-            }
-        }
+            0b001 => Color.red,
+            0b010 => Color.green,
+            0b100 => Color.blue,
+            0b011 => Color.yellow,
+            0b101 => Color.magenta,
+            0b110 => Color.cyan,
+            0b111 => Color.white,
+            _ => Color.black,
+        };
 
-        public Color ToColor()
+        public string Name => value switch
         {
-            return Color.ToColor();
-        }
+            0b001 => "Red",
+            0b010 => "Green",
+            0b100 => "Blue",
+            0b011 => "Yellow",
+            0b101 => "Magenta",
+            0b110 => "Cyan",
+            0b111 => "White",
+            _ => "Black",
+        };
 
         public override bool Equals(object obj)
         {
-            return obj is Signal signal && r == signal.r && g == signal.g && b == signal.b;
+            return obj is Signal signal && this == signal;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(r, g, b);
-        }
-    }
-
-    public static class SignalColorFunction
-    {
-        public static Signal ToSignal(this SignalColor color)
-        {
-            return color switch
-            {
-                SignalColor.Black => Black,
-                SignalColor.Red => Red,
-                SignalColor.Green => Green,
-                SignalColor.Blue => Blue,
-                SignalColor.Yellow => Yellow,
-                SignalColor.Cyan => Cyan,
-                SignalColor.Magenta => Magenta,
-                SignalColor.White => White,
-                _ => Black
-            };
-        }
-
-        public static Color ToColor(this SignalColor color)
-        {
-            return color switch
-            {
-                SignalColor.Black => Color.black,
-                SignalColor.Red => Color.red,
-                SignalColor.Green => Color.green,
-                SignalColor.Blue => Color.blue,
-                SignalColor.Yellow => Color.yellow,
-                SignalColor.Cyan => Color.cyan,
-                SignalColor.Magenta => Color.magenta,
-                SignalColor.White => Color.white,
-                _ => Color.black
-            };
+            return Value.GetHashCode();
         }
     }
 }

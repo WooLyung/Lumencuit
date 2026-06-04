@@ -10,6 +10,28 @@ namespace Lumencuit.Editor
     [CustomEditor(typeof(StageData))]
     public sealed class StageDataEditor : UnityEditor.Editor
     {
+        private static readonly string[] SignalNames = {
+            "Black",
+            "Red",
+            "Green",
+            "Blue",
+            "Yellow",
+            "Cyan",
+            "Magenta",
+            "White"
+        };
+
+        private static readonly Signal[] SignalValues = {
+            Signal.Black,
+            Signal.Red,
+            Signal.Green,
+            Signal.Blue,
+            Signal.Yellow,
+            Signal.Cyan,
+            Signal.Magenta,
+            Signal.White
+        };
+
         private const int CellSize = 24;
         private const int CellGap = 2;
         private SerializedProperty entityBlueprintsProperty;
@@ -37,10 +59,84 @@ namespace Lumencuit.Editor
             EditorGUILayout.Space(20);
             DrawBlueprintStacks(entityBlueprintsProperty);
             EditorGUILayout.Space(20);
-            EditorGUILayout.PropertyField(goalsProperty, true);
+            DrawGoals(goalsProperty);
             serializedObject.ApplyModifiedProperties();
             if (EditorGUI.EndChangeCheck())
                 EditorUtility.SetDirty(stageData);
+        }
+
+        private static Signal DrawSignalPopup(string label, Signal current)
+        {
+            int index = 0;
+
+            for (int i = 0; i < SignalValues.Length; i++)
+            {
+                if (SignalValues[i] == current)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            int newIndex = EditorGUILayout.Popup(label, index, SignalNames);
+            return SignalValues[newIndex];
+        }
+
+        private static void DrawGoals(SerializedProperty goalsProperty)
+        {
+            EditorGUILayout.LabelField("Goals", EditorStyles.boldLabel);
+
+            for (int i = 0; i < goalsProperty.arraySize; i++)
+            {
+                SerializedProperty goalProperty = goalsProperty.GetArrayElementAtIndex(i);
+                SerializedProperty signalProperty = goalProperty.FindPropertyRelative("signal");
+                SerializedProperty countProperty = goalProperty.FindPropertyRelative("count");
+
+                EditorGUILayout.BeginVertical("box");
+
+                EditorGUILayout.BeginHorizontal();
+
+                EditorGUILayout.LabelField($"Goal {i}", EditorStyles.boldLabel);
+
+                if (GUILayout.Button("Remove", GUILayout.Width(80)))
+                {
+                    goalsProperty.DeleteArrayElementAtIndex(i);
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.EndVertical();
+                    break;
+                }
+
+                EditorGUILayout.EndHorizontal();
+
+                Signal oldSignal = signalProperty != null
+                    ? (Signal)signalProperty.boxedValue
+                    : Signal.Black;
+
+                Signal newSignal = DrawSignalPopup("Color", oldSignal);
+
+                if (signalProperty != null && newSignal != oldSignal)
+                    signalProperty.boxedValue = newSignal;
+
+                EditorGUILayout.PropertyField(countProperty);
+
+                EditorGUILayout.EndVertical();
+            }
+
+            if (GUILayout.Button("Add Goal"))
+            {
+                int index = goalsProperty.arraySize;
+                goalsProperty.InsertArrayElementAtIndex(index);
+
+                SerializedProperty goalProperty = goalsProperty.GetArrayElementAtIndex(index);
+                SerializedProperty signalProperty = goalProperty.FindPropertyRelative("signal");
+                SerializedProperty countProperty = goalProperty.FindPropertyRelative("count");
+
+                if (signalProperty != null)
+                    signalProperty.boxedValue = Signal.Black;
+
+                if (countProperty != null)
+                    countProperty.intValue = 1;
+            }
         }
 
         private static void DrawTileGrid(StageData stageData)
@@ -125,22 +221,27 @@ namespace Lumencuit.Editor
             }
 
             CircuitElement.CircuitElementType oldType = blueprint.Type;
-            CircuitElement.CircuitElementType newType = (CircuitElement.CircuitElementType)EditorGUILayout.EnumPopup("Type", oldType);
+            CircuitElement.CircuitElementType newType =
+                (CircuitElement.CircuitElementType)EditorGUILayout.EnumPopup("Type", oldType);
 
             bool needColor = ColoredBlueprint.HasColor(newType);
+
             if (needColor)
             {
-                Signal oldSignal = blueprint is ColoredBlueprint colored ? colored.Signal : Signal.Black;
+                Signal oldSignal = blueprint is ColoredBlueprint colored
+                    ? colored.Signal
+                    : Signal.Black;
+
                 if (newType != oldType || blueprint is not ColoredBlueprint)
                 {
                     blueprintProperty.managedReferenceValue = new ColoredBlueprint(newType, oldSignal);
                     return;
                 }
 
-                Signal.SignalColor oldColor = oldSignal.Color;
-                Signal.SignalColor newColor = (Signal.SignalColor)EditorGUILayout.EnumPopup("Color", oldColor);
-                if (newColor != oldColor)
-                    blueprintProperty.managedReferenceValue = new ColoredBlueprint(newType, newColor.ToSignal());
+                Signal newSignal = DrawSignalPopup("Color", oldSignal);
+
+                if (newSignal != oldSignal)
+                    blueprintProperty.managedReferenceValue = new ColoredBlueprint(newType, newSignal);
             }
             else
             {

@@ -16,10 +16,10 @@ namespace Lumencuit
         [Serializable]
         public class StageGoal
         {
-            [SerializeField] private Signal.SignalColor signalColor;
-            [SerializeField] private int count;
+            [SerializeField] private Signal signal = Signal.Black;
+            [SerializeField] private int count = 1;
 
-            public Signal.SignalColor SignalColor => signalColor;
+            public Signal Signal => signal;
             public int Count => count;
         }
 

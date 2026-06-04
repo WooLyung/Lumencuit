@@ -208,13 +208,13 @@ namespace Lumencuit
 
         private CircuitResult CheckClearStage(WorldGrid worldGrid, SimulatedGrid simulatedGrid)
         {
-            Dictionary<SignalColor, int> goalCounts = new();
+            Dictionary<Signal, int> goalCounts = new();
             foreach (StageData.StageGoal goal in stageData.Goals)
-                goalCounts[goal.SignalColor] = goal.Count;
+                goalCounts[goal.Signal] = goal.Count;
 
             foreach (Vector2Int pos in worldGrid.GetAllGoalPositions())
             {
-                SignalColor signal = simulatedGrid.Signals[pos.x, pos.y].Color;
+                Signal signal = simulatedGrid.Signals[pos.x, pos.y];
                 if (!goalCounts.TryGetValue(signal, out int count) || count <= 0)
                     return CircuitResult.Fail;
                 goalCounts[signal]--;

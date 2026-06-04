@@ -17,10 +17,10 @@ MonoBehaviour:
   Height: 3
   Blueprints:
   - blueprint:
-      rid: 5301989182464852066
+      rid: 5301989198179860539
     count: 1
   - blueprint:
-      rid: 5301989182464852067
+      rid: 5301989198179860540
     count: 1
   - blueprint:
       rid: 5301989182464852059
@@ -29,7 +29,8 @@ MonoBehaviour:
       rid: 5301989182464852061
     count: 1
   Goals:
-  - signalColor: 5
+  - signal:
+      value: 5
     count: 1
   enabledTiles: 010101010101010101
   references:
@@ -43,19 +44,15 @@ MonoBehaviour:
       type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 6
-    - rid: 5301989182464852066
+    - rid: 5301989198179860539
       type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 2
         signal:
-          r: 1
-          g: 0
-          b: 0
-    - rid: 5301989182464852067
+          value: 1
+    - rid: 5301989198179860540
       type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 2
         signal:
-          r: 0
-          g: 0
-          b: 1
+          value: 4

@@ -44,11 +44,17 @@ namespace Lumencuit
             var gui = GameObject.Find("StageData").GetComponent<TextMeshProUGUI>();
             gui.text += "<Blueprints>\n";
             foreach (EntityBlueprintStack entityBlueprintStack in stageData.Blueprints)
-                gui.text += $"- {entityBlueprintStack.Blueprint.Type} * {entityBlueprintStack.Count}\n";
+            {
+                if (entityBlueprintStack.Blueprint is ColoredBlueprint coloredBlueprint)
+                    gui.text += $"- {coloredBlueprint.Type}[{coloredBlueprint.Signal.Name}] * {entityBlueprintStack.Count}\n";
+                else
+                    gui.text += $"- {entityBlueprintStack.Blueprint.Type} * {entityBlueprintStack.Count}\n";
+            }
+
 
             gui.text += "\n<Goals>\n";
             foreach (StageData.StageGoal goal in stageData.Goals)
-                gui.text += $"- {goal.SignalColor} * {goal.Count}\n";
+                gui.text += $"- {goal.Signal.Name} * {goal.Count}\n";
 
             RenderGrid();
         }
@@ -85,8 +91,8 @@ namespace Lumencuit
 
                 ViewObject viewObject = view.GetComponent<ViewObject>();
                 viewObject.PortUpdate(e.Entity);
-                viewObject.SetColor(Color.black);
-                viewObject.SetPortColor(Signal.SignalColor.Black.ToColor());
+                viewObject.SetSignal(Signal.Black);
+                viewObject.SetPortSignal(Signal.Black);
 
                 views.Add(e.Pos, new View(view, viewObject));
             }
@@ -106,20 +112,20 @@ namespace Lumencuit
             if (views.TryGetValue(e.Pos, out View view))
             {
                 view.ViewObject.PortUpdate(e.Entity);
-                view.ViewObject.SetPortColor(Signal.SignalColor.Black.ToColor());
+                view.ViewObject.SetPortSignal(Signal.Black);
             }
         }
 
         public void OnSignalUpdated(ISimulationEventListener.SignalUpdatedEvent e)
         {
             if (views.TryGetValue(e.Pos, out View view))
-                view.ViewObject.SetColor(e.Signal.ToColor());
+                view.ViewObject.SetSignal(e.Signal);
         }
 
         public void OnPortSignalUpdated(ISimulationEventListener.PortSignalUpdatedEvent e)
         {
             if (views.TryGetValue(e.Pos, out View view))
-                view.ViewObject.SetPortColor(e.Dir, e.Signal.ToColor());
+                view.ViewObject.SetPortSignal(e.Dir, e.Signal);
         }
 
         public void OnCircuitResultEvent(CircuitResultEvent e)

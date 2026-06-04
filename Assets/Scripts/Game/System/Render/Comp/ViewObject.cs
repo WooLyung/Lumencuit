@@ -5,16 +5,16 @@ namespace Lumencuit
 {
     public abstract class ViewObject : MonoBehaviour
     {
-        public abstract void SetColor(Color color);
-        public abstract void SetPortColor(Vector2Int dir, Color color);
+        public abstract void SetSignal(Signal signal);
+        public abstract void SetPortSignal(Vector2Int dir, Signal signal);
         public abstract void PortUpdate(Entity entity);
 
-        public void SetPortColor(Color color)
+        public void SetPortSignal(Signal signal)
         {
-            SetPortColor(Vector2Int.left, color);
-            SetPortColor(Vector2Int.right, color);
-            SetPortColor(Vector2Int.up, color);
-            SetPortColor(Vector2Int.down, color);
+            SetPortSignal(Vector2Int.left, signal);
+            SetPortSignal(Vector2Int.right, signal);
+            SetPortSignal(Vector2Int.up, signal);
+            SetPortSignal(Vector2Int.down, signal);
         }
     }
 }
