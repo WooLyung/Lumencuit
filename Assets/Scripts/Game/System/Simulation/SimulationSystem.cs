@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using static Lumencuit.Signal;
 
 namespace Lumencuit
 {
@@ -9,18 +8,6 @@ namespace Lumencuit
     /// </summary>
     public sealed class SimulationSystem : IEntityEventListener
     {
-        /// <summary>
-        /// 모든 방향을 포함하는 신호 집합입니다.
-        /// </summary>
-        private class SignalSet
-        {
-            public Signal Center = Black;
-            public Signal Left = Black;
-            public Signal Right = Black;
-            public Signal Up = Black;
-            public Signal Down = Black;
-        };
-
         /// <summary>
         /// 시뮬레이션 결과가 저장된 그리드입니다.
         /// </summary>
@@ -33,6 +20,7 @@ namespace Lumencuit
             public readonly QuantumSignal[,] DownPorts;
             public readonly QuantumSignal[,] RightPorts;
             public readonly QuantumSignal[,] LeftPorts;
+            public readonly int[,] Turbidities;
 
             public SimulatedGrid(int width, int height)
             {
@@ -44,6 +32,8 @@ namespace Lumencuit
                 DownPorts = new QuantumSignal[Width, Height];
                 RightPorts = new QuantumSignal[Width, Height];
                 LeftPorts = new QuantumSignal[Width, Height];
+                Turbidities = new int[Width, Height];
+
                 for (int x = 0; x < Width; x++)
                 {
                     for (int y = 0; y < Height; y++)
@@ -53,6 +43,7 @@ namespace Lumencuit
                         DownPorts[x, y] = QuantumSignal.Null;
                         RightPorts[x, y] = QuantumSignal.Null;
                         LeftPorts[x, y] = QuantumSignal.Null;
+                        Turbidities[x, y] = 0;
                     }
                 }
             }
@@ -87,16 +78,30 @@ namespace Lumencuit
                     return;
 
                 List<QuantumSignal> inputs = new();
+                int turbidity = 0;
                 if (entity.UpPort == Entity.PortType.Input)
+                {
                     inputs.Add(simulatedGrid.UpPorts[next.x, next.y]);
+                    turbidity = Mathf.Max(turbidity, simulatedGrid.Turbidities[next.x, next.y + 1]);
+                }
                 if (entity.DownPort == Entity.PortType.Input)
+                {
                     inputs.Add(simulatedGrid.DownPorts[next.x, next.y]);
+                    turbidity = Mathf.Max(turbidity, simulatedGrid.Turbidities[next.x, next.y - 1]);
+                }
                 if (entity.RightPort == Entity.PortType.Input)
+                {
                     inputs.Add(simulatedGrid.RightPorts[next.x, next.y]);
+                    turbidity = Mathf.Max(turbidity, simulatedGrid.Turbidities[next.x + 1, next.y]);
+                }
                 if (entity.LeftPort == Entity.PortType.Input)
+                {
                     inputs.Add(simulatedGrid.LeftPorts[next.x, next.y]);
+                    turbidity = Mathf.Max(turbidity, simulatedGrid.Turbidities[next.x - 1, next.y]);
+                }
 
                 simulatedGrid.Signals[next.x, next.y] = entity.Flow(inputs);
+                simulatedGrid.Turbidities[next.x, next.y] = turbidity + entity.Element.TurbidityDelta;
                 queue.Enqueue(next);
             }
 
@@ -110,7 +115,7 @@ namespace Lumencuit
             foreach (Vector2Int pos in worldGrid.GetAllSourcePositions())
             {
                 Entity source = worldGrid.GetEntityAt(pos.x, pos.y);
-                simulatedGrid.Signals[pos.x, pos.y] = (source.Element as Source)?.Signal ?? QuantumSignal.Null;
+                simulatedGrid.Signals[pos.x, pos.y] = source.Flow(new List<QuantumSignal>());
                 queue.Enqueue(pos);
             }
 
@@ -119,7 +124,8 @@ namespace Lumencuit
             {
                 Vector2Int front = queue.Dequeue();
                 Entity entity = worldGrid.GetEntityAt(front.x, front.y);
-                
+                int turbidity = simulatedGrid.Turbidities[front.x, front.y];
+
                 if (entity.UpPort == Entity.PortType.Output)
                 {
                     Vector2Int next = front + Vector2Int.up;
@@ -208,23 +214,64 @@ namespace Lumencuit
 
         private CircuitResult CheckClearStage(WorldGrid worldGrid, SimulatedGrid simulatedGrid)
         {
-            Dictionary<QuantumSignal, int> goalCounts = new();
-            foreach (StageGoal goal in stageData.Goals)
-                goalCounts[goal.Signal] = goal.Count;
+            List<StageGoal> goalSlots = new();
 
+            foreach (StageGoal goal in stageData.Goals)
+                for (int i = 0; i < goal.Count; i++)
+                    goalSlots.Add(goal);
+
+            List<(QuantumSignal signal, int turbidity)> lamps = new();
             foreach (Vector2Int pos in worldGrid.GetAllGoalPositions())
+                lamps.Add((simulatedGrid.Signals[pos.x, pos.y], simulatedGrid.Turbidities[pos.x, pos.y]));
+
+            if (goalSlots.Count != lamps.Count)
+                return CircuitResult.Fail;
+
+            int[] matchedGoalByLamp = new int[lamps.Count];
+
+            for (int i = 0; i < matchedGoalByLamp.Length; i++)
+                matchedGoalByLamp[i] = -1;
+
+            for (int goalIndex = 0; goalIndex < goalSlots.Count; goalIndex++)
             {
-                QuantumSignal signal = simulatedGrid.Signals[pos.x, pos.y];
-                if (!goalCounts.TryGetValue(signal, out int count) || count <= 0)
+                bool[] visitedLamp = new bool[lamps.Count];
+                if (!TryMatchGoal(goalIndex, goalSlots, lamps, matchedGoalByLamp, visitedLamp))
                     return CircuitResult.Fail;
-                goalCounts[signal]--;
             }
 
-            foreach (int count in goalCounts.Values)
-                if (count != 0)
-                    return CircuitResult.Fail;
-
             return CircuitResult.Success;
+        }
+
+        /// <summary>
+        /// 이분 매칭으로 램프와 스테이지 목표를 매칭합니다.
+        /// </summary>
+        /// <param name="goalIndex">현재 매칭을 시도할 목표</param>
+        /// <param name="goals">목표 리스트</param>
+        /// <param name="lamps">램프 리스트</param>
+        /// <param name="matchedGoalByLamp">지금까지 매칭된 목표와 램프</param>
+        /// <param name="visitedLamp">현재 연산에서 매칭을 시도했던 램프</param>
+        /// <returns></returns>
+        private static bool TryMatchGoal(int goalIndex, List<StageGoal> goals, List<(QuantumSignal signal, int turbidity)> lamps, int[] matchedGoalByLamp, bool[] visitedLamp)
+        {
+            StageGoal goal = goals[goalIndex];
+
+            for (int lampIndex = 0; lampIndex < lamps.Count; lampIndex++)
+            {
+                if (visitedLamp[lampIndex])
+                    continue;
+
+                if (!goal.IsMatch(lamps[lampIndex].signal, lamps[lampIndex].turbidity))
+                    continue;
+
+                visitedLamp[lampIndex] = true;
+                if (matchedGoalByLamp[lampIndex] == -1 || TryMatchGoal(matchedGoalByLamp[lampIndex], goals, lamps, matchedGoalByLamp, visitedLamp))
+                {
+                    matchedGoalByLamp[lampIndex] = goalIndex;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void OnGridUpdated(IEntityEventListener.GridUpdatedEvent e)

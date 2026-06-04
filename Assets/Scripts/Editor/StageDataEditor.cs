@@ -2,6 +2,7 @@
 using System.Drawing.Printing;
 using UnityEditor;
 using UnityEngine;
+using static Lumencuit.TurbidityCondition;
 
 namespace Lumencuit.Editor
 {
@@ -256,6 +257,7 @@ namespace Lumencuit.Editor
                 SerializedProperty goalProperty = goalsProperty.GetArrayElementAtIndex(i);
                 SerializedProperty signalProperty = goalProperty.FindPropertyRelative("signal");
                 SerializedProperty countProperty = goalProperty.FindPropertyRelative("count");
+                SerializedProperty conditionProperty = goalProperty.FindPropertyRelative("turbidityCondition");
 
                 EditorGUILayout.BeginVertical("box");
                 EditorGUILayout.BeginHorizontal();
@@ -284,6 +286,9 @@ namespace Lumencuit.Editor
                 if (countProperty != null)
                     EditorGUILayout.PropertyField(countProperty);
 
+                if (conditionProperty != null)
+                    DrawTurbidityCondition(conditionProperty);
+
                 EditorGUILayout.EndVertical();
             }
 
@@ -295,12 +300,16 @@ namespace Lumencuit.Editor
                 SerializedProperty goalProperty = goalsProperty.GetArrayElementAtIndex(index);
                 SerializedProperty signalProperty = goalProperty.FindPropertyRelative("signal");
                 SerializedProperty countProperty = goalProperty.FindPropertyRelative("count");
+                SerializedProperty conditionProperty = goalProperty.FindPropertyRelative("turbidityCondition");
 
                 if (signalProperty != null)
                     signalProperty.boxedValue = QuantumSignal.Null;
 
                 if (countProperty != null)
                     countProperty.intValue = 1;
+
+                if (conditionProperty != null)
+                    conditionProperty.managedReferenceValue = new NoTurbidityCondition();
             }
         }
 
@@ -388,6 +397,46 @@ namespace Lumencuit.Editor
             {
                 if (newType != oldType || blueprint is ColoredBlueprint)
                     blueprintProperty.managedReferenceValue = new EntityBlueprint(newType);
+            }
+        }
+
+        private static void DrawTurbidityCondition(SerializedProperty conditionProperty)
+        {
+            if (conditionProperty.managedReferenceValue == null)
+                conditionProperty.managedReferenceValue = new NoTurbidityCondition();
+
+            TurbidityConditionType currentType = GetTurbidityConditionType(conditionProperty.managedReferenceValue);
+            TurbidityConditionType newType = (TurbidityConditionType)EditorGUILayout.EnumPopup("Turbidity", currentType);
+
+            if (newType != currentType)
+            {
+                conditionProperty.managedReferenceValue = CreateTurbidityCondition(newType);
+                return;
+            }
+
+            switch (conditionProperty.managedReferenceValue)
+            {
+                case MinTurbidityCondition:
+                    {
+                        SerializedProperty minProperty = conditionProperty.FindPropertyRelative("min");
+                        EditorGUILayout.PropertyField(minProperty, new GUIContent("Min"));
+                        break;
+                    }
+                case MaxTurbidityCondition:
+                    {
+                        SerializedProperty maxProperty = conditionProperty.FindPropertyRelative("max");
+                        EditorGUILayout.PropertyField(maxProperty, new GUIContent("Max"));
+                        break;
+                    }
+                case RangeTurbidityCondition:
+                    {
+                        SerializedProperty minProperty = conditionProperty.FindPropertyRelative("min");
+                        SerializedProperty maxProperty = conditionProperty.FindPropertyRelative("max");
+
+                        EditorGUILayout.PropertyField(minProperty, new GUIContent("Min"));
+                        EditorGUILayout.PropertyField(maxProperty, new GUIContent("Max"));
+                        break;
+                    }
             }
         }
     }
