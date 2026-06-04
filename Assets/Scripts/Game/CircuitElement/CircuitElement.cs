@@ -52,9 +52,9 @@ namespace Lumencuit
         /// 현재 연결된 입력 신호입니다.
         /// </param>
         /// <returns>
-        /// 계산된 출력 신호입니다. 입력이 부족한 경우 Black 신호를 출력합니다.
+        /// 계산된 출력 신호입니다. 입력이 부족한 경우 Null 신호를 출력합니다.
         /// </returns>
-        public abstract Signal Flow(IReadOnlyList<Signal> inputs);
+        public abstract QuantumSignal Flow(IReadOnlyList<QuantumSignal> inputs);
     }
 
     public static class CircuitElementTypeFunction

@@ -16,10 +16,10 @@ namespace Lumencuit
         [Serializable]
         public class StageGoal
         {
-            [SerializeField] private Signal signal = Signal.Black;
+            [SerializeField] private QuantumSignal signal = QuantumSignal.Null;
             [SerializeField] private int count = 1;
 
-            public Signal Signal => signal;
+            public QuantumSignal Signal => signal;
             public int Count => count;
         }
 

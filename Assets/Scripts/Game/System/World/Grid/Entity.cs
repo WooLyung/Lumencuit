@@ -52,7 +52,7 @@ namespace Lumencuit
         public int InPortCount => (LeftPort == PortType.Input ? 1 : 0) + (DownPort == PortType.Input ? 1 : 0) + (RightPort == PortType.Input ? 1 : 0) + (UpPort == PortType.Input ? 1 : 0);
         public int OutPortCount => (LeftPort == PortType.Output ? 1 : 0) + (DownPort == PortType.Output ? 1 : 0) + (RightPort == PortType.Output ? 1 : 0) + (UpPort == PortType.Output ? 1 : 0); 
 
-        public Signal Flow(IReadOnlyList<Signal> inputs)
+        public QuantumSignal Flow(IReadOnlyList<QuantumSignal> inputs)
         {
             return Element.Flow(inputs);
         }

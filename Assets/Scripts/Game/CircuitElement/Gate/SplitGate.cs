@@ -19,11 +19,11 @@ namespace Lumencuit
 
         public static CircuitElement Instance => instance ??= new SplitGate();
 
-        public override Signal Flow(IReadOnlyList<Signal> inputs)
+        public override QuantumSignal Flow(IReadOnlyList<QuantumSignal> inputs)
         {
-            foreach (Signal input in inputs)
+            foreach (QuantumSignal input in inputs)
                 return input;
-            return Signal.Black;
+            return QuantumSignal.Null;
         }
     }
 }

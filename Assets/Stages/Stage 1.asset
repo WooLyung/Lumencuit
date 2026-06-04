@@ -13,46 +13,62 @@ MonoBehaviour:
   m_Name: Stage 1
   m_EditorClassIdentifier: Assembly-CSharp::Lumencuit.StageData
   StageName: Stage 1
-  Width: 3
-  Height: 3
+  Width: 5
+  Height: 5
   Blueprints:
   - blueprint:
-      rid: 5301989198179860539
+      rid: 5301989198179860554
     count: 1
   - blueprint:
-      rid: 5301989198179860540
+      rid: 5301989198179860556
     count: 1
   - blueprint:
-      rid: 5301989182464852059
+      rid: 5301989198179860558
     count: 1
   - blueprint:
-      rid: 5301989182464852061
+      rid: 5301989198179860552
+    count: 1
+  - blueprint:
+      rid: 5301989198179860551
+    count: 1
+  - blueprint:
+      rid: 5301989198179860553
     count: 1
   Goals:
   - signal:
-      value: 5
+      mask: 136
     count: 1
-  enabledTiles: 010101010101010101
+  enabledTiles: 01010101010101010101010101010101010101010101010101
   references:
     version: 2
     RefIds:
-    - rid: 5301989182464852059
+    - rid: 5301989198179860551
       type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
-        type: 0
-    - rid: 5301989182464852061
+        type: 4
+    - rid: 5301989198179860552
       type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 6
-    - rid: 5301989198179860539
+    - rid: 5301989198179860553
+      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 0
+    - rid: 5301989198179860554
       type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 2
         signal:
-          value: 1
-    - rid: 5301989198179860540
+          mask: 34
+    - rid: 5301989198179860556
       type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 2
         signal:
-          value: 4
+          mask: 2
+    - rid: 5301989198179860558
+      type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 2
+        signal:
+          mask: 68

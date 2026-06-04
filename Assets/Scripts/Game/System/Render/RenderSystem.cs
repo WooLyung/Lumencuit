@@ -46,7 +46,7 @@ namespace Lumencuit
             foreach (EntityBlueprintStack entityBlueprintStack in stageData.Blueprints)
             {
                 if (entityBlueprintStack.Blueprint is ColoredBlueprint coloredBlueprint)
-                    gui.text += $"- {coloredBlueprint.Type}[{coloredBlueprint.Signal.Name}] * {entityBlueprintStack.Count}\n";
+                    gui.text += $"- {coloredBlueprint.Type}[{coloredBlueprint.Signal}] * {entityBlueprintStack.Count}\n";
                 else
                     gui.text += $"- {entityBlueprintStack.Blueprint.Type} * {entityBlueprintStack.Count}\n";
             }
@@ -54,7 +54,7 @@ namespace Lumencuit
 
             gui.text += "\n<Goals>\n";
             foreach (StageData.StageGoal goal in stageData.Goals)
-                gui.text += $"- {goal.Signal.Name} * {goal.Count}\n";
+                gui.text += $"- {goal.Signal} * {goal.Count}\n";
 
             RenderGrid();
         }
@@ -91,8 +91,8 @@ namespace Lumencuit
 
                 ViewObject viewObject = view.GetComponent<ViewObject>();
                 viewObject.PortUpdate(e.Entity);
-                viewObject.SetSignal(Signal.Black);
-                viewObject.SetPortSignal(Signal.Black);
+                viewObject.SetSignal(QuantumSignal.Null);
+                viewObject.SetPortSignal(QuantumSignal.Null);
 
                 views.Add(e.Pos, new View(view, viewObject));
             }
@@ -112,7 +112,7 @@ namespace Lumencuit
             if (views.TryGetValue(e.Pos, out View view))
             {
                 view.ViewObject.PortUpdate(e.Entity);
-                view.ViewObject.SetPortSignal(Signal.Black);
+                view.ViewObject.SetPortSignal(QuantumSignal.Null);
             }
         }
 

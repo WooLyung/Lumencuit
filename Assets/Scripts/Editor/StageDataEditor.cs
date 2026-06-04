@@ -10,30 +10,22 @@ namespace Lumencuit.Editor
     [CustomEditor(typeof(StageData))]
     public sealed class StageDataEditor : UnityEditor.Editor
     {
-        private static readonly string[] SignalNames = {
-            "Black",
-            "Red",
-            "Green",
-            "Blue",
-            "Yellow",
-            "Cyan",
-            "Magenta",
-            "White"
-        };
-
-        private static readonly Signal[] SignalValues = {
-            Signal.Black,
-            Signal.Red,
-            Signal.Green,
-            Signal.Blue,
-            Signal.Yellow,
-            Signal.Cyan,
-            Signal.Magenta,
-            Signal.White
+        private static readonly Color[] SignalColors =
+        {
+            Color.black,   // 0b000 = 0
+            Color.red,     // 0b001 = 1
+            Color.green,   // 0b010 = 2
+            Color.yellow,  // 0b011 = 3
+            Color.blue,    // 0b100 = 4
+            Color.magenta, // 0b101 = 5
+            Color.cyan,    // 0b110 = 6
+            Color.white    // 0b111 = 7
         };
 
         private const int CellSize = 24;
         private const int CellGap = 2;
+        private const int SignalCellSize = 22;
+
         private SerializedProperty entityBlueprintsProperty;
         private SerializedProperty goalsProperty;
 
@@ -51,35 +43,88 @@ namespace Lumencuit.Editor
             EditorGUI.BeginChangeCheck();
 
             stageData.StageName = EditorGUILayout.TextField("Stage Name", stageData.StageName);
-            stageData.Width = EditorGUILayout.IntField("Width", stageData.Width);
-            stageData.Height = EditorGUILayout.IntField("Height", stageData.Height);
+            stageData.Width = Mathf.Max(1, EditorGUILayout.IntField("Width", stageData.Width));
+            stageData.Height = Mathf.Max(1, EditorGUILayout.IntField("Height", stageData.Height));
+
+            EditorGUILayout.Space(10);
             EditorGUILayout.LabelField("Tile Layout", EditorStyles.boldLabel);
             stageData.ResizeTiles();
             DrawTileGrid(stageData);
+
             EditorGUILayout.Space(20);
             DrawBlueprintStacks(entityBlueprintsProperty);
+
             EditorGUILayout.Space(20);
             DrawGoals(goalsProperty);
+
             serializedObject.ApplyModifiedProperties();
+
             if (EditorGUI.EndChangeCheck())
                 EditorUtility.SetDirty(stageData);
         }
 
-        private static Signal DrawSignalPopup(string label, Signal current)
+        private static QuantumSignal DrawQuantumSignalField(string label, QuantumSignal current)
         {
-            int index = 0;
+            EditorGUILayout.LabelField(label);
 
-            for (int i = 0; i < SignalValues.Length; i++)
+            EditorGUILayout.BeginVertical("box");
+
+            Rect[] rects = new Rect[SignalColors.Length];
+
+            EditorGUILayout.BeginHorizontal();
+            for (int i = 0; i < SignalColors.Length; i++)
+                rects[i] = DrawSignalColorCell(i);
+            EditorGUILayout.EndHorizontal();
+
+            byte mask = current.Mask;
+
+            EditorGUILayout.BeginHorizontal();
+            for (int i = 0; i < SignalColors.Length; i++)
             {
-                if (SignalValues[i] == current)
-                {
-                    index = i;
-                    break;
-                }
-            }
+                Rect rect = GUILayoutUtility.GetRect(
+                    SignalCellSize,
+                    SignalCellSize,
+                    GUILayout.Width(SignalCellSize),
+                    GUILayout.Height(SignalCellSize)
+                );
 
-            int newIndex = EditorGUILayout.Popup(label, index, SignalNames);
-            return SignalValues[newIndex];
+                bool enabled = (mask & (1 << i)) != 0;
+                bool newEnabled = EditorGUI.Toggle(rect, enabled);
+
+                if (newEnabled)
+                    mask |= (byte)(1 << i);
+                else
+                    mask &= (byte)~(1 << i);
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.EndVertical();
+
+            return new QuantumSignal(mask);
+        }
+
+        private static Rect DrawSignalColorCell(int index)
+        {
+            Rect rect = GUILayoutUtility.GetRect(
+                SignalCellSize,
+                SignalCellSize,
+                GUILayout.Width(SignalCellSize),
+                GUILayout.Height(SignalCellSize)
+            );
+
+            EditorGUI.DrawRect(rect, SignalColors[index]);
+
+            Handles.color = Color.gray;
+            Handles.DrawAAPolyLine(
+                1f,
+                new Vector3(rect.xMin, rect.yMin),
+                new Vector3(rect.xMax, rect.yMin),
+                new Vector3(rect.xMax, rect.yMax),
+                new Vector3(rect.xMin, rect.yMax),
+                new Vector3(rect.xMin, rect.yMin)
+            );
+
+            return rect;
         }
 
         private static void DrawGoals(SerializedProperty goalsProperty)
@@ -95,7 +140,6 @@ namespace Lumencuit.Editor
                 EditorGUILayout.BeginVertical("box");
 
                 EditorGUILayout.BeginHorizontal();
-
                 EditorGUILayout.LabelField($"Goal {i}", EditorStyles.boldLabel);
 
                 if (GUILayout.Button("Remove", GUILayout.Width(80)))
@@ -108,16 +152,17 @@ namespace Lumencuit.Editor
 
                 EditorGUILayout.EndHorizontal();
 
-                Signal oldSignal = signalProperty != null
-                    ? (Signal)signalProperty.boxedValue
-                    : Signal.Black;
+                QuantumSignal oldSignal = signalProperty != null
+                    ? (QuantumSignal)signalProperty.boxedValue
+                    : QuantumSignal.Null;
 
-                Signal newSignal = DrawSignalPopup("Color", oldSignal);
+                QuantumSignal newSignal = DrawQuantumSignalField("Signal", oldSignal);
 
                 if (signalProperty != null && newSignal != oldSignal)
                     signalProperty.boxedValue = newSignal;
 
-                EditorGUILayout.PropertyField(countProperty);
+                if (countProperty != null)
+                    EditorGUILayout.PropertyField(countProperty);
 
                 EditorGUILayout.EndVertical();
             }
@@ -132,7 +177,7 @@ namespace Lumencuit.Editor
                 SerializedProperty countProperty = goalProperty.FindPropertyRelative("count");
 
                 if (signalProperty != null)
-                    signalProperty.boxedValue = Signal.Black;
+                    signalProperty.boxedValue = QuantumSignal.Null;
 
                 if (countProperty != null)
                     countProperty.intValue = 1;
@@ -144,20 +189,28 @@ namespace Lumencuit.Editor
             for (int y = stageData.Height - 1; y >= 0; y--)
             {
                 EditorGUILayout.BeginHorizontal();
+
                 for (int x = 0; x < stageData.Width; x++)
                 {
                     bool enabled = stageData.IsEnabledTile(x, y);
-                    GUI.backgroundColor = enabled ? new Color(0.35f, 0.8f, 0.45f) : new Color(0.25f, 0.25f, 0.25f);
+
+                    GUI.backgroundColor = enabled
+                        ? new Color(0.35f, 0.8f, 0.45f)
+                        : new Color(0.25f, 0.25f, 0.25f);
+
                     if (GUILayout.Button("", GUILayout.Width(CellSize), GUILayout.Height(CellSize)))
                     {
                         Undo.RecordObject(stageData, "Toggle Stage Tile");
                         stageData.SetEnabledTile(x, y, !enabled);
                         EditorUtility.SetDirty(stageData);
                     }
+
                     GUILayout.Space(CellGap);
                 }
+
                 EditorGUILayout.EndHorizontal();
             }
+
             GUI.backgroundColor = Color.white;
         }
 
@@ -177,7 +230,6 @@ namespace Lumencuit.Editor
                 EditorGUILayout.BeginVertical("box");
 
                 EditorGUILayout.BeginHorizontal();
-
                 EditorGUILayout.LabelField($"Blueprint {i}", EditorStyles.boldLabel);
 
                 if (GUILayout.Button("Remove", GUILayout.Width(80)))
@@ -191,7 +243,9 @@ namespace Lumencuit.Editor
                 EditorGUILayout.EndHorizontal();
 
                 DrawBlueprintField(blueprintProperty);
-                EditorGUILayout.PropertyField(countProperty);
+
+                if (countProperty != null)
+                    EditorGUILayout.PropertyField(countProperty);
 
                 EditorGUILayout.EndVertical();
             }
@@ -206,7 +260,9 @@ namespace Lumencuit.Editor
                 SerializedProperty countProperty = stackProperty.FindPropertyRelative("count");
 
                 blueprintProperty.managedReferenceValue = new EntityBlueprint();
-                countProperty.intValue = 1;
+
+                if (countProperty != null)
+                    countProperty.intValue = 1;
             }
         }
 
@@ -228,9 +284,9 @@ namespace Lumencuit.Editor
 
             if (needColor)
             {
-                Signal oldSignal = blueprint is ColoredBlueprint colored
+                QuantumSignal oldSignal = blueprint is ColoredBlueprint colored
                     ? colored.Signal
-                    : Signal.Black;
+                    : QuantumSignal.Null;
 
                 if (newType != oldType || blueprint is not ColoredBlueprint)
                 {
@@ -238,7 +294,7 @@ namespace Lumencuit.Editor
                     return;
                 }
 
-                Signal newSignal = DrawSignalPopup("Color", oldSignal);
+                QuantumSignal newSignal = DrawQuantumSignalField("Signal", oldSignal);
 
                 if (newSignal != oldSignal)
                     blueprintProperty.managedReferenceValue = new ColoredBlueprint(newType, newSignal);

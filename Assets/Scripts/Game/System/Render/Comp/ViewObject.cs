@@ -5,11 +5,11 @@ namespace Lumencuit
 {
     public abstract class ViewObject : MonoBehaviour
     {
-        public abstract void SetSignal(Signal signal);
-        public abstract void SetPortSignal(Vector2Int dir, Signal signal);
+        public abstract void SetSignal(QuantumSignal signal);
+        public abstract void SetPortSignal(Vector2Int dir, QuantumSignal signal);
         public abstract void PortUpdate(Entity entity);
 
-        public void SetPortSignal(Signal signal)
+        public void SetPortSignal(QuantumSignal signal)
         {
             SetPortSignal(Vector2Int.left, signal);
             SetPortSignal(Vector2Int.right, signal);

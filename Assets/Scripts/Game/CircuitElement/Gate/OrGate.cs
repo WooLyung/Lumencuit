@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Lumencuit
 {
@@ -18,10 +19,12 @@ namespace Lumencuit
 
         public static CircuitElement Instance => instance ??= new OrGate();
 
-        public override Signal Flow(IReadOnlyList<Signal> inputs)
+        public override QuantumSignal Flow(IReadOnlyList<QuantumSignal> inputs)
         {
-            Signal output = Signal.Black;
-            foreach (Signal input in inputs)
+            if (inputs.Count() == 0)
+                return QuantumSignal.Null;
+            QuantumSignal output = QuantumSignal.Black;
+            foreach (QuantumSignal input in inputs)
                 output |= input;
             return output;
         }

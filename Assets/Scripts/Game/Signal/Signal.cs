@@ -34,8 +34,10 @@ namespace Lumencuit
         // 이항 연산자
         public static Signal operator &(Signal a, Signal b) => new((byte)(a.value & b.value));
         public static Signal operator |(Signal a, Signal b) => new((byte)(a.value | b.value));
-        public static Signal operator -(Signal a, Signal b) => new((byte)(a.Value & ~b.Value & 0b111));
         public static Signal operator ^(Signal a, Signal b) => new((byte)(a.value ^ b.value));
+        public static Signal operator -(Signal a, Signal b) => new((byte)(a.Value & ~b.Value & 0b111));
+        
+        // 비교 연산자
         public static bool operator ==(Signal a, Signal b) => a.Value == b.Value;
         public static bool operator !=(Signal a, Signal b) => !(a == b);
 
@@ -62,6 +64,8 @@ namespace Lumencuit
             0b111 => "White",
             _ => "Black",
         };
+
+        public static Signal FromValue(byte value) => new Signal(value);
 
         public override bool Equals(object obj)
         {

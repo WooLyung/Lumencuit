@@ -11,9 +11,9 @@ namespace Lumencuit
         {
             public readonly Entity Entity;
             public readonly Vector2Int Pos;
-            public readonly Signal Signal;
+            public readonly QuantumSignal Signal;
 
-            public SignalUpdatedEvent(Entity entity, Vector2Int pos, Signal signal)
+            public SignalUpdatedEvent(Entity entity, Vector2Int pos, QuantumSignal signal)
             {
                 Entity = entity;
                 Pos = pos;
@@ -26,9 +26,9 @@ namespace Lumencuit
             public readonly Entity Entity;
             public readonly Vector2Int Dir;
             public readonly Vector2Int Pos;
-            public readonly Signal Signal;
+            public readonly QuantumSignal Signal;
 
-            public PortSignalUpdatedEvent(Entity entity, Vector2Int dir, Vector2Int pos, Signal signal)
+            public PortSignalUpdatedEvent(Entity entity, Vector2Int dir, Vector2Int pos, QuantumSignal signal)
             {
                 Entity = entity;
                 Dir = dir;

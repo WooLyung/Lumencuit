@@ -19,13 +19,12 @@ namespace Lumencuit
 
         public static CircuitElement Instance => instance ??= new SubtractGate();
 
-        public override Signal Flow(IReadOnlyList<Signal> inputs)
+        public override QuantumSignal Flow(IReadOnlyList<QuantumSignal> inputs)
         {
             if (inputs.Count() == 0)
-                return Signal.Black;
+                return QuantumSignal.Null;
             if (inputs.Count() == 1)
                 return inputs.First();
-
             return inputs.First() - inputs.Last();
         }
     }

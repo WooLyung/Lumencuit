@@ -9,18 +9,18 @@ namespace Lumencuit
     [Serializable]
     public sealed class ColoredBlueprint : EntityBlueprint
     {
-        [SerializeField] private Signal signal = Signal.Black;
+        [SerializeField] private QuantumSignal signal = QuantumSignal.Null;
 
         public ColoredBlueprint()
         {
         }
 
-        public ColoredBlueprint(CircuitElementType type, Signal signal) : base(type)
+        public ColoredBlueprint(CircuitElementType type, QuantumSignal signal) : base(type)
         {
             this.signal = signal;
         }
 
-        public Signal Signal => signal;
+        public QuantumSignal Signal => signal;
 
         public override EntityBlueprint Clone()
         {

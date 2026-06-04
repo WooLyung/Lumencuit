@@ -28,31 +28,31 @@ namespace Lumencuit
         {
             public readonly int Width;
             public readonly int Height;
-            public readonly Signal[,] Signals;
-            public readonly Signal[,] UpPorts;
-            public readonly Signal[,] DownPorts;
-            public readonly Signal[,] RightPorts;
-            public readonly Signal[,] LeftPorts;
+            public readonly QuantumSignal[,] Signals;
+            public readonly QuantumSignal[,] UpPorts;
+            public readonly QuantumSignal[,] DownPorts;
+            public readonly QuantumSignal[,] RightPorts;
+            public readonly QuantumSignal[,] LeftPorts;
 
             public SimulatedGrid(int width, int height)
             {
                 Width = width;
                 Height = height;
 
-                Signals = new Signal[Width, Height];
-                UpPorts = new Signal[Width, Height];
-                DownPorts = new Signal[Width, Height];
-                RightPorts = new Signal[Width, Height];
-                LeftPorts = new Signal[Width, Height];
+                Signals = new QuantumSignal[Width, Height];
+                UpPorts = new QuantumSignal[Width, Height];
+                DownPorts = new QuantumSignal[Width, Height];
+                RightPorts = new QuantumSignal[Width, Height];
+                LeftPorts = new QuantumSignal[Width, Height];
                 for (int x = 0; x < Width; x++)
                 {
                     for (int y = 0; y < Height; y++)
                     {
-                        Signals[x, y] = Black;
-                        UpPorts[x, y] = Black;
-                        DownPorts[x, y] = Black;
-                        RightPorts[x, y] = Black;
-                        LeftPorts[x, y] = Black;
+                        Signals[x, y] = QuantumSignal.Null;
+                        UpPorts[x, y] = QuantumSignal.Null;
+                        DownPorts[x, y] = QuantumSignal.Null;
+                        RightPorts[x, y] = QuantumSignal.Null;
+                        LeftPorts[x, y] = QuantumSignal.Null;
                     }
                 }
             }
@@ -86,7 +86,7 @@ namespace Lumencuit
                 if (entity == null)
                     return;
 
-                List<Signal> inputs = new();
+                List<QuantumSignal> inputs = new();
                 if (entity.UpPort == Entity.PortType.Input)
                     inputs.Add(simulatedGrid.UpPorts[next.x, next.y]);
                 if (entity.DownPort == Entity.PortType.Input)
@@ -110,7 +110,7 @@ namespace Lumencuit
             foreach (Vector2Int pos in worldGrid.GetAllSourcePositions())
             {
                 Entity source = worldGrid.GetEntityAt(pos.x, pos.y);
-                simulatedGrid.Signals[pos.x, pos.y] = (source.Element as Source)?.Signal ?? Black;
+                simulatedGrid.Signals[pos.x, pos.y] = (source.Element as Source)?.Signal ?? QuantumSignal.Null;
                 queue.Enqueue(pos);
             }
 
@@ -208,13 +208,13 @@ namespace Lumencuit
 
         private CircuitResult CheckClearStage(WorldGrid worldGrid, SimulatedGrid simulatedGrid)
         {
-            Dictionary<Signal, int> goalCounts = new();
+            Dictionary<QuantumSignal, int> goalCounts = new();
             foreach (StageData.StageGoal goal in stageData.Goals)
                 goalCounts[goal.Signal] = goal.Count;
 
             foreach (Vector2Int pos in worldGrid.GetAllGoalPositions())
             {
-                Signal signal = simulatedGrid.Signals[pos.x, pos.y];
+                QuantumSignal signal = simulatedGrid.Signals[pos.x, pos.y];
                 if (!goalCounts.TryGetValue(signal, out int count) || count <= 0)
                     return CircuitResult.Fail;
                 goalCounts[signal]--;
@@ -267,14 +267,14 @@ namespace Lumencuit
             AlertResult(result);
         }
 
-        private void NotifySignalUpdated(Entity entity, Vector2Int pos, Signal signal)
+        private void NotifySignalUpdated(Entity entity, Vector2Int pos, QuantumSignal signal)
         {
             ISimulationEventListener.SignalUpdatedEvent e = new ISimulationEventListener.SignalUpdatedEvent(entity, pos, signal);
             foreach (ISimulationEventListener listener in listeners)
                 listener.OnSignalUpdated(e);
         }
 
-        private void NotifyPortSignalUpdated(Entity entity, Vector2Int dir, Vector2Int pos, Signal signal)
+        private void NotifyPortSignalUpdated(Entity entity, Vector2Int dir, Vector2Int pos, QuantumSignal signal)
         {
             ISimulationEventListener.PortSignalUpdatedEvent e = new ISimulationEventListener.PortSignalUpdatedEvent(entity, dir, pos, signal);
             foreach (ISimulationEventListener listener in listeners)

@@ -11,21 +11,21 @@ namespace Lumencuit
         [SerializeField] private SpriteRenderer upPort;
         [SerializeField] private SpriteRenderer downPort;
 
-        public override void SetSignal(Signal signal)
+        public override void SetSignal(QuantumSignal signal)
         {
-            center.color = signal.Color;
+            center.color = signal.ToSignal()?.Color ?? Color.grey;
         }
 
-        public override void SetPortSignal(Vector2Int dir, Signal signal)
+        public override void SetPortSignal(Vector2Int dir, QuantumSignal signal)
         {
             if (dir == Vector2Int.left)
-                leftPort.color = signal.Color;
+                leftPort.color = signal.ToSignal()?.Color ?? Color.grey;
             else if (dir == Vector2Int.right)
-                rightPort.color = signal.Color;
+                rightPort.color = signal.ToSignal()?.Color ?? Color.grey;
             else if (dir == Vector2Int.up)
-                upPort.color = signal.Color;
+                upPort.color = signal.ToSignal()?.Color ?? Color.grey;
             else if (dir == Vector2Int.down)
-                downPort.color = signal.Color;
+                downPort.color = signal.ToSignal()?.Color ?? Color.grey;
         }
 
         public override void PortUpdate(Entity entity)

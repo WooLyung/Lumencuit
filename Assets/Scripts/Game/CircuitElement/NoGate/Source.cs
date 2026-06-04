@@ -14,16 +14,16 @@ namespace Lumencuit
         public override int OutSignalCount => 1;
         public override bool RequiresOrderedInputs => false;
 
-        public readonly Signal Signal;
+        public readonly QuantumSignal Signal;
 
-        private Source(Signal signal) 
+        private Source(QuantumSignal signal) 
         {
             Signal = signal;
         }
 
-        public static CircuitElement Create(Signal signal) => new Source(signal);
+        public static CircuitElement Create(QuantumSignal signal) => new Source(signal);
 
-        public override Signal Flow(IReadOnlyList<Signal> inputs)
+        public override QuantumSignal Flow(IReadOnlyList<QuantumSignal> inputs)
         {
             return Signal;
         }

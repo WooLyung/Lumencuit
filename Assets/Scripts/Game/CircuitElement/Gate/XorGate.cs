@@ -18,10 +18,10 @@ namespace Lumencuit
 
         public static CircuitElement Instance => instance ??= new XorGate();
 
-        public override Signal Flow(IReadOnlyList<Signal> inputs)
+        public override QuantumSignal Flow(IReadOnlyList<QuantumSignal> inputs)
         {
-            Signal output = Signal.Black;
-            foreach (Signal input in inputs)
+            QuantumSignal output = QuantumSignal.Black;
+            foreach (QuantumSignal input in inputs)
                 output ^= input;
             return output;
         }
