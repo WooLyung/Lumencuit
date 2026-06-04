@@ -102,9 +102,9 @@ namespace Lumencuit
 
             List<string> names = new();
             foreach (Signal signal in GetSignals())
-                names.Add(signal.Name);
+                names.Add(signal.ShortName);
 
-            return "{" + string.Join(", ", names) + "}";
+            return "{" + string.Join("", names) + "}";
         }
     }
 }

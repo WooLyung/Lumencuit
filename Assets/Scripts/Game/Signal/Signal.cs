@@ -65,6 +65,18 @@ namespace Lumencuit
             _ => "Black",
         };
 
+        public string ShortName => value switch
+        {
+            0b001 => "R",
+            0b010 => "G",
+            0b100 => "B",
+            0b011 => "Y",
+            0b101 => "M",
+            0b110 => "C",
+            0b111 => "W",
+            _ => "K",
+        };
+
         public static Signal FromValue(byte value) => new Signal(value);
 
         public override bool Equals(object obj)
