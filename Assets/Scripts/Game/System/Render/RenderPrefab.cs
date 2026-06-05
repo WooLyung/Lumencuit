@@ -17,6 +17,7 @@ namespace Lumencuit
         [SerializeField] private GameObject lampBridge;
         [SerializeField] private GameObject source;
         [SerializeField] private GameObject wire;
+        [SerializeField] private GameObject signalGenerator;
 
         [SerializeField] private GameObject andGate;
         [SerializeField] private GameObject notGate;
@@ -40,6 +41,7 @@ namespace Lumencuit
                 CircuitElementType.OrGate => orGate,
                 CircuitElementType.SplitGate => splitGate,
                 CircuitElementType.XorGate => xorGate,
+                CircuitElementType.SignalGenerator => signalGenerator,
                 _ => null
             };
         }

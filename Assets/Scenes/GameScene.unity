@@ -875,6 +875,7 @@ MonoBehaviour:
     lampBridge: {fileID: 3804965436788688523, guid: 0dcb6b805cc2bc74e94ce5ccf1301fb3, type: 3}
     source: {fileID: 3804965436788688523, guid: a91934c7f7759064885415d3e2d85967, type: 3}
     wire: {fileID: 3804965436788688523, guid: fa77ab57ec7377b4bbb32ab72d2344b7, type: 3}
+    signalGenerator: {fileID: 3804965436788688523, guid: 610370368001f5e4d9ee77578cf02f14, type: 3}
     andGate: {fileID: 3804965436788688523, guid: 8bac1696f414bf54b9912b74799d2d07, type: 3}
     notGate: {fileID: 3804965436788688523, guid: cf4de822a8c35fa4db0796a478b6cca0, type: 3}
     orGate: {fileID: 3804965436788688523, guid: 0dfeaeff43b7adf49975a0d28a0453a3, type: 3}

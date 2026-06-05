@@ -16,6 +16,8 @@ namespace Lumencuit
 
         public static readonly CircuitResult Success = new CircuitResult("Success");
         public static readonly CircuitResult Fail = new CircuitResult("Fail");
+        public static readonly CircuitResult MultipleSignalGenerators = new CircuitResult("MultipleSignalGenerators");
+        public static readonly CircuitResult HasCycle = new CircuitResult("HasCycle");
         public static readonly CircuitResult CantReach = new CircuitResult("CantReach");
         public static readonly CircuitResult UnplacedBlueprint = new CircuitResult("UnplacedBlueprint");
         public static readonly CircuitResult IncompleteCircuit = new CircuitResult("IncompleteCircuit");

@@ -12,8 +12,6 @@ namespace Lumencuit
         public override int TurbidityDelta => 0;
         public override int InSignalCount => 1;
         public override int OutSignalCount => 2;
-        public override bool RequiresOrderedInputs => false;
-
 
         private SplitGate() { }
 

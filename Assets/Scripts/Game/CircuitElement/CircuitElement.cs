@@ -14,8 +14,8 @@ namespace Lumencuit
         /// </summary>
         public enum CircuitElementType
         {
-            Lamp, LampBridge, Source, Wire,
-            AndGate, NotGate, OrGate, SplitGate, SubtractGate, XorGate
+            Lamp, LampBridge, Source, Wire, SignalGenerator,
+            AndGate, NotGate, OrGate, SplitGate, XorGate
         }
 
         public abstract CircuitElementType Type { get; }
@@ -34,11 +34,6 @@ namespace Lumencuit
         /// 회로 요소에서 출력되는 신호의 수입니다.
         /// </summary>
         public abstract int OutSignalCount { get; }
-
-        /// <summary>
-        /// 입력 포트의 순서를 지정합니다.
-        /// </summary>
-        public abstract bool RequiresOrderedInputs { get; }
 
         /// <summary>
         /// 최종 목표(램프)인지 지정합니다.
@@ -70,8 +65,8 @@ namespace Lumencuit
                 CircuitElementType.NotGate => NotGate.Instance,
                 CircuitElementType.OrGate => OrGate.Instance,
                 CircuitElementType.SplitGate => SplitGate.Instance,
-                CircuitElementType.SubtractGate => SubtractGate.Instance,
                 CircuitElementType.XorGate => XorGate.Instance,
+                CircuitElementType.SignalGenerator => SignalGenerator.Instance,
                 _ => null
             };
         }

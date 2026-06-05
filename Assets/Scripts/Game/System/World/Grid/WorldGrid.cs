@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -108,6 +109,14 @@ namespace Lumencuit
             }
 
             return new WorldGrid(Width, Height, grid, enabledTiles);
+        }
+
+        public IEnumerable<Vector2Int> GetAllEntityPositions()
+        {
+            for (int x = 0; x < Width; x++)
+                for (int y = 0; y < Height; y++)
+                    if (HasEntityAt(x, y))
+                        yield return new Vector2Int(x, y);
         }
     }
 }

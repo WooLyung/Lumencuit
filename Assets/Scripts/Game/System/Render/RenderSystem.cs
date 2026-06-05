@@ -138,7 +138,11 @@ namespace Lumencuit
             else if (result == CircuitResult.IncompleteCircuit)
                 gui.text = "완성되지 않은 회로";
             else if (result == CircuitResult.CantReach)
-                gui.text = "도달 불가능하거나\n사이클인 요소가 있음";
+                gui.text = "도달 불가능한 요소";
+            else if (result == CircuitResult.HasCycle)
+                gui.text = "사이클이 있음";
+            else if (result == CircuitResult.MultipleSignalGenerators)
+                gui.text = "너무 많은 신호 생성기";
             else if (result == CircuitResult.UnplacedBlueprint)
                 gui.text = "설치되지 않은 청사진";
             else if (result == CircuitResult.Success)

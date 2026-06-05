@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Windows;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace Lumencuit
 {
@@ -11,7 +13,7 @@ namespace Lumencuit
         /// <summary>
         /// 시뮬레이션 결과가 저장된 그리드입니다.
         /// </summary>
-        private class SimulatedGrid
+        public sealed class SimulatedGrid
         {
             public readonly int Width;
             public readonly int Height;
@@ -47,6 +49,32 @@ namespace Lumencuit
                     }
                 }
             }
+
+            public SimulatedGrid Clone()
+            {
+                SimulatedGrid clone = new SimulatedGrid(Width, Height);
+                for (int x = 0; x < Width; x++)
+                {
+                    for (int y = 0; y < Height; y++)
+                    {
+                        clone.Signals[x, y] = Signals[x, y];
+                        clone.UpPorts[x, y] = UpPorts[x, y];
+                        clone.DownPorts[x, y] = DownPorts[x, y];
+                        clone.RightPorts[x, y] = RightPorts[x, y];
+                        clone.LeftPorts[x, y] = LeftPorts[x, y];
+                        clone.Turbidities[x, y] = Turbidities[x, y];
+                    }
+                }
+                return clone;
+            }
+        }
+
+        /// <summary>
+        /// 신호 계산에 대한 결과입니다.
+        /// </summary>
+        public enum FlowResult
+        {
+            Success, HasCycle, CantReach, MultipleSignalGenerators
         }
 
         private readonly StageData stageData;
@@ -63,15 +91,38 @@ namespace Lumencuit
         /// <summary>
         /// 그리드의 복사본을 이용해 전체 신호를 계산합니다.
         /// </summary>
-        private void FlowAll(WorldGrid worldGrid, out bool cantReach, out SimulatedGrid simulatedGrid)
+        // 1. SCC를 계산합니다.
+        // 2. SCC의 신호 생성기 개수를 검사합니다.
+        // 3. 위상 정렬로 신호를 계산합니다.
+        // 4. 필요 입력이 충족된 SCC를 찾습니다.
+        // 5. 신호 생성기로부터 8종의 신호 가능성을 검사합니다.
+        // 6. (5)로부터 양자 신호를 생성하고 위상 정렬 탐색 대상으로 추가합니다.
+        // 7. (3)을 반복합니다.
+        private void FlowAll(WorldGrid worldGrid, out FlowResult result, out SimulatedGrid simulatedGrid)
         {
             simulatedGrid = new SimulatedGrid(worldGrid.Width, worldGrid.Height);
+
             int[,] remainedIn = new int[worldGrid.Width, worldGrid.Height];
+            bool[,] calculated = new bool[worldGrid.Width, worldGrid.Height];
             Queue<Vector2Int> queue = new();
-            cantReach = false;
+            result = FlowResult.Success;
+
+            // SCC를 찾고 검사
+            List<List<Vector2Int>> sccs0 = SCCHelper.FindSCCs(worldGrid);
+            List<List<Vector2Int>> sccs = new();
+            foreach (var scc in sccs0)
+            {
+                int count = SCCHelper.CountSignalGenerator(worldGrid, scc);
+                if (count == 0)
+                    result = FlowResult.HasCycle;
+                else if (count >= 2)
+                    result = FlowResult.MultipleSignalGenerators;
+                else
+                    sccs.Add(scc);
+            }
 
             // 신호 계산 후 큐에 넣기
-            void AddQueue(Vector2Int next, SimulatedGrid simulatedGrid)
+            void CalculateSignal(Vector2Int next, SimulatedGrid simulatedGrid)
             {
                 Entity entity = worldGrid.GetEntityAt(next.x, next.y);
                 if (entity == null)
@@ -100,6 +151,7 @@ namespace Lumencuit
                     turbidity = Mathf.Max(turbidity, simulatedGrid.Turbidities[next.x - 1, next.y]);
                 }
 
+                calculated[next.x, next.y] = true;
                 simulatedGrid.Signals[next.x, next.y] = entity.Flow(inputs);
                 simulatedGrid.Turbidities[next.x, next.y] = turbidity + entity.Element.TurbidityDelta;
                 queue.Enqueue(next);
@@ -120,40 +172,67 @@ namespace Lumencuit
             }
 
             // 위상 정렬
-            while (queue.Count > 0)
+            while (true)
             {
-                Vector2Int front = queue.Dequeue();
-                Entity entity = worldGrid.GetEntityAt(front.x, front.y);
-                int turbidity = simulatedGrid.Turbidities[front.x, front.y];
+                // 신호 계산
+                while (queue.Count > 0)
+                {
+                    Vector2Int front = queue.Dequeue();
+                    Entity entity = worldGrid.GetEntityAt(front.x, front.y);
+                    int turbidity = simulatedGrid.Turbidities[front.x, front.y];
 
-                if (entity.UpPort == Entity.PortType.Output)
-                {
-                    Vector2Int next = front + Vector2Int.up;
-                    simulatedGrid.UpPorts[front.x, front.y] = simulatedGrid.DownPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
-                    if (--remainedIn[next.x, next.y] == 0)
-                        AddQueue(next, simulatedGrid);
+                    if (entity.UpPort == Entity.PortType.Output)
+                    {
+                        Vector2Int next = front + Vector2Int.up;
+                        simulatedGrid.UpPorts[front.x, front.y] = simulatedGrid.DownPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
+                        if (--remainedIn[next.x, next.y] == 0)
+                            CalculateSignal(next, simulatedGrid);
+                    }
+                    if (entity.DownPort == Entity.PortType.Output)
+                    {
+                        Vector2Int next = front + Vector2Int.down;
+                        simulatedGrid.DownPorts[front.x, front.y] = simulatedGrid.UpPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
+                        if (--remainedIn[next.x, next.y] == 0)
+                            CalculateSignal(next, simulatedGrid);
+                    }
+                    if (entity.RightPort == Entity.PortType.Output)
+                    {
+                        Vector2Int next = front + Vector2Int.right;
+                        simulatedGrid.RightPorts[front.x, front.y] = simulatedGrid.LeftPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
+                        if (--remainedIn[next.x, next.y] == 0)
+                            CalculateSignal(next, simulatedGrid);
+                    }
+                    if (entity.LeftPort == Entity.PortType.Output)
+                    {
+                        Vector2Int next = front + Vector2Int.left;
+                        simulatedGrid.LeftPorts[front.x, front.y] = simulatedGrid.RightPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
+                        if (--remainedIn[next.x, next.y] == 0)
+                            CalculateSignal(next, simulatedGrid);
+                    }
                 }
-                if (entity.DownPort == Entity.PortType.Output)
+
+                // 입력이 모두 충족된 SCC 계산
+                HashSet<List<Vector2Int>> sccsSet = new(sccs);
+                bool newNode = false;
+                foreach (var scc in sccs)
                 {
-                    Vector2Int next = front + Vector2Int.down;
-                    simulatedGrid.DownPorts[front.x, front.y] = simulatedGrid.UpPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
-                    if (--remainedIn[next.x, next.y] == 0)
-                        AddQueue(next, simulatedGrid);
+                    int count = SCCHelper.CountUnresolvedExternalInputs(worldGrid, calculated, scc);
+                    if (count > 0)
+                        continue;
+                    sccsSet.Remove(scc);
+                    newNode = true;
+
+                    SCCHelper.TryGetSignalGenerator(worldGrid, scc, out Vector2Int generatorPos);
+                    QuantumSignal generatorSignal = SCCHelper.CalculateSignalGeneratorSCC(worldGrid, simulatedGrid, remainedIn, scc);
+                    calculated[generatorPos.x, generatorPos.y] = true;
+                    simulatedGrid.Signals[generatorPos.x, generatorPos.y] = generatorSignal;
+                    simulatedGrid.Turbidities[generatorPos.x, generatorPos.y] = 0;
+                    queue.Enqueue(generatorPos);
                 }
-                if (entity.RightPort == Entity.PortType.Output)
-                {
-                    Vector2Int next = front + Vector2Int.right;
-                    simulatedGrid.RightPorts[front.x, front.y] = simulatedGrid.LeftPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
-                    if (--remainedIn[next.x, next.y] == 0)
-                        AddQueue(next, simulatedGrid);
-                }
-                if (entity.LeftPort == Entity.PortType.Output)
-                {
-                    Vector2Int next = front + Vector2Int.left;
-                    simulatedGrid.LeftPorts[front.x, front.y] = simulatedGrid.RightPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
-                    if (--remainedIn[next.x, next.y] == 0)
-                        AddQueue(next, simulatedGrid);
-                }
+                sccs = new(sccsSet);
+
+                if (!newNode)
+                    break;
             }
 
             // 렌더링 적용
@@ -178,21 +257,15 @@ namespace Lumencuit
                 }
             }
 
-            // 사이클 검사
+            if (result != FlowResult.Success)
+                return;
+
+            // 도달 가능성 검사
             for (int x = 0; x < worldGrid.Width; x++)
-            {
                 for (int y = 0; y < worldGrid.Height; y++)
-                {
                     if (worldGrid.TryGetEntityAt(x, y, out Entity entity))
-                    {
-                        if (remainedIn[x, y] != 0)
-                        {
-                            cantReach = true;
-                            return;
-                        }
-                    }
-                }
-            }
+                        if (remainedIn[x, y] > 0)
+                            result = FlowResult.CantReach;
         }
 
         private CircuitResult IsCircuitComplete(WorldGrid worldGrid, List<EntityBlueprintStack> blueprints)
@@ -286,13 +359,20 @@ namespace Lumencuit
             List<EntityBlueprintStack> blueprints = e.BlueprintsClone;
 
             // 그리드 전체 신호 계산
-            FlowAll(worldGrid, out bool cantReach, out SimulatedGrid simulatedGrid);
+            FlowAll(worldGrid, out FlowResult flowResult, out SimulatedGrid simulatedGrid);
             
-            // 사이클 혹은 도달 가능성 검사
-            if (cantReach)
+            // 플로우 실패 처리
+            switch (flowResult)
             {
-                AlertResult(CircuitResult.CantReach);
-                return;
+                case FlowResult.CantReach:
+                    AlertResult(CircuitResult.CantReach);
+                    return;
+                case FlowResult.HasCycle:
+                    AlertResult(CircuitResult.HasCycle);
+                    return;
+                case FlowResult.MultipleSignalGenerators:
+                    AlertResult(CircuitResult.MultipleSignalGenerators);
+                    return;
             }
 
             // 회로 완성 검사
