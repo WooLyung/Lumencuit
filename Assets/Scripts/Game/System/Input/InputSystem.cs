@@ -9,27 +9,186 @@ namespace Lumencuit
     /// </summary>
     public abstract class InputSystem
     {
-        public enum InputState
+        /// <summary>
+        /// 선택된 입력 모드입니다.
+        /// </summary>
+        public enum InputMode
         {
-            Drag, None
+            None, Place, Wire, Remove
         }
-        
-        protected WorldSystem worldSystem;
+
+        /// <summary>
+        /// 드래그 상태입니다.
+        /// </summary>
+        public enum DragState
+        {
+            None,
+            Dragging
+        }
+
+        protected readonly WorldSystem worldSystem;
+        protected readonly Camera camera;
+
+        private InputMode inputMode = InputMode.None;
+        private DragState dragState = DragState.None;
+
         private EntityBlueprint selectedBlueprint = null;
-        private InputState currInputState = InputState.None;
+        private Vector2Int dragStartPos;
+        private Vector2Int prevDragPos = new(-1, -1);
         private List<Vector2Int> path = new();
 
-        public InputState CurrInputState => currInputState;
-
-        public InputSystem(WorldSystem worldSystem)
+        public InputSystem(WorldSystem worldSystem, Camera camera)
         {
             this.worldSystem = worldSystem;
+            this.camera = camera;
         }
 
-        public abstract void Update();
+        /// <summary>
+        /// 포인터가 위치한 타일을 구합니다.
+        /// </summary>
+        protected abstract bool TryGetPointerTilePos(out Vector2Int pos);
 
+        /// <summary>
+        /// 포인터 프레스를 검사합니다.
+        /// </summary>
+        protected abstract bool IsPointerPressedThisFrame();
+
+        /// <summary>
+        /// 포인터 클릭를 검사합니다.
+        /// </summary>
+        protected abstract bool IsPointerPressed();
+
+        /// <summary>
+        /// 포인터 릴리즈를 검사합니다.
+        /// </summary>
+        protected abstract bool IsPointerReleasedThisFrame();
+
+        /// <summary>
+        /// 포인터가 UI에 의해 막혔는지 검사합니다.
+        /// </summary>
+        protected abstract bool IsPointerBlockedByUI();
+
+        public virtual void Update()
+        {
+            UpdatePointerDrag();
+            CheckPointerPressed();
+        }
+
+        private void CheckPointerPressed()
+        {
+            if (IsPointerBlockedByUI())
+                return;
+            if (!TryGetPointerTilePos(out Vector2Int pos))
+                return;
+            if (!IsPointerPressedThisFrame())
+                return;
+
+            switch (inputMode)
+            {
+                case InputMode.Place:
+                    {
+                        PlaceBlueprint(pos.x, pos.y);
+                        break;
+                    }
+                case InputMode.Remove:
+                    {
+                        RemoveEntity(pos.x, pos.y);
+                        break;
+                    }
+            }
+        }
+
+        private void UpdatePointerDrag()
+        {
+            if (IsPointerBlockedByUI())
+                CancelDrag();
+            else if (!TryGetPointerTilePos(out Vector2Int pos))
+                CancelDrag();
+            else if (IsPointerPressedThisFrame())
+                BeginDrag(pos);
+            else if (IsPointerReleasedThisFrame())
+                EndDrag(pos);
+            else if (IsPointerPressed() && dragState == DragState.Dragging && prevDragPos != pos)
+            {
+                ContinueDrag(pos);
+                prevDragPos = pos;
+            }
+        }
+
+        private void BeginDrag(Vector2Int pos)
+        {
+            dragState = DragState.Dragging;
+            dragStartPos = pos;
+            prevDragPos = pos;
+
+            switch (inputMode)
+            {
+                case InputMode.Wire:
+                    {
+                        BeginWirePath(pos.x, pos.y);
+                        break;
+                    }
+            }
+        }
+
+        private void ContinueDrag(Vector2Int pos)
+        {
+            switch (inputMode)
+            {
+                case InputMode.Wire:
+                    {
+                        ContinueWirePath(pos.x, pos.y);
+                        break;
+                    }
+            }
+        }
+
+        private void EndDrag(Vector2Int pos)
+        {
+            if (dragState != DragState.Dragging)
+                return;
+
+            switch (inputMode)
+            {
+                case InputMode.Wire:
+                    {
+                        EndWirePath();
+                        break;
+                    }
+            }
+
+            dragState = DragState.None;
+            prevDragPos = new Vector2Int(-1, -1);
+        }
+
+        private void CancelDrag()
+        {
+            dragState = DragState.None;
+            prevDragPos = new Vector2Int(-1, -1);
+            path.Clear();
+        }
+
+        /// <summary>
+        /// 선택된 입력 상태를 변경합니다.
+        /// </summary>
+        protected void SetInputMode(InputMode inputState)
+        {
+            if (inputState == inputMode)
+                return;
+
+            CancelDrag();
+            path.Clear();
+            selectedBlueprint = null;
+            inputMode = inputState;
+            dragState = DragState.None;
+        }
+
+        /// <summary>
+        /// 청사진을 선택합니다.
+        /// </summary>
         protected void SelectBlueprint(EntityBlueprint blueprint)
         {
+            SetInputMode(blueprint == null ? InputMode.None : InputMode.Place);
             selectedBlueprint = blueprint;
         }
 
@@ -38,32 +197,27 @@ namespace Lumencuit
             if (selectedBlueprint == null)
                 return;
             worldSystem.TryCreateEntity(selectedBlueprint, x, y);
-            selectedBlueprint = null;
         }
 
-        protected void StartPath(int x, int y)
+        protected void RemoveEntity(int x, int y)
         {
-            if (currInputState != InputState.None)
+            worldSystem.TryRemoveEntity(x, y);
+        }
+
+        private void BeginWirePath(int x, int y)
+        {
+            if (!worldSystem.TryGetEntityAt(x, y, out Entity entity))
                 return;
 
-            selectedBlueprint = null;
-            Entity entity = worldSystem.GetEntityAt(x, y);
-            if (entity == null)
-                return;
             if (entity.OutPortCount >= entity.Element.OutSignalCount)
                 return;
 
-            currInputState = InputState.Drag;
             path.Clear();
             path.Add(new Vector2Int(x, y));
         }
 
-        protected void NextPath(int x, int y)
+        private void ContinueWirePath(int x, int y)
         {
-            if (currInputState != InputState.Drag)
-                return;
-
-            selectedBlueprint = null;
             Vector2Int next = new Vector2Int(x, y);
             if (path.Count == 0)
             {
@@ -85,20 +239,12 @@ namespace Lumencuit
             path.Add(next);
         }
 
-        protected void EndPath()
+        private void EndWirePath()
         {
-            selectedBlueprint = null;
-            if (currInputState != InputState.Drag)
-            {
-                currInputState = InputState.None;
-                return;
-            }
-
             if (path.Count >= 3)
                 worldSystem.TryCreateWire(path);
 
             path.Clear();
-            currInputState = InputState.None;
         }
     }
 }

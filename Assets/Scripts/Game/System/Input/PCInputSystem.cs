@@ -9,46 +9,101 @@ namespace Lumencuit
     /// </summary>
     public sealed class PCInputSystem : InputSystem
     {
-        private readonly Camera camera;
         private readonly StageData stageData;
-        private Vector2Int preTarget = new Vector2Int(-1, -1);
 
-        public PCInputSystem(WorldSystem worldSystem, Camera camera, StageData stageData) : base(worldSystem)
+        public PCInputSystem(WorldSystem worldSystem, Camera camera, StageData stageData) : base(worldSystem, camera)
         {
-            this.camera = camera;
             this.stageData = stageData;
         }
-        
-        public override void Update()
-        {
-            Mouse();
-            Keyboard();
-        }
 
-        private bool TryGetTargetPos(out Vector2Int pos)
+        protected override bool TryGetPointerTilePos(out Vector2Int pos)
         {
-            Mouse mouse = UnityEngine.InputSystem.Mouse.current;
-            pos = Vector2Int.zero;
+            pos = default;
 
+            Mouse mouse = Mouse.current;
             if (mouse == null)
                 return false;
 
             Vector2 mousePosition = mouse.position.ReadValue();
             Ray ray = camera.ScreenPointToRay(mousePosition);
+
             if (!Physics.Raycast(ray, out RaycastHit hit))
                 return false;
+            
             if (!hit.collider.TryGetComponent(out GridTilePos gridTilePos))
                 return false;
 
             pos = gridTilePos.Pos;
             return true;
         }
-
-        private void Keyboard()
+        
+        protected override bool IsPointerPressedThisFrame()
         {
-            Keyboard keyboard = UnityEngine.InputSystem.Keyboard.current;
+            Mouse mouse = Mouse.current;
+            if (mouse == null)
+                return false;
+            return mouse.leftButton.wasPressedThisFrame;
+        }
+
+        protected override bool IsPointerPressed()
+        {
+            Mouse mouse = Mouse.current;
+            if (mouse == null)
+                return false;
+            return !mouse.leftButton.wasPressedThisFrame && !mouse.leftButton.wasReleasedThisFrame && mouse.leftButton.isPressed;
+        }
+
+        protected override bool IsPointerReleasedThisFrame()
+        {
+            Mouse mouse = Mouse.current;
+            if (mouse == null)
+                return false;
+            return mouse.leftButton.wasReleasedThisFrame;
+        }
+
+        protected override bool IsPointerBlockedByUI()
+        {
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                return true;
+            return false;
+        }
+
+
+        public override void Update()
+        {
+            base.Update();
+            KeyboardUpdate();
+            MouseUpdate();
+        }
+
+        private void MouseUpdate()
+        {
+            if (IsPointerBlockedByUI())
+                return;
+            if (!TryGetPointerTilePos(out Vector2Int pos))
+                return;
+
+            Mouse mouse = Mouse.current;
+            if (mouse == null)
+                return;
+
+            if (mouse.rightButton.wasPressedThisFrame)
+                RemoveEntity(pos.x, pos.y);
+        }
+
+        private void KeyboardUpdate()
+        {
+            Keyboard keyboard = Keyboard.current;
             if (keyboard == null)
                 return;
+
+            // Q: 삭제
+            if (keyboard.qKey.wasPressedThisFrame)
+                SetInputMode(InputMode.Remove);
+
+            // W: 선 연결
+            if (keyboard.wKey.wasPressedThisFrame)
+                SetInputMode(InputMode.Wire);
 
             if (keyboard.digit1Key.wasPressedThisFrame && stageData.Blueprints.Count >= 1)
                 SelectBlueprint(stageData.Blueprints[0].Blueprint);
@@ -68,44 +123,6 @@ namespace Lumencuit
                 SelectBlueprint(stageData.Blueprints[7].Blueprint);
             if (keyboard.digit9Key.wasPressedThisFrame && stageData.Blueprints.Count >= 9)
                 SelectBlueprint(stageData.Blueprints[8].Blueprint);
-        }
-
-        private void Mouse()
-        {
-            Mouse mouse = UnityEngine.InputSystem.Mouse.current;
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-            {
-                EndPath();
-                return;
-            }
-            if (!TryGetTargetPos(out Vector2Int pos))
-            {
-                EndPath();
-                return;
-            }
-            Entity entity = worldSystem.GetEntityAt(pos.x, pos.y);
-
-            if (mouse.leftButton.wasPressedThisFrame)
-            {
-                if (entity == null)
-                    PlaceBlueprint(pos.x, pos.y);
-                else if (entity.OutPortCount < entity.Element.OutSignalCount)
-                    StartPath(pos.x, pos.y);
-            }
-            else if (mouse.leftButton.wasReleasedThisFrame)
-            {
-                EndPath();
-            }
-            else if (mouse.leftButton.isPressed)
-            {
-                if (preTarget != pos)
-                    NextPath(pos.x, pos.y);
-            }
-
-            if (mouse.rightButton.wasPressedThisFrame)
-                worldSystem.TryRemoveEntity(pos.x, pos.y);
-
-            preTarget = pos;
         }
     }
 }

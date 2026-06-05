@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Lumencuit
 {
     /// <summary>
@@ -5,12 +7,19 @@ namespace Lumencuit
     /// </summary>
     public sealed class NullInputSystem : InputSystem
     {
-        public NullInputSystem(WorldSystem worldSystem) : base(worldSystem)
+        public NullInputSystem(WorldSystem worldSystem, Camera camera) : base(worldSystem, camera)
         {
         }
 
-        public override void Update()
+        protected override bool IsPointerBlockedByUI() => false;
+        protected override bool IsPointerPressed() => false;
+        protected override bool IsPointerPressedThisFrame() => false;
+        protected override bool IsPointerReleasedThisFrame() => false;
+
+        protected override bool TryGetPointerTilePos(out Vector2Int pos)
         {
+            pos = default;
+            return false;
         }
     }
 }
