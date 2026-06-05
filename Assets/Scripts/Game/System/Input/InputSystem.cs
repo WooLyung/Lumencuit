@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -71,7 +72,8 @@ namespace Lumencuit
         public virtual void Update()
         {
             UpdatePointerDrag();
-            CheckPointerPressed();
+            if (inputMode == InputMode.Place)
+                CheckPointerPressed();
         }
 
         private void CheckPointerPressed()
@@ -87,12 +89,7 @@ namespace Lumencuit
             {
                 case InputMode.Place:
                     {
-                        PlaceBlueprint(pos.x, pos.y);
-                        break;
-                    }
-                case InputMode.Remove:
-                    {
-                        RemoveEntity(pos.x, pos.y);
+                        PlaceOrReplaceBlueprint(pos.x, pos.y);
                         break;
                     }
             }
@@ -155,6 +152,11 @@ namespace Lumencuit
                         EndWirePath();
                         break;
                     }
+                case InputMode.Remove:
+                    {
+                        RemoveEntities(dragStartPos, pos);
+                        break;
+                    }
             }
 
             dragState = DragState.None;
@@ -192,16 +194,26 @@ namespace Lumencuit
             selectedBlueprint = blueprint;
         }
 
-        protected void PlaceBlueprint(int x, int y)
+        protected void PlaceOrReplaceBlueprint(int x, int y)
         {
             if (selectedBlueprint == null)
                 return;
-            worldSystem.TryCreateEntity(selectedBlueprint, x, y);
+
+            EntityRequestResult result = worldSystem.TryCreateEntity(selectedBlueprint, x, y);
+            if (result != EntityRequestResult.Success)
+                worldSystem.TryReplaceEntity(selectedBlueprint, x, y);
         }
 
         protected void RemoveEntity(int x, int y)
         {
             worldSystem.TryRemoveEntity(x, y);
+        }
+
+        private void RemoveEntities(Vector2Int start, Vector2Int end)
+        {
+            for (int x = Mathf.Min(start.x, end.x); x <= Mathf.Max(start.x, end.x); x++)
+                for (int y = Mathf.Min(start.y, end.y); y <= Mathf.Max(start.y, end.y); y++)
+                    worldSystem.TryRemoveEntity(x, y);
         }
 
         private void BeginWirePath(int x, int y)
@@ -230,7 +242,7 @@ namespace Lumencuit
                 return;
 
             int existingIndex = path.IndexOf(next);
-            if (existingIndex >= 0)
+            if (existingIndex >= 1)
             {
                 path.RemoveRange(existingIndex + 1, path.Count - existingIndex - 1);
                 return;
@@ -241,6 +253,8 @@ namespace Lumencuit
 
         private void EndWirePath()
         {
+            if (path.Count == 1)
+                worldSystem.TryReplaceEntity(new EntityBlueprint(CircuitElement.CircuitElementType.Wire), path[0].x, path[0].y);
             if (path.Count >= 3)
                 worldSystem.TryCreateWire(path);
 

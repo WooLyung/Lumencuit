@@ -24,6 +24,7 @@ namespace Lumencuit
         public static readonly EntityRequestResult UnavailableBlueprint = new EntityRequestResult("UnavailableBlueprint");
         public static readonly EntityRequestResult UnavailablePort = new EntityRequestResult("UnavailablePort");
         public static readonly EntityRequestResult IsFixed = new EntityRequestResult("IsFixed");
+        public static readonly EntityRequestResult InvalidPort = new EntityRequestResult("InvalidPort");
 
         public static bool operator ==(EntityRequestResult a, EntityRequestResult b) => a.Result == b.Result;
         public static bool operator !=(EntityRequestResult a, EntityRequestResult b) => a.Result != b.Result;

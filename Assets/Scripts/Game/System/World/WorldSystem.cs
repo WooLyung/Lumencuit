@@ -3,6 +3,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEditor.Overlays;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace Lumencuit
 {
@@ -87,6 +88,43 @@ namespace Lumencuit
             return EntityRequestResult.Success;
         }
 
+        public EntityRequestResult TryReplaceEntity(EntityBlueprint blueprint, int x, int y)
+        {
+            bool isWire = blueprint.Type == CircuitElement.CircuitElementType.Wire;
+
+            if (!worldGrid.IsEnabledTile(x, y))
+                return EntityRequestResult.InvalidTile;
+            if (!worldGrid.TryGetEntityAt(x, y, out Entity oldEntity))
+                return EntityRequestResult.IsEmpty;
+            if (oldEntity.IsFixed)
+                return EntityRequestResult.IsFixed;
+
+            Entity newEntity = new Entity(blueprint, oldEntity.GetPorts());
+            if (newEntity.Element.InSignalCount < oldEntity.InPortCount || (isWire && oldEntity.InPortCount != 1))
+                return EntityRequestResult.InvalidPort;
+            if (newEntity.Element.OutSignalCount < oldEntity.OutPortCount || (isWire && oldEntity.OutPortCount != 1))
+                return EntityRequestResult.InvalidPort;
+
+            EntityBlueprintStack oldStack = blueprints.FirstOrDefault(stack => stack.Blueprint == oldEntity.MadeBy);
+            if (oldStack != null)
+                oldStack.Count++;
+
+            if (!isWire)
+            {
+                EntityBlueprintStack newStack = blueprints.FirstOrDefault(stack => stack.Blueprint == blueprint && stack.Count > 0);
+                if (newStack == null)
+                    return EntityRequestResult.UnavailableBlueprint;
+                newStack.Count--;
+            }
+
+            worldGrid.SetEntityAt(newEntity, x, y);
+            NotifyEntityRemoved(oldEntity, new Vector2Int(x, y));
+            NotifyEntityCreated(newEntity, new Vector2Int(x, y));
+            NotifyGridUpdated();
+
+            return EntityRequestResult.Success;
+        }
+
         public EntityRequestResult TryRemoveEntity(int x, int y)
         {
             if (!worldGrid.IsEnabledTile(x, y))
@@ -112,7 +150,7 @@ namespace Lumencuit
                 stack.Count++;
 
             RemoveAllConnectedWireNetworks(new Vector2Int(x, y));
-           worldGrid.RemoveEntityAt(x, y);
+            worldGrid.RemoveEntityAt(x, y);
             NotifyEntityRemoved(entity, pos);
             NotifyGridUpdated();
             return EntityRequestResult.Success;
@@ -192,6 +230,8 @@ namespace Lumencuit
                 if (Mathf.Abs(prev.x - curr.x) + Mathf.Abs(prev.y - curr.y) != 1)
                     return EntityRequestResult.InvalidPath;
                 if (!worldGrid.IsEnabledTile(curr.x, curr.y))
+                    return EntityRequestResult.InvalidPath;
+                if (i != path.Count - 1 && worldGrid.HasEntityAt(curr.x, curr.y))
                     return EntityRequestResult.InvalidPath;
             }
 

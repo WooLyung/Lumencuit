@@ -58,6 +58,7 @@ namespace Lumencuit
         public PortType RightPort { get => ports.Right; set => ports.Right = value; }
         public PortType UpPort { get => ports.Up; set => ports.Up = value; }
         public PortType DownPort { get => ports.Down; set => ports.Down = value; }
+        public Ports GetPorts() => ports;
         public int InPortCount => (LeftPort == PortType.Input ? 1 : 0) + (DownPort == PortType.Input ? 1 : 0) + (RightPort == PortType.Input ? 1 : 0) + (UpPort == PortType.Input ? 1 : 0);
         public int OutPortCount => (LeftPort == PortType.Output ? 1 : 0) + (DownPort == PortType.Output ? 1 : 0) + (RightPort == PortType.Output ? 1 : 0) + (UpPort == PortType.Output ? 1 : 0);
         public bool IsFixed => isFixed;
