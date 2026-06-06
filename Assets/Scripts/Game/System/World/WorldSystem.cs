@@ -113,10 +113,6 @@ namespace Lumencuit
             if (newEntity.Element.OutSignalCount < oldEntity.OutPortCount || (isWire && oldEntity.OutPortCount != 1))
                 return EntityRequestResult.InvalidPort;
 
-            EntityBlueprintStack oldStack = blueprints.FirstOrDefault(stack => stack.Blueprint == oldEntity.MadeBy);
-            if (oldStack != null)
-                oldStack.Count++;
-
             if (!isWire)
             {
                 EntityBlueprintStack newStack = blueprints.FirstOrDefault(stack => stack.Blueprint == blueprint && stack.Count > 0);
@@ -124,6 +120,10 @@ namespace Lumencuit
                     return EntityRequestResult.UnavailableBlueprint;
                 newStack.Count--;
             }
+
+            EntityBlueprintStack oldStack = blueprints.FirstOrDefault(stack => stack.Blueprint == oldEntity.MadeBy);
+            if (oldStack != null)
+                oldStack.Count++;
 
             worldGrid.SetEntityAt(newEntity, x, y);
             NotifyEntityRemoved(oldEntity, new Vector2Int(x, y));
@@ -202,11 +202,15 @@ namespace Lumencuit
                     RemoveAllConnectedWireNetworks(new Vector2Int(x, y));
                     worldGrid.RemoveEntityAt(x, y);
                     NotifyEntityRemoved(entity, pos);
-                    NotifyGridUpdated();
+                    success = true;
                 }
             }
 
-            PushUndoStack();
+            if (success)
+            {
+                NotifyGridUpdated();
+                PushUndoStack();
+            }
             return success ? EntityRequestResult.Success : EntityRequestResult.Fail;
         }
 
@@ -359,8 +363,13 @@ namespace Lumencuit
                     {
                         if (!snapshot.WorldGrid.TryGetEntityAt(x, y, out Entity snapshotEntity))
                             NotifyEntityRemoved(entity, pos);
+                        else if (snapshotEntity.MadeBy != entity.MadeBy)
+                        {
+                            NotifyEntityRemoved(entity, pos);
+                            NotifyEntityCreated(snapshotEntity, pos);
+                        }
                         else if (snapshotEntity.GetPorts() != entity.GetPorts())
-                            NotifyEntityPortUpdated(snapshotEntity, pos);
+                                NotifyEntityPortUpdated(snapshotEntity, pos);
                     }
                     else
                     {
