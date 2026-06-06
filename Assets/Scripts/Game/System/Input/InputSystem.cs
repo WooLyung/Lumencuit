@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.LowLevel;
 
 namespace Lumencuit
 {
@@ -154,7 +154,7 @@ namespace Lumencuit
                     }
                 case InputMode.Remove:
                     {
-                        RemoveEntities(dragStartPos, pos);
+                        RemoveEntityRange(dragStartPos, pos);
                         break;
                     }
             }
@@ -209,11 +209,27 @@ namespace Lumencuit
             worldSystem.TryRemoveEntity(x, y);
         }
 
-        private void RemoveEntities(Vector2Int start, Vector2Int end)
+        protected void Undo()
         {
-            for (int x = Mathf.Min(start.x, end.x); x <= Mathf.Max(start.x, end.x); x++)
-                for (int y = Mathf.Min(start.y, end.y); y <= Mathf.Max(start.y, end.y); y++)
-                    worldSystem.TryRemoveEntity(x, y);
+            CancelDrag();
+            path.Clear();
+            dragState = DragState.None;
+
+            worldSystem.TryUndo();
+        }
+
+        protected void Redo()
+        {
+            CancelDrag();
+            path.Clear();
+            dragState = DragState.None;
+
+            worldSystem.TryRedo();
+        }
+
+        private void RemoveEntityRange(Vector2Int start, Vector2Int end)
+        {
+            worldSystem.TryRemoveEntityRange(start, end);
         }
 
         private void BeginWirePath(int x, int y)

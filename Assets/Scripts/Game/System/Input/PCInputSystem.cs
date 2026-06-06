@@ -105,6 +105,14 @@ namespace Lumencuit
             if (keyboard.wKey.wasPressedThisFrame)
                 SetInputMode(InputMode.Wire);
 
+            // Z: undo
+            if (keyboard.zKey.wasPressedThisFrame)
+                Undo();
+
+            // X: redo
+            if (keyboard.xKey.wasPressedThisFrame)
+                Redo();
+
             if (keyboard.digit1Key.wasPressedThisFrame && stageData.Blueprints.Count >= 1)
                 SelectBlueprint(stageData.Blueprints[0].Blueprint);
             if (keyboard.digit2Key.wasPressedThisFrame && stageData.Blueprints.Count >= 2)

@@ -15,6 +15,8 @@ namespace Lumencuit
         }
 
         public static readonly EntityRequestResult Success = new EntityRequestResult("Success");
+        public static readonly EntityRequestResult CantUndo = new EntityRequestResult("CantUndo");
+        public static readonly EntityRequestResult CantRedo = new EntityRequestResult("CantRedo");
         public static readonly EntityRequestResult Fail = new EntityRequestResult("Fail");
         public static readonly EntityRequestResult NeedWire = new EntityRequestResult("NeedWire");
         public static readonly EntityRequestResult InvalidTile = new EntityRequestResult("InvalidTile");

@@ -1,9 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
-using UnityEditor.Overlays;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace Lumencuit
 {
@@ -12,9 +9,12 @@ namespace Lumencuit
     /// </summary>
     public sealed class WorldSystem
     {
-        private readonly WorldGrid worldGrid;
+        private WorldGrid worldGrid;
         private readonly List<EntityBlueprintStack> blueprints = new();
         private readonly List<IEntityEventListener> listeners = new();
+
+        private readonly Stack<WorldSnapshot> undoStack = new();
+        private readonly Stack<WorldSnapshot> redoStack = new();
 
         public WorldSystem(StageData stageData)
         {
@@ -27,10 +27,17 @@ namespace Lumencuit
             Camera.main.transform.position = new Vector3((stageData.Width - 1) / 2f, (stageData.Height - 1) / 2f, Camera.main.transform.position.z);
         }
 
+        private void PushUndoStack()
+        {
+            undoStack.Push(new WorldSnapshot(worldGrid, blueprints));
+            redoStack.Clear();
+        }
+
         public void InitPrePlacedBlueprint(StageData stageData)
         {
             foreach (PrePlacedBlueprint ppb in stageData.PrePlacedBlueprints)
                 TryPrePlaceEntity(ppb.Blueprint, ppb.Ports, ppb.Position.x, ppb.Position.y);
+            PushUndoStack();
         }
 
         public void AddListener(IEntityEventListener listener) => listeners.Add(listener);
@@ -85,6 +92,7 @@ namespace Lumencuit
             NotifyEntityCreated(entity, new Vector2Int(x, y));
             NotifyGridUpdated();
 
+            PushUndoStack();
             return EntityRequestResult.Success;
         }
 
@@ -122,6 +130,7 @@ namespace Lumencuit
             NotifyEntityCreated(newEntity, new Vector2Int(x, y));
             NotifyGridUpdated();
 
+            PushUndoStack();
             return EntityRequestResult.Success;
         }
 
@@ -141,7 +150,10 @@ namespace Lumencuit
             if (WireHelper.IsWire(entity))
             {
                 if (TryRemoveWireNetwork(pos))
+                {
+                    PushUndoStack();
                     return EntityRequestResult.Success;
+                }
                 return EntityRequestResult.Fail;
             }
 
@@ -153,7 +165,49 @@ namespace Lumencuit
             worldGrid.RemoveEntityAt(x, y);
             NotifyEntityRemoved(entity, pos);
             NotifyGridUpdated();
+
+            PushUndoStack();
             return EntityRequestResult.Success;
+        }
+
+        public EntityRequestResult TryRemoveEntityRange(Vector2Int start, Vector2Int end)
+        {
+            bool success = false;
+            for (int x = Mathf.Min(start.x, end.x); x <= Mathf.Max(start.x, end.x); x++)
+            {
+                for (int y = Mathf.Min(start.y, end.y); y <= Mathf.Max(start.y, end.y); y++)
+                {
+                    if (!worldGrid.IsEnabledTile(x, y))
+                        continue;
+
+                    if (!worldGrid.HasEntityAt(x, y))
+                        continue;
+
+                    Vector2Int pos = new Vector2Int(x, y);
+                    Entity entity = worldGrid.GetEntityAt(x, y);
+
+                    if (entity.IsFixed)
+                        continue;
+                    if (WireHelper.IsWire(entity))
+                    {
+                        if (TryRemoveWireNetwork(pos))
+                            success = true;
+                        continue;
+                    }
+
+                    EntityBlueprintStack stack = blueprints.FirstOrDefault(stack => stack.Blueprint == entity.MadeBy);
+                    if (stack != null)
+                        stack.Count++;
+
+                    RemoveAllConnectedWireNetworks(new Vector2Int(x, y));
+                    worldGrid.RemoveEntityAt(x, y);
+                    NotifyEntityRemoved(entity, pos);
+                    NotifyGridUpdated();
+                }
+            }
+
+            PushUndoStack();
+            return success ? EntityRequestResult.Success : EntityRequestResult.Fail;
         }
 
         private void RemoveAllConnectedWireNetworks(Vector2Int pos)
@@ -264,7 +318,62 @@ namespace Lumencuit
             }
 
             NotifyGridUpdated();
+            PushUndoStack();
             return EntityRequestResult.Success;
+        }
+
+        public EntityRequestResult TryUndo()
+        {
+            if (undoStack.Count < 2)
+                return EntityRequestResult.CantUndo;
+            redoStack.Push(undoStack.Pop());
+
+            WorldSnapshot snapshot = undoStack.Peek();
+            UpdateToSnapshot(snapshot);
+
+            NotifyGridUpdated();
+            return EntityRequestResult.Success;
+        }
+
+        public EntityRequestResult TryRedo()
+        {
+            if (redoStack.Count < 1)
+                return EntityRequestResult.CantRedo;
+            undoStack.Push(redoStack.Pop());
+
+            WorldSnapshot snapshot = undoStack.Peek();
+            UpdateToSnapshot(snapshot);
+
+            NotifyGridUpdated();
+            return EntityRequestResult.Success;
+        }
+
+        private void UpdateToSnapshot(WorldSnapshot snapshot)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    Vector2Int pos = new Vector2Int(x, y);
+                    if (worldGrid.TryGetEntityAt(x, y, out Entity entity))
+                    {
+                        if (!snapshot.WorldGrid.TryGetEntityAt(x, y, out Entity snapshotEntity))
+                            NotifyEntityRemoved(entity, pos);
+                        else if (snapshotEntity.GetPorts() != entity.GetPorts())
+                            NotifyEntityPortUpdated(snapshotEntity, pos);
+                    }
+                    else
+                    {
+                        if (snapshot.WorldGrid.TryGetEntityAt(x, y, out Entity snapshotEntity))
+                            NotifyEntityCreated(snapshotEntity, pos);
+                    }
+                }
+            }
+            worldGrid = snapshot.WorldGrid.Clone();
+
+            blueprints.Clear();
+            foreach (EntityBlueprintStack blueprint in snapshot.Blueprints)
+                blueprints.Add(blueprint.Clone());
         }
 
         /// <summary>

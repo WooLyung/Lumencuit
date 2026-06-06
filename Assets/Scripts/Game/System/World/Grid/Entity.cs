@@ -1,37 +1,18 @@
-using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 
 namespace Lumencuit
 {
     /// <summary>
     /// 그리드에 설치된 회로 요소를 나타내는 객체입니다.
     /// </summary>
-    public class Entity
+    public partial class Entity
     {
         /// <summary>
         /// 회로 요소의 각 면의 입출력 여부를 나타냅니다.
         /// </summary>
         public enum PortType { Input, Output, None };
-
-        /// <summary>
-        /// 회로 요소의 네 면의 입출력 여부를 나타냅니다.
-        /// </summary>
-        [Serializable]
-        public struct Ports
-        {
-            public PortType Left, Right, Up, Down;
-
-            public Ports(PortType left, PortType right, PortType up, PortType down)
-            {
-                Left = left;
-                Right = right;
-                Up = up;
-                Down = down;
-            }
-
-            public static readonly Ports None = new(PortType.None, PortType.None, PortType.None, PortType.None);
-        }
 
         public readonly EntityBlueprint MadeBy;
         public readonly CircuitElement Element;
