@@ -12,11 +12,12 @@ namespace Lumencuit
         [SerializeField] private ViewRoot viewRoot;
         [SerializeField] private RenderRegistry renderRegistry;
 
-        // 시스템 변수
+        // 시스템
         private WorldSystem worldSystem;
         private SimulationSystem simulationSystem;
         private InputSystem inputSystem;
         private RenderSystem renderSystem;
+        private StageController stageController;
 
         private void Awake()
         {
@@ -27,14 +28,15 @@ namespace Lumencuit
             StageData stageData = context.SelectedStage;
 
             worldSystem = new(stageData);
-            simulationSystem = new(worldSystem, stageData);
-            renderSystem = new(worldSystem, simulationSystem, renderRegistry.Prefabs, viewRoot, stageData);
+            stageController = new();
+            simulationSystem = new(worldSystem, stageController, stageData);
+            renderSystem = new(worldSystem, stageController, simulationSystem, renderRegistry.Prefabs, viewRoot, stageData);
 #if UNITY_ANDROID || UNITY_IOS
-            inputSystem = new NullInputSystem(worldSystem);
+            inputSystem = new NullInputSystem(worldSystem, stageController);
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_EDITOR
-            inputSystem = new PCInputSystem(worldSystem, Camera.main, stageData);
+            inputSystem = new PCInputSystem(worldSystem, stageController, Camera.main, stageData);
 #else
-            inputSystem = new NullInputSystem(worldSystem);
+            inputSystem = new NullInputSystem(worldSystem, stageController);
 #endif
 
             worldSystem.InitPrePlacedBlueprint(stageData);

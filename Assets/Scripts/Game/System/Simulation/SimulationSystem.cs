@@ -78,12 +78,14 @@ namespace Lumencuit
         }
 
         private readonly StageData stageData;
+        private readonly StageController stageController;
         private readonly List<ISimulationEventListener> listeners = new();
 
-        public SimulationSystem(WorldSystem worldSystem, StageData stageData)
+        public SimulationSystem(WorldSystem worldSystem, StageController stageController, StageData stageData)
         {
             worldSystem.AddListener(this);
             this.stageData = stageData;
+            this.stageController = stageController;
         }
 
         public void AddListener(ISimulationEventListener listener) => listeners.Add(listener);
@@ -392,6 +394,7 @@ namespace Lumencuit
             }
 
             AlertResult(result);
+            stageController.Clear();
         }
 
         private void NotifySignalUpdated(Entity entity, Vector2Int pos, QuantumSignal signal)

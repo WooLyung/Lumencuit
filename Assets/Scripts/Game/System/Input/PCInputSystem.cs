@@ -11,7 +11,7 @@ namespace Lumencuit
     {
         private readonly StageData stageData;
 
-        public PCInputSystem(WorldSystem worldSystem, Camera camera, StageData stageData) : base(worldSystem, camera)
+        public PCInputSystem(WorldSystem worldSystem, StageController stageController, Camera camera, StageData stageData) : base(worldSystem, stageController, camera)
         {
             this.stageData = stageData;
         }
@@ -68,10 +68,13 @@ namespace Lumencuit
             return false;
         }
 
-
         public override void Update()
         {
             base.Update();
+
+            if (stageController.IsCleared)
+                return;
+
             KeyboardUpdate();
             MouseUpdate();
         }

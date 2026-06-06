@@ -18,23 +18,14 @@ MonoBehaviour:
   PrePlacedBlueprints: []
   Blueprints:
   - blueprint:
-      rid: 5301989220222238794
+      rid: 5301989253374804057
     count: 1
   - blueprint:
-      rid: 5301989220222238800
-    count: 1
-  - blueprint:
-      rid: 5301989220222238802
-    count: 1
-  - blueprint:
-      rid: 5301989220222238804
-    count: 1
-  - blueprint:
-      rid: 5301989220222238808
+      rid: 5301989253374804056
     count: 1
   Goals:
   - signal:
-      mask: 255
+      mask: 2
     turbidityCondition:
       rid: 5301989220222238785
     count: 1
@@ -45,25 +36,13 @@ MonoBehaviour:
     - rid: 5301989220222238785
       type: {class: NoTurbidityCondition, ns: Lumencuit, asm: Assembly-CSharp}
       data: 
-    - rid: 5301989220222238794
+    - rid: 5301989253374804056
+      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 0
+    - rid: 5301989253374804057
       type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 2
         signal:
-          mask: 8
-    - rid: 5301989220222238800
-      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
-      data:
-        type: 4
-    - rid: 5301989220222238802
-      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
-      data:
-        type: 8
-    - rid: 5301989220222238804
-      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
-      data:
-        type: 6
-    - rid: 5301989220222238808
-      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
-      data:
-        type: 9
+          mask: 2

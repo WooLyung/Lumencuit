@@ -7,7 +7,7 @@ namespace Lumencuit
     /// </summary>
     public sealed class NullInputSystem : InputSystem
     {
-        public NullInputSystem(WorldSystem worldSystem, Camera camera) : base(worldSystem, camera)
+        public NullInputSystem(WorldSystem worldSystem, StageController stageController, Camera camera) : base(worldSystem, stageController, camera)
         {
         }
 

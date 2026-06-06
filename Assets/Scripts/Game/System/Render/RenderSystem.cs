@@ -26,14 +26,16 @@ namespace Lumencuit
         }
 
         private readonly WorldSystem worldSystem;
+        private readonly StageController stageController;
         private readonly RenderPrefab prefabs;
         private readonly ViewRoot viewRoot;
         private readonly StageData stageData;
         private readonly Dictionary<Vector2Int, View> views = new();
 
-        public RenderSystem(WorldSystem worldSystem, SimulationSystem simulationSystem, RenderPrefab prefabs, ViewRoot viewRoot, StageData stageData)
+        public RenderSystem(WorldSystem worldSystem, StageController stageController, SimulationSystem simulationSystem, RenderPrefab prefabs, ViewRoot viewRoot, StageData stageData)
         {
             this.worldSystem = worldSystem;
+            this.stageController = stageController;
             this.prefabs = prefabs;
             this.viewRoot = viewRoot;
             this.stageData = stageData;
