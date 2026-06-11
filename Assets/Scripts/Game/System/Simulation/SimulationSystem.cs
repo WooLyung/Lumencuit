@@ -78,14 +78,12 @@ namespace Lumencuit
         }
 
         private readonly StageData stageData;
-        private readonly StageController stageController;
         private readonly List<ISimulationEventListener> listeners = new();
 
-        public SimulationSystem(WorldSystem worldSystem, StageController stageController, StageData stageData)
+        public SimulationSystem(WorldSystem worldSystem, StageData stageData)
         {
             worldSystem.AddListener(this);
             this.stageData = stageData;
-            this.stageController = stageController;
         }
 
         public void AddListener(ISimulationEventListener listener) => listeners.Add(listener);
@@ -351,11 +349,6 @@ namespace Lumencuit
 
         public void OnGridUpdated(IEntityEventListener.GridUpdatedEvent e)
         {
-            void AlertResult(CircuitResult result)
-            {
-                NotifyCircuitResult(result);
-            }
-
             // worldGrid는 복사본으로, 기존 월드 시스템에 영향을 주지 않습니다.
             WorldGrid worldGrid = e.WorldGridClone;
             List<EntityBlueprintStack> blueprints = e.BlueprintsClone;
@@ -367,13 +360,13 @@ namespace Lumencuit
             switch (flowResult)
             {
                 case FlowResult.CantReach:
-                    AlertResult(CircuitResult.CantReach);
+                    NotifyCircuitResult(CircuitResult.CantReach);
                     return;
                 case FlowResult.HasCycle:
-                    AlertResult(CircuitResult.HasCycle);
+                    NotifyCircuitResult(CircuitResult.HasCycle);
                     return;
                 case FlowResult.MultipleSignalGenerators:
-                    AlertResult(CircuitResult.MultipleSignalGenerators);
+                    NotifyCircuitResult(CircuitResult.MultipleSignalGenerators);
                     return;
             }
 
@@ -381,7 +374,7 @@ namespace Lumencuit
             CircuitResult result = IsCircuitComplete(worldGrid, blueprints);
             if (result != CircuitResult.Success)
             {
-                AlertResult(result);
+                NotifyCircuitResult(result);
                 return;
             }
 
@@ -389,12 +382,12 @@ namespace Lumencuit
             result = CheckClearStage(worldGrid, simulatedGrid);
             if (result != CircuitResult.Success)
             {
-                AlertResult(result);
+                NotifyCircuitResult(result);
                 return;
             }
 
-            AlertResult(result);
-            stageController.Clear();
+            GameEventBus.NotifyStageCleared(new StageClearedEvent());
+            NotifyCircuitResult(result);
         }
 
         private void NotifySignalUpdated(Entity entity, Vector2Int pos, QuantumSignal signal)

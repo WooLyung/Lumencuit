@@ -28,9 +28,9 @@ namespace Lumencuit
             StageData stageData = context.SelectedStage;
 
             worldSystem = new(stageData);
-            stageController = new();
-            simulationSystem = new(worldSystem, stageController, stageData);
-            renderSystem = new(worldSystem, stageController, simulationSystem, renderRegistry.Prefabs, viewRoot, stageData);
+            simulationSystem = new(worldSystem, stageData);
+            stageController = new(simulationSystem);
+            renderSystem = new(worldSystem, simulationSystem, renderRegistry.Prefabs, viewRoot, stageData);
 #if UNITY_ANDROID || UNITY_IOS
             inputSystem = new NullInputSystem(worldSystem, stageController);
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_EDITOR
@@ -38,7 +38,6 @@ namespace Lumencuit
 #else
             inputSystem = new NullInputSystem(worldSystem, stageController);
 #endif
-
             worldSystem.InitPrePlacedBlueprint(stageData);
         }
 
@@ -49,6 +48,11 @@ namespace Lumencuit
         private void Update()
         {
             inputSystem.Update();
+        }
+
+        private void OnDestroy()
+        {
+            GameEventBus.Clear();
         }
     }
 }

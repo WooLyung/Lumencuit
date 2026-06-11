@@ -1,17 +1,25 @@
+using static Lumencuit.ISimulationEventListener;
+
 namespace Lumencuit
 {
     /// <summary>
     /// 현 스테이지의 정보를 관리합니다.
     /// </summary>
-    public sealed class StageController
+    public sealed class StageController : ISimulationEventListener
     {
         private bool isCleared;
 
         public bool IsCleared => isCleared;
 
-        public void Clear()
+        public StageController(SimulationSystem simulationSystem)
         {
-            isCleared = true;
+            simulationSystem.AddListener(this);
+        }
+
+        public void OnCircuitResultEvent(CircuitResultEvent e)
+        {
+            if (e.Result == CircuitResult.Success)
+                isCleared = true;
         }
     }
 }

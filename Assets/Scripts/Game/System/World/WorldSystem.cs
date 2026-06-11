@@ -511,9 +511,12 @@ namespace Lumencuit
             foreach (EntityBlueprintStack blueprint in blueprints)
                 blueprintsClone.Add(blueprint.Clone());
 
-            IEntityEventListener.GridUpdatedEvent e = new IEntityEventListener.GridUpdatedEvent(worldGrid.Clone(), blueprintsClone);
+            WorldGrid worldGridClone = worldGrid.Clone();
+            IEntityEventListener.GridUpdatedEvent e = new IEntityEventListener.GridUpdatedEvent(worldGridClone, blueprintsClone);
             foreach (IEntityEventListener listener in listeners)
                 listener.OnGridUpdated(e);
+
+            GameEventBus.NotifyGridChanged(new GridUpdatedEvent(worldGridClone));
         }
     }
 }
