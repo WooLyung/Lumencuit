@@ -1,3 +1,4 @@
+using UnityEngine;
 using static Lumencuit.ISimulationEventListener;
 
 namespace Lumencuit
@@ -18,6 +19,8 @@ namespace Lumencuit
 
         public void OnCircuitResultEvent(CircuitResultEvent e)
         {
+            Logger.Info(e.Result.Result);
+
             if (e.Result == CircuitResult.Success)
                 isCleared = true;
         }
