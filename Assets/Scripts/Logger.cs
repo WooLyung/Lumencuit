@@ -19,8 +19,8 @@ namespace Lumencuit
         private static string latestLogPath;
         private static string sessionLogPath;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        public static void Initialize()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void Initialize()
         {
             try
             {
