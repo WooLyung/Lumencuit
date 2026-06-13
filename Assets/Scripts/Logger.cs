@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -10,11 +11,13 @@ namespace Lumencuit
     /// </summary>
     public static class Logger
     {
+        private const int MaxSessionLogCount = 20;
         private const string LogDirectoryName = "Logs";
         private const string LatestLogFileName = "latest.log";
 
         private static readonly object fileLock = new();
 
+        private static readonly string logDirectoryPath = Path.Combine(Application.persistentDataPath, LogDirectoryName);
         private static bool isWritable;
         private static string latestLogPath;
         private static string sessionLogPath;
@@ -24,7 +27,6 @@ namespace Lumencuit
         {
             try
             {
-                string logDirectoryPath = Path.Combine(Application.persistentDataPath, LogDirectoryName);
                 Directory.CreateDirectory(logDirectoryPath);
 
                 string sessionFileName = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".log";
@@ -43,10 +45,13 @@ namespace Lumencuit
 
                 isWritable = true;
                 Application.logMessageReceived += OnUnityLogReceived;
+
+                CleanupOldLogs();
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 isWritable = false;
+                Debug.LogError($"[Logger] Failed to initialize logger.\n{e}");
             }
         }
 
@@ -113,6 +118,25 @@ namespace Lumencuit
                 line += $"\n{exception}";
 
             return line;
+        }
+
+        private static void CleanupOldLogs()
+        {
+            try
+            {
+                DirectoryInfo directory = new DirectoryInfo(logDirectoryPath);
+
+                FileInfo[] logFiles = directory.GetFiles("*.log")
+                    .Where(file => file.Name != LatestLogFileName)
+                    .OrderByDescending(file => file.CreationTimeUtc)
+                    .ToArray();
+
+                for (int i = MaxSessionLogCount; i < logFiles.Length; i++)
+                    logFiles[i].Delete();
+            }
+            catch (Exception)
+            {
+            }
         }
     }
 }
