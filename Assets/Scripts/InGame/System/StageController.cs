@@ -23,6 +23,7 @@ namespace Lumencuit
                 return;
             
             isCleared = true;
+            SaveManagement.ClearCurrentStage();
             SaveManagement.MarkStageCleared(e.StageData.StageId);
         }
     }

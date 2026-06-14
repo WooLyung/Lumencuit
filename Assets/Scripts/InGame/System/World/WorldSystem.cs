@@ -54,8 +54,33 @@ namespace Lumencuit
                 InitPrePlacedBlueprint(stageData);
             }
 
+            PushUndoStack();
             AddListener(stageSaveHandler);
             NotifyGridUpdated();
+        }
+
+        public void Reset()
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    if (!TryGetEntityAt(x, y, out Entity entity))
+                        continue;
+                    worldGrid.RemoveEntityAt(x, y);
+                    NotifyEntityRemoved(entity, new Vector2Int(x, y));
+                }
+            }
+
+            blueprints.Clear();
+            foreach (EntityBlueprintStack blueprint in stageData.Blueprints)
+                blueprints.Add(blueprint.Clone());
+
+            InitPrePlacedBlueprint(stageData);
+
+            undoStack.Clear();
+            redoStack.Clear();
+            PushUndoStack();
         }
 
         private void PushUndoStack()
@@ -68,8 +93,6 @@ namespace Lumencuit
         {
             foreach (PrePlacedBlueprint ppb in stageData.PrePlacedBlueprints)
                 TryPrePlaceEntity(ppb.Blueprint, ppb.Ports, ppb.Position.x, ppb.Position.y);
-            NotifyGridUpdated();
-            PushUndoStack();
         }
 
         public void AddListener(IEntityEventListener listener) => listeners.Add(listener);

@@ -108,6 +108,10 @@ namespace Lumencuit
             if (keyboard.wKey.wasPressedThisFrame)
                 SetInputMode(InputMode.Wire);
 
+            // R: 초기화
+            if (keyboard.rKey.wasPressedThisFrame)
+                Reset();
+
             // Z: undo
             if (keyboard.zKey.wasPressedThisFrame)
                 Undo();

@@ -187,6 +187,17 @@ namespace Lumencuit
         }
 
         /// <summary>
+        /// 스테이지를 초기 상태로 초기화합니다.
+        /// </summary>
+        protected void Reset()
+        {
+            if (stageController.IsCleared)
+                return;
+
+            worldSystem.Reset();
+        }
+
+        /// <summary>
         /// 선택된 입력 상태를 변경합니다.
         /// </summary>
         protected void SetInputMode(InputMode inputState)
