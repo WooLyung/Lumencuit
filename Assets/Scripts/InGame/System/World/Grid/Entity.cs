@@ -12,7 +12,7 @@ namespace Lumencuit
         /// <summary>
         /// 회로 요소의 각 면의 입출력 여부를 나타냅니다.
         /// </summary>
-        public enum PortType { Input, Output, None };
+        public enum PortType { None = 0, Input = 1, Output = 2 };
 
         public readonly EntityBlueprint MadeBy;
         public readonly CircuitElement Element;

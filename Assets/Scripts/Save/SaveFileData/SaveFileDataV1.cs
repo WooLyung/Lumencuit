@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace Lumencuit
+namespace Lumencuit.Save
 {
     /// <summary>
     /// 세이브 데이터 v1
@@ -10,5 +10,6 @@ namespace Lumencuit
     {
         public int Version = 1;
         public GlobalFileDataV1 Global = new();
+        public StageFileDataV1 CurrentStage = new();
     }
 }

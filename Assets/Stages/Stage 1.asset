@@ -12,14 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f10df99362435f4ca4d61c2fdb3cc79, type: 3}
   m_Name: Stage 1
   m_EditorClassIdentifier: Assembly-CSharp::Lumencuit.StageData
-  StageName: Stage 1
+  StageId: Stage1
   Width: 5
   Height: 5
-  PrePlacedBlueprints: []
-  Blueprints:
+  PrePlacedBlueprints:
   - blueprint:
-      rid: 5301989253374804057
-    count: 1
+      rid: 5301989433416876093
+    position: {x: 2, y: 2}
+    ports:
+      Left: 0
+      Right: 0
+      Up: 0
+      Down: 0
+  Blueprints:
   - blueprint:
       rid: 5301989253374804056
     count: 1
@@ -40,7 +45,7 @@ MonoBehaviour:
       type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 0
-    - rid: 5301989253374804057
+    - rid: 5301989433416876093
       type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 2

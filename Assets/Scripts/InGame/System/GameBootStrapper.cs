@@ -21,12 +21,14 @@ namespace Lumencuit
 
         private void Awake()
         {
+            // 스테이지 컨텍스트로부터 스테이지 데이터 불러오기
             StageContext context = GameObject.Find("StageContext")?.GetComponent<StageContext>();
             if (context == null)
                 return;
             Destroy(context.gameObject);
             StageData stageData = context.SelectedStage;
 
+            // 객체 생성
             worldSystem = new(stageData);
             simulationSystem = new(worldSystem, stageData);
             stageController = new(simulationSystem);
@@ -38,7 +40,9 @@ namespace Lumencuit
 #else
             inputSystem = new NullInputSystem(worldSystem, stageController);
 #endif
-            worldSystem.InitPrePlacedBlueprint(stageData);
+
+            // 초기화
+            worldSystem.Init();
         }
 
         private void Start()

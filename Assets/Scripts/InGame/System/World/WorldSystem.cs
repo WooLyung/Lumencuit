@@ -10,6 +10,9 @@ namespace Lumencuit
     public sealed class WorldSystem
     {
         private WorldGrid worldGrid;
+        private readonly StageSaveHandler stageSaveHandler;
+        private readonly StageData stageData;
+
         private readonly List<EntityBlueprintStack> blueprints = new();
         private readonly List<IEntityEventListener> listeners = new();
 
@@ -19,12 +22,40 @@ namespace Lumencuit
         public WorldSystem(StageData stageData)
         {
             worldGrid = new(stageData);
-
-            foreach (EntityBlueprintStack blueprint in stageData.Blueprints)
-                blueprints.Add(blueprint.Clone());
+            stageSaveHandler = new(this, stageData);
+            this.stageData = stageData;
 
             // [임시] 카메라 위치 변경
             Camera.main.transform.position = new Vector3((stageData.Width - 1) / 2f, (stageData.Height - 1) / 2f, Camera.main.transform.position.z);
+        }
+
+        public void Init()
+        {
+            foreach (EntityBlueprintStack blueprint in stageData.Blueprints)
+                blueprints.Add(blueprint.Clone());
+
+            if (!stageSaveHandler.TryLoadStageData())
+            {
+                blueprints.Clear();
+                foreach (EntityBlueprintStack blueprint in stageData.Blueprints)
+                    blueprints.Add(blueprint.Clone());
+
+                for (int x = 0; x < Width; x++)
+                {
+                    for (int y = 0; y < Height; y++)
+                    {
+                        if (TryGetEntityAt(x, y, out Entity entity))
+                        {
+                            worldGrid.RemoveEntityAt(x, y);
+                            NotifyEntityRemoved(entity, new Vector2Int(x, y));
+                        }
+                    }
+                }
+                InitPrePlacedBlueprint(stageData);
+            }
+
+            AddListener(stageSaveHandler);
+            NotifyGridUpdated();
         }
 
         private void PushUndoStack()
@@ -61,14 +92,22 @@ namespace Lumencuit
             return false;
         }
 
-        public EntityRequestResult TryPrePlaceEntity(EntityBlueprint blueprint, Entity.Ports ports, int x, int y)
+        public EntityRequestResult TryPrePlaceEntity(EntityBlueprint blueprint, Entity.Ports ports, int x, int y, bool isFixed = true)
         {
             if (!worldGrid.IsEnabledTile(x, y))
                 return EntityRequestResult.InvalidTile;
             if (worldGrid.HasEntityAt(x, y))
                 return EntityRequestResult.AlreadyExist;
+            
+            if (!isFixed && blueprint.Type != CircuitElement.CircuitElementType.Wire)
+            {
+                EntityBlueprintStack stack = blueprints.FirstOrDefault(stack => stack.Blueprint == blueprint && stack.Count > 0);
+                if (stack == null)
+                    return EntityRequestResult.UnavailableBlueprint;
+                stack.Count--;
+            }
 
-            Entity entity = new Entity(blueprint.Clone(), ports, true);
+            Entity entity = new Entity(blueprint.Clone(), ports, isFixed);
             worldGrid.SetEntityAt(entity, x, y);
             NotifyEntityCreated(entity, new Vector2Int(x, y));
 

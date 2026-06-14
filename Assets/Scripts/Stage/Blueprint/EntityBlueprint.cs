@@ -12,6 +12,7 @@ namespace Lumencuit
         [SerializeField] protected CircuitElementType type = CircuitElementType.Lamp;
 
         public CircuitElementType Type => type;
+        public string Id => type.ToString();
 
         public EntityBlueprint()
         {

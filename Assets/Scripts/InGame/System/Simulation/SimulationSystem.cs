@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Windows;
 using static UnityEngine.EventSystems.EventTrigger;
@@ -406,7 +407,7 @@ namespace Lumencuit
 
         private void NotifyCircuitResult(CircuitResult result)
         {
-            ISimulationEventListener.CircuitResultEvent e = new ISimulationEventListener.CircuitResultEvent(result);
+            ISimulationEventListener.CircuitResultEvent e = new ISimulationEventListener.CircuitResultEvent(result, stageData);
             foreach (ISimulationEventListener listener in listeners)
                 listener.OnCircuitResultEvent(e);
         }

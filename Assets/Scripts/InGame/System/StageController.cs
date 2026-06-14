@@ -19,8 +19,11 @@ namespace Lumencuit
 
         public void OnCircuitResultEvent(CircuitResultEvent e)
         {
-            if (e.Result == CircuitResult.Success)
-                isCleared = true;
+            if (e.Result != CircuitResult.Success)
+                return;
+            
+            isCleared = true;
+            SaveManagement.MarkStageCleared(e.StageData.StageId);
         }
     }
 }

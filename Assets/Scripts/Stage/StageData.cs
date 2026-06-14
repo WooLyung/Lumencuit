@@ -10,7 +10,7 @@ namespace Lumencuit
     [CreateAssetMenu(fileName = "StageData", menuName = "Lumencuit/Stage Data")]
     public sealed class StageData : ScriptableObject
     {
-        public string StageName;
+        public string StageId;
 
         public int Width = 1;
         public int Height = 1;

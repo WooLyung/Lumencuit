@@ -39,11 +39,13 @@ namespace Lumencuit
 
         public class CircuitResultEvent
         {
+            public readonly StageData StageData;
             public readonly CircuitResult Result;
 
-            public CircuitResultEvent(CircuitResult result)
+            public CircuitResultEvent(CircuitResult result, StageData stageData)
             {
                 Result = result;
+                StageData = stageData;
             }
         }
 

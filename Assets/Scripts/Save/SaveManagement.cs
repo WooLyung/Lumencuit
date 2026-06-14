@@ -3,6 +3,7 @@ using System.IO;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using UnityEngine;
+using Lumencuit.Save;
 
 namespace Lumencuit
 {
@@ -11,6 +12,8 @@ namespace Lumencuit
     /// </summary>
     public static class SaveManagement
     {
+        private const int VERSION_1 = 1;
+
         // 경로 및 파일명
         private const string SaveDirectoryName = "Saves";
         private const string SaveFileName = "save.xml";
@@ -20,7 +23,11 @@ namespace Lumencuit
         // 버전 및 데이터
         private const int CurrentVersion = 1;
         private static GlobalSaveData globalData = new();
+        private static StageSaveData currentStageData = null;
+
         public static GlobalSaveData GlobalData => globalData;
+        public static StageSaveData CurrentStageData => currentStageData;
+        public static bool HasCurrentStage => currentStageData != null;
 
         // 처리용
         private static readonly object fileLock = new();
@@ -56,6 +63,7 @@ namespace Lumencuit
                 Logger.Info("Save file does not exist. Creating new save file.", "SaveManagement");
 
                 globalData = new GlobalSaveData();
+                currentStageData = null;
                 Save();
                 return;
             }
@@ -67,10 +75,19 @@ namespace Lumencuit
 
                 switch (version)
                 {
-                    case 1:
+                    case VERSION_1:
                         SaveFileDataV1 fileData = LoadSaveFile<SaveFileDataV1>();
                         globalData = new GlobalSaveData();
                         globalData.LoadFromFileData(fileData.Global);
+                        if (fileData.CurrentStage != null)
+                        {
+                            currentStageData = new StageSaveData(fileData.CurrentStage.StageId);
+                            currentStageData.LoadFromFileData(fileData.CurrentStage);
+                        }
+                        else
+                        {
+                            currentStageData = null;
+                        }
                         break;
 
                     default:
@@ -98,7 +115,8 @@ namespace Lumencuit
             SaveFileDataV1 fileData = new SaveFileDataV1
             {
                 Version = CurrentVersion,
-                Global = globalData.ToFileData()
+                Global = globalData.ToFileData(),
+                CurrentStage = currentStageData?.ToFileData() ?? null
             };
 
             string tempPath = saveFilePath + ".tmp";
@@ -188,6 +206,33 @@ namespace Lumencuit
             {
                 Logger.Error("Failed to backup invalid save file.", "SaveManagement", e);
             }
+        }
+
+        /// <summary>
+        /// 현재 스테이지 정보를 갱신합니다.
+        /// </summary>
+        public static void SetCurrentStage(StageSaveData stageSaveData)
+        {
+            currentStageData = stageSaveData;
+            Save();
+        }
+
+        /// <summary>
+        /// 현재 스테이지 정보를 제거합니다.
+        /// </summary>
+        public static void ClearCurrentStage()
+        {
+            currentStageData = null;
+            Save();
+        }
+
+        /// <summary>
+        /// 스테이지를 클리어한 것으로 저장합니다.
+        /// </summary>
+        public static void MarkStageCleared(string stageId)
+        {
+            globalData.MarkStageCleared(stageId);
+            Save();
         }
     }
 }

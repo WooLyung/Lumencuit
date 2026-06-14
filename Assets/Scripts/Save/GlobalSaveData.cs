@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Lumencuit
+namespace Lumencuit.Save
 {
     /// <summary>
     /// 런타임 글로벌 세이브 데이터

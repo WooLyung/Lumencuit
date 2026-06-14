@@ -84,7 +84,7 @@ namespace Lumencuit.Editor
         {
             // 스테이지 프로퍼티
             EditorGUILayout.LabelField("Stage Properties", TitleStyle);
-            stageData.StageName = EditorGUILayout.TextField("Stage Name", stageData.StageName);
+            stageData.StageId = EditorGUILayout.TextField("Stage Id", stageData.StageId);
             stageData.Width = Mathf.Max(1, EditorGUILayout.IntField("Width", stageData.Width));
             stageData.Height = Mathf.Max(1, EditorGUILayout.IntField("Height", stageData.Height));
 

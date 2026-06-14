@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace Lumencuit
+namespace Lumencuit.Save
 {
     /// <summary>
     /// 글로벌 데이터 v1
