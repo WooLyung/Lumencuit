@@ -44,6 +44,7 @@ namespace Lumencuit
                 File.WriteAllText(sessionLogPath, header, Encoding.UTF8);
 
                 isWritable = true;
+                Application.logMessageReceived -= OnUnityLogReceived;
                 Application.logMessageReceived += OnUnityLogReceived;
 
                 CleanupOldLogs();

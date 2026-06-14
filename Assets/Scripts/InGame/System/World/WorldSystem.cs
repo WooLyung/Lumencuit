@@ -37,6 +37,7 @@ namespace Lumencuit
         {
             foreach (PrePlacedBlueprint ppb in stageData.PrePlacedBlueprints)
                 TryPrePlaceEntity(ppb.Blueprint, ppb.Ports, ppb.Position.x, ppb.Position.y);
+            NotifyGridUpdated();
             PushUndoStack();
         }
 
@@ -70,7 +71,6 @@ namespace Lumencuit
             Entity entity = new Entity(blueprint.Clone(), ports, true);
             worldGrid.SetEntityAt(entity, x, y);
             NotifyEntityCreated(entity, new Vector2Int(x, y));
-            NotifyGridUpdated();
 
             return EntityRequestResult.Success;
         }
@@ -151,6 +151,7 @@ namespace Lumencuit
             {
                 if (TryRemoveWireNetwork(pos))
                 {
+                    NotifyGridUpdated();
                     PushUndoStack();
                     return EntityRequestResult.Success;
                 }
@@ -436,7 +437,6 @@ namespace Lumencuit
                 NotifyEntityRemoved(wire, wirePos);
             }
 
-            NotifyGridUpdated();
             return true;
         }
 

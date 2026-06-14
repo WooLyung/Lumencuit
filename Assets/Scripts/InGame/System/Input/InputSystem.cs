@@ -122,7 +122,7 @@ namespace Lumencuit
         private void BeginDrag(Vector2Int pos)
         {
             if (stageController.IsCleared)
-                CancelDrag();
+                return;
 
             dragState = DragState.Dragging;
             dragStartPos = pos;
@@ -141,7 +141,7 @@ namespace Lumencuit
         private void ContinueDrag(Vector2Int pos)
         {
             if (stageController.IsCleared)
-                CancelDrag();
+                return;
 
             switch (inputMode)
             {
@@ -156,7 +156,7 @@ namespace Lumencuit
         private void EndDrag(Vector2Int pos)
         {
             if (stageController.IsCleared)
-                CancelDrag();
+                return;
 
             if (dragState != DragState.Dragging)
                 return;
@@ -207,7 +207,7 @@ namespace Lumencuit
         protected void SelectBlueprint(EntityBlueprint blueprint)
         {
             if (stageController.IsCleared)
-                CancelDrag();
+                return;
 
             SetInputMode(blueprint == null ? InputMode.None : InputMode.Place);
             selectedBlueprint = blueprint;
@@ -216,20 +216,20 @@ namespace Lumencuit
         protected void PlaceOrReplaceBlueprint(int x, int y)
         {
             if (stageController.IsCleared)
-                CancelDrag();
+                return;
 
             if (selectedBlueprint == null)
                 return;
 
             EntityRequestResult result = worldSystem.TryCreateEntity(selectedBlueprint, x, y);
-            if (result != EntityRequestResult.Success)
+            if (result == EntityRequestResult.AlreadyExist)
                 worldSystem.TryReplaceEntity(selectedBlueprint, x, y);
         }
 
         protected void RemoveEntity(int x, int y)
         {
             if (stageController.IsCleared)
-                CancelDrag();
+                return;
 
             worldSystem.TryRemoveEntity(x, y);
         }
@@ -237,7 +237,7 @@ namespace Lumencuit
         protected void Undo()
         {
             if (stageController.IsCleared)
-                CancelDrag();
+                return;
 
             CancelDrag();
             path.Clear();
@@ -249,7 +249,7 @@ namespace Lumencuit
         protected void Redo()
         {
             if (stageController.IsCleared)
-                CancelDrag();
+                return;
 
             CancelDrag();
             path.Clear();
@@ -261,7 +261,7 @@ namespace Lumencuit
         private void RemoveEntityRange(Vector2Int start, Vector2Int end)
         {
             if (stageController.IsCleared)
-                CancelDrag();
+                return;
 
             worldSystem.TryRemoveEntityRange(start, end);
         }
@@ -269,7 +269,7 @@ namespace Lumencuit
         private void BeginWirePath(int x, int y)
         {
             if (stageController.IsCleared)
-                CancelDrag();
+                return;
 
             if (!worldSystem.TryGetEntityAt(x, y, out Entity entity))
                 return;
@@ -284,7 +284,7 @@ namespace Lumencuit
         private void ContinueWirePath(int x, int y)
         {
             if (stageController.IsCleared)
-                CancelDrag();
+                return;
 
             Vector2Int next = new Vector2Int(x, y);
             if (path.Count == 0)
@@ -310,7 +310,7 @@ namespace Lumencuit
         private void EndWirePath()
         {
             if (stageController.IsCleared)
-                CancelDrag();
+                return;
 
             if (path.Count == 1)
                 worldSystem.TryReplaceEntity(new EntityBlueprint(CircuitElement.CircuitElementType.Wire), path[0].x, path[0].y);
