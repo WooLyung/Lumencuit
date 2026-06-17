@@ -94,6 +94,7 @@ namespace Lumencuit
                         Logger.Warning($"Unsupported save version: {version}. Creating new save data.", "SaveManagement");
                         BackupSave();
                         globalData = new GlobalSaveData();
+                        currentStageData = null;
                         Save();
                         return;
                 }
@@ -103,6 +104,7 @@ namespace Lumencuit
                 Logger.Error("Failed to load save file. Creating new save data.", "SaveManagement", e);
                 BackupSave();
                 globalData = new GlobalSaveData();
+                currentStageData = null;
                 Save();
             }
         }

@@ -10,7 +10,7 @@ namespace Lumencuit
     public sealed class WorldSystem
     {
         private WorldGrid worldGrid;
-        private readonly StageSaveHandler stageSaveHandler;
+        private readonly StageSaveAdapter stageSaveHandler;
         private readonly StageData stageData;
 
         private readonly List<EntityBlueprintStack> blueprints = new();
@@ -84,6 +84,7 @@ namespace Lumencuit
             undoStack.Clear();
             redoStack.Clear();
             PushUndoStack();
+            NotifyGridUpdated();
         }
 
         private void PushUndoStack()
@@ -172,7 +173,7 @@ namespace Lumencuit
             if (oldEntity.IsFixed)
                 return EntityRequestResult.IsFixed;
 
-            Entity newEntity = new Entity(blueprint, oldEntity.GetPorts());
+            Entity newEntity = new Entity(blueprint.Clone(), oldEntity.GetPorts());
             if (newEntity.Element.InSignalCount < oldEntity.InPortCount || (isWire && oldEntity.InPortCount != 1))
                 return EntityRequestResult.InvalidPort;
             if (newEntity.Element.OutSignalCount < oldEntity.OutPortCount || (isWire && oldEntity.OutPortCount != 1))

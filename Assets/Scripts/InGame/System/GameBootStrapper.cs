@@ -24,9 +24,21 @@ namespace Lumencuit
             // 스테이지 컨텍스트로부터 스테이지 데이터 불러오기
             StageContext context = GameObject.Find("StageContext")?.GetComponent<StageContext>();
             if (context == null)
+            {
+                Logger.Error("StageContext is missing.", "GameBootStrapper");
+                enabled = false;
                 return;
+            }
+
             Destroy(context.gameObject);
             StageData stageData = context.SelectedStage;
+
+            if (stageData == null)
+            {
+                Logger.Error("SelectedStage is missing.", "GameBootStrapper");
+                enabled = false;
+                return;
+            }
 
             // 객체 생성
             worldSystem = new(stageData);
@@ -51,7 +63,7 @@ namespace Lumencuit
 
         private void Update()
         {
-            inputSystem.Update();
+            inputSystem?.Update();
         }
 
         private void OnDestroy()

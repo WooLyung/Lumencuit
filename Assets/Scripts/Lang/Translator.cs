@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -37,7 +38,16 @@ namespace Lumencuit
                 return key;
             if (textMap.TryGetValue(key, out string value))
                 return string.Format(value, args);
-            return key;
+
+            try
+            {
+                return string.Format(value, args);
+            }
+            catch (FormatException e)
+            {
+                Logger.Error($"Invalid language format. Key={key}, Value={value}", "Lang", e);
+                return key;
+            }
         }
 
         /// <summary>
@@ -52,7 +62,7 @@ namespace Lumencuit
             if (!Directory.Exists(path))
             {
                 textMap = null;
-                Debug.LogError($"Language directory not found: {path}");
+                Logger.Error($"Language directory not found: {path}", "Translator");
                 return;
             }
             LoadDirectory(path);
@@ -60,11 +70,22 @@ namespace Lumencuit
 
         private static void LoadDirectory(string path)
         {
-            foreach (string filePath in Directory.GetFiles(path, "*.xml"))
-                LoadXmlFile(filePath);
+            try
+            {
+                foreach (string filePath in Directory.GetFiles(path, "*.xml"))
+                    LoadXmlFile(filePath);
 
-            foreach (string directoryPath in Directory.GetDirectories(path))
-                LoadDirectory(directoryPath);
+                foreach (string directoryPath in Directory.GetDirectories(path))
+                    LoadDirectory(directoryPath);
+            }
+            catch (IOException e)
+            {
+                Logger.Error($"Failed to load language directory. Path={path}", "Translator", e);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                Logger.Error($"No permission to load language directory. Path={path}", "Translator", e);
+            }
         }
 
         private static void LoadXmlFile(string path)
@@ -86,7 +107,7 @@ namespace Lumencuit
             }
             catch (XmlException e)
             {
-                Debug.LogError($"Invalid language file: {path}\n{e}");
+                Logger.Error($"Invalid language file: {path}", "Lang", e);
             }
         }
     }

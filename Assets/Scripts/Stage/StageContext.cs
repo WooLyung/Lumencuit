@@ -10,7 +10,7 @@ namespace Lumencuit
     {
         private StageData selectedStage;
 
-        private void Start()
+        private void Awake()
         {
             DontDestroyOnLoad(gameObject);
         }

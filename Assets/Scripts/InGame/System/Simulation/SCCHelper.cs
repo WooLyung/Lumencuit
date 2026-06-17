@@ -71,10 +71,36 @@ namespace Lumencuit
         private static IEnumerable<Vector2Int> GetOutputConnectedPositions(WorldGrid worldGrid, Vector2Int pos)
         {
             Entity entity = worldGrid.GetEntityAt(pos.x, pos.y);
-            if (entity.UpPort == Entity.PortType.Output) yield return pos + Vector2Int.up;
-            if (entity.DownPort == Entity.PortType.Output) yield return pos + Vector2Int.down;
-            if (entity.RightPort == Entity.PortType.Output) yield return pos + Vector2Int.right;
-            if (entity.LeftPort == Entity.PortType.Output) yield return pos + Vector2Int.left;
+
+            Vector2Int next;
+
+            if (entity.UpPort == Entity.PortType.Output)
+            {
+                next = pos + Vector2Int.up;
+                if (worldGrid.TryGetEntityAt(next.x, next.y, out Entity target) && target.DownPort == Entity.PortType.Input)
+                    yield return next;
+            }
+
+            if (entity.DownPort == Entity.PortType.Output)
+            {
+                next = pos + Vector2Int.down;
+                if (worldGrid.TryGetEntityAt(next.x, next.y, out Entity target) && target.UpPort == Entity.PortType.Input)
+                    yield return next;
+            }
+
+            if (entity.RightPort == Entity.PortType.Output)
+            {
+                next = pos + Vector2Int.right;
+                if (worldGrid.TryGetEntityAt(next.x, next.y, out Entity target) && target.LeftPort == Entity.PortType.Input)
+                    yield return next;
+            }
+
+            if (entity.LeftPort == Entity.PortType.Output)
+            {
+                next = pos + Vector2Int.left;
+                if (worldGrid.TryGetEntityAt(next.x, next.y, out Entity target) && target.RightPort == Entity.PortType.Input)
+                    yield return next;
+            }
         }
 
         /// <summary>
@@ -115,12 +141,31 @@ namespace Lumencuit
             {
                 if (portType != Entity.PortType.Input)
                     return;
+
                 Vector2Int connectedPos = pos + dir;
+
                 if (sccSet.Contains(connectedPos))
+                    return;
+                if (!worldGrid.TryGetEntityAt(connectedPos.x, connectedPos.y, out Entity connectedEntity))
+                    return;
+                if (!IsConnectedOutput(connectedEntity, -dir))
                     return;
                 if (!calculated[connectedPos.x, connectedPos.y])
                     count++;
             }
+        }
+
+        private static bool IsConnectedOutput(Entity entity, Vector2Int dirToScc)
+        {
+            if (dirToScc == Vector2Int.up)
+                return entity.UpPort == Entity.PortType.Output;
+            if (dirToScc == Vector2Int.down)
+                return entity.DownPort == Entity.PortType.Output;
+            if (dirToScc == Vector2Int.right)
+                return entity.RightPort == Entity.PortType.Output;
+            if (dirToScc == Vector2Int.left)
+                return entity.LeftPort == Entity.PortType.Output;
+            return false;
         }
 
         /// <summary>
@@ -174,39 +219,72 @@ namespace Lumencuit
             simulatedGridClone.Signals[generatorPos.x, generatorPos.y] = testSignal;
             queue.Enqueue(generatorPos);
 
+            // 안전한 신호 전파
+            bool TryPropagateOutput(Vector2Int from, Vector2Int dir)
+            {
+                Vector2Int to = from + dir;
+
+                if (!worldGrid.TryGetEntityAt(to.x, to.y, out Entity target))
+                    return false;
+
+                QuantumSignal signal = simulatedGridClone.Signals[from.x, from.y];
+
+                if (dir == Vector2Int.up)
+                {
+                    if (target.DownPort != Entity.PortType.Input)
+                        return false;
+
+                    simulatedGridClone.UpPorts[from.x, from.y] = signal;
+                    simulatedGridClone.DownPorts[to.x, to.y] = signal;
+                }
+                else if (dir == Vector2Int.down)
+                {
+                    if (target.UpPort != Entity.PortType.Input)
+                        return false;
+
+                    simulatedGridClone.DownPorts[from.x, from.y] = signal;
+                    simulatedGridClone.UpPorts[to.x, to.y] = signal;
+                }
+                else if (dir == Vector2Int.right)
+                {
+                    if (target.LeftPort != Entity.PortType.Input)
+                        return false;
+
+                    simulatedGridClone.RightPorts[from.x, from.y] = signal;
+                    simulatedGridClone.LeftPorts[to.x, to.y] = signal;
+                }
+                else if (dir == Vector2Int.left)
+                {
+                    if (target.RightPort != Entity.PortType.Input)
+                        return false;
+
+                    simulatedGridClone.LeftPorts[from.x, from.y] = signal;
+                    simulatedGridClone.RightPorts[to.x, to.y] = signal;
+                }
+
+                return --remainedInClone[to.x, to.y] == 0;
+            }
+
             while (queue.Count > 0)
             {
                 Vector2Int front = queue.Dequeue();
                 Entity entity = worldGrid.GetEntityAt(front.x, front.y);
 
                 if (entity.UpPort == Entity.PortType.Output)
-                {
-                    Vector2Int next = front + Vector2Int.up;
-                    simulatedGridClone.UpPorts[front.x, front.y] = simulatedGridClone.DownPorts[next.x, next.y] = simulatedGridClone.Signals[front.x, front.y];
-                    if (--remainedInClone[next.x, next.y] == 0)
-                        CalculateSignal(next);
-                }
+                    if (TryPropagateOutput(front, Vector2Int.up))
+                        CalculateSignal(front + Vector2Int.up);
+
                 if (entity.DownPort == Entity.PortType.Output)
-                {
-                    Vector2Int next = front + Vector2Int.down;
-                    simulatedGridClone.DownPorts[front.x, front.y] = simulatedGridClone.UpPorts[next.x, next.y] = simulatedGridClone.Signals[front.x, front.y];
-                    if (--remainedInClone[next.x, next.y] == 0)
-                        CalculateSignal(next);
-                }
+                    if (TryPropagateOutput(front, Vector2Int.down))
+                        CalculateSignal(front + Vector2Int.down);
+
                 if (entity.RightPort == Entity.PortType.Output)
-                {
-                    Vector2Int next = front + Vector2Int.right;
-                    simulatedGridClone.RightPorts[front.x, front.y] = simulatedGridClone.LeftPorts[next.x, next.y] = simulatedGridClone.Signals[front.x, front.y];
-                    if (--remainedInClone[next.x, next.y] == 0)
-                        CalculateSignal(next);
-                }
+                    if (TryPropagateOutput(front, Vector2Int.right))
+                        CalculateSignal(front + Vector2Int.right);
+
                 if (entity.LeftPort == Entity.PortType.Output)
-                {
-                    Vector2Int next = front + Vector2Int.left;
-                    simulatedGridClone.LeftPorts[front.x, front.y] = simulatedGridClone.RightPorts[next.x, next.y] = simulatedGridClone.Signals[front.x, front.y];
-                    if (--remainedInClone[next.x, next.y] == 0)
-                        CalculateSignal(next);
-                }
+                    if (TryPropagateOutput(front, Vector2Int.left))
+                        CalculateSignal(front + Vector2Int.left);
             }
 
             return GetGeneratorInputSignal(generator, simulatedGridClone, generatorPos);

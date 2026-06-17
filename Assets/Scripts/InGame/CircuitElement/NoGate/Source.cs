@@ -7,7 +7,6 @@ namespace Lumencuit
     /// </summary>
     public sealed class Source : CircuitElement
     {
-        private static CircuitElement instance;
         public override CircuitElementType Type => CircuitElementType.Source;
         public override int TurbidityDelta => 0;
         public override int InSignalCount => 0;

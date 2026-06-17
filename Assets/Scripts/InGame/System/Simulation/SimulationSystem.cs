@@ -155,6 +155,58 @@ namespace Lumencuit
                 queue.Enqueue(next);
             }
 
+            // 안전한 신호 전파
+            bool TryPropagateOutput(Vector2Int from, Vector2Int dir, SimulatedGrid simulatedGrid)
+            {
+                Vector2Int to = from + dir;
+
+                if (!worldGrid.TryGetEntityAt(to.x, to.y, out Entity target))
+                {
+                    Logger.Warning($"Signal propagation skipped. Target entity not found. From={from}, To={to}", "Simulation");
+                    return false;
+                }
+
+                QuantumSignal signal = simulatedGrid.Signals[from.x, from.y];
+
+                if (dir == Vector2Int.up)
+                {
+                    if (target.DownPort != Entity.PortType.Input)
+                        return false;
+
+                    simulatedGrid.UpPorts[from.x, from.y] = signal;
+                    simulatedGrid.DownPorts[to.x, to.y] = signal;
+                }
+                else if (dir == Vector2Int.down)
+                {
+                    if (target.UpPort != Entity.PortType.Input)
+                        return false;
+
+                    simulatedGrid.DownPorts[from.x, from.y] = signal;
+                    simulatedGrid.UpPorts[to.x, to.y] = signal;
+                }
+                else if (dir == Vector2Int.right)
+                {
+                    if (target.LeftPort != Entity.PortType.Input)
+                        return false;
+
+                    simulatedGrid.RightPorts[from.x, from.y] = signal;
+                    simulatedGrid.LeftPorts[to.x, to.y] = signal;
+                }
+                else if (dir == Vector2Int.left)
+                {
+                    if (target.RightPort != Entity.PortType.Input)
+                        return false;
+
+                    simulatedGrid.LeftPorts[from.x, from.y] = signal;
+                    simulatedGrid.RightPorts[to.x, to.y] = signal;
+                }
+
+                if (--remainedIn[to.x, to.y] == 0)
+                    CalculateSignal(to, simulatedGrid);
+
+                return true;
+            }
+
             // 초기화
             for (int x = 0; x < worldGrid.Width; x++)
                 for (int y = 0; y < worldGrid.Height; y++)
@@ -177,36 +229,18 @@ namespace Lumencuit
                 {
                     Vector2Int front = queue.Dequeue();
                     Entity entity = worldGrid.GetEntityAt(front.x, front.y);
-                    int turbidity = simulatedGrid.Turbidities[front.x, front.y];
 
                     if (entity.UpPort == Entity.PortType.Output)
-                    {
-                        Vector2Int next = front + Vector2Int.up;
-                        simulatedGrid.UpPorts[front.x, front.y] = simulatedGrid.DownPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
-                        if (--remainedIn[next.x, next.y] == 0)
-                            CalculateSignal(next, simulatedGrid);
-                    }
+                        TryPropagateOutput(front, Vector2Int.up, simulatedGrid);
+
                     if (entity.DownPort == Entity.PortType.Output)
-                    {
-                        Vector2Int next = front + Vector2Int.down;
-                        simulatedGrid.DownPorts[front.x, front.y] = simulatedGrid.UpPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
-                        if (--remainedIn[next.x, next.y] == 0)
-                            CalculateSignal(next, simulatedGrid);
-                    }
+                        TryPropagateOutput(front, Vector2Int.down, simulatedGrid);
+
                     if (entity.RightPort == Entity.PortType.Output)
-                    {
-                        Vector2Int next = front + Vector2Int.right;
-                        simulatedGrid.RightPorts[front.x, front.y] = simulatedGrid.LeftPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
-                        if (--remainedIn[next.x, next.y] == 0)
-                            CalculateSignal(next, simulatedGrid);
-                    }
+                        TryPropagateOutput(front, Vector2Int.right, simulatedGrid);
+
                     if (entity.LeftPort == Entity.PortType.Output)
-                    {
-                        Vector2Int next = front + Vector2Int.left;
-                        simulatedGrid.LeftPorts[front.x, front.y] = simulatedGrid.RightPorts[next.x, next.y] = simulatedGrid.Signals[front.x, front.y];
-                        if (--remainedIn[next.x, next.y] == 0)
-                            CalculateSignal(next, simulatedGrid);
-                    }
+                        TryPropagateOutput(front, Vector2Int.left, simulatedGrid);
                 }
 
                 // 입력이 모두 충족된 SCC 계산

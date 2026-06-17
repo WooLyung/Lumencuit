@@ -19,6 +19,9 @@ namespace Lumencuit
 
         public void OnCircuitResultEvent(CircuitResultEvent e)
         {
+            if (isCleared)
+                return;
+
             if (e.Result != CircuitResult.Success)
                 return;
             

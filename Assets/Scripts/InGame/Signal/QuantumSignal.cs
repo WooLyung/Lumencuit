@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace Lumencuit
@@ -43,7 +42,11 @@ namespace Lumencuit
         {
             if (!IsSingle)
                 return null;
-            return GetSignals().ToList()[0];
+
+            foreach (Signal signal in GetSignals())
+                return signal;
+
+            return null;
         }
 
         /// <summary>

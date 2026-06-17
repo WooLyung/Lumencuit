@@ -7,12 +7,12 @@ namespace Lumencuit
     /// <summary>
     /// 월드 시스템의 데이터를 저장 및 불러옵니다.
     /// </summary>
-    public sealed class StageSaveHandler : IEntityEventListener
+    public sealed class StageSaveAdapter : IEntityEventListener
     {
         private readonly WorldSystem worldSystem;
         private readonly StageData stageData;
 
-        public StageSaveHandler(WorldSystem worldSystem, StageData stageData)
+        public StageSaveAdapter(WorldSystem worldSystem, StageData stageData)
         {
             this.worldSystem = worldSystem;
             this.stageData = stageData;
@@ -57,20 +57,25 @@ namespace Lumencuit
 
         /// <summary>
         /// 세이브 파일이 존재한다면 월드 시스템에 반영합니다.
-        /// </summary> 
+        /// </summary>
         public bool TryLoadStageData()
         {
+            // 저장된 스테이지가 없음
             if (!SaveManagement.HasCurrentStage)
                 return false;
 
             // 스테이지 데이터가 저장되어 있었다면 검증을 시작
             StageSaveData saveData = SaveManagement.CurrentStageData;
 
+            // 다른 스테이지라면 무시함
             if (saveData.StageId != stageData.StageId)
                 return false;
 
             if (saveData.Entities == null)
+            {
+                Logger.Warning("Stage save load failed. Entities is null.", "StageSaveAdapter");
                 return false;
+            }
 
             // entityMap: 배치된 엔티티, fixedMap: 미리 배치되어 고정된 블루프린트
             Dictionary<Vector2Int, EntityFileDataV1> entityMap = new();
@@ -82,31 +87,52 @@ namespace Lumencuit
                 Vector2Int pos = new Vector2Int(entityData.X, entityData.Y);
 
                 if (!worldSystem.IsEnabledTile(pos.x, pos.y))
+                {
+                    Logger.Warning($"Stage save load failed. Entity is placed on disabled tile. Pos={pos}, BlueprintId={entityData.BlueprintId}", "StageSaveAdapter");
                     return false;
+                }
 
                 if (entityData.Ports == null)
+                {
+                    Logger.Warning($"Stage save load failed. Ports is null. Pos={pos}, BlueprintId={entityData.BlueprintId}", "StageSaveAdapter");
                     return false;
+                }
 
                 if (!IsValidPortData(entityData.Ports))
+                {
+                    Logger.Warning($"Stage save load failed. Invalid port data. Pos={pos}, BlueprintId={entityData.BlueprintId}", "StageSaveAdapter");
                     return false;
+                }
 
                 if (entityMap.ContainsKey(pos))
+                {
+                    Logger.Warning($"Stage save load failed. Duplicated entity position. Pos={pos}, BlueprintId={entityData.BlueprintId}", "StageSaveAdapter");
                     return false;
+                }
 
                 entityMap.Add(pos, entityData);
             }
 
             // 모든 고정 블루프린트가 배치되었는지 확인
             if (!ValidateFixedEntities(entityMap, fixedMap))
+            {
+                Logger.Warning("Stage save load failed. Fixed entity validation failed.", "StageSaveAdapter");
                 return false;
+            }
 
             // 고정 블루프린트를 제외하고 블루프린트 스택에 맞는지 확인
             if (!ValidateBlueprintStacks(entityMap, fixedMap))
+            {
+                Logger.Warning("Stage save load failed. Blueprint stack validation failed.", "StageSaveAdapter");
                 return false;
+            }
 
             // 포트 개수 및 연결성 확인
             if (!ValidatePorts(entityMap))
+            {
+                Logger.Warning("Stage save load failed. Port validation failed.", "StageSaveAdapter");
                 return false;
+            }
 
             // 검증이 끝났다면 배치 시작
             foreach (KeyValuePair<Vector2Int, EntityFileDataV1> pair in entityMap)
@@ -117,12 +143,18 @@ namespace Lumencuit
                 bool isFixed = fixedMap.ContainsKey(pos);
 
                 if (!TryFindBlueprint(entityData, isFixed, fixedMap.TryGetValue(pos, out PrePlacedBlueprint fixedBlueprint) ? fixedBlueprint : null, out EntityBlueprint blueprint))
+                {
+                    Logger.Warning($"Stage save load failed. Blueprint not found. Pos={pos}, BlueprintId={entityData.BlueprintId}, SignalMask={entityData.SignalMask}, IsFixed={isFixed}", "StageSaveAdapter");
                     return false;
+                }
 
                 EntityRequestResult result = worldSystem.TryPrePlaceEntity(blueprint, ToPorts(entityData.Ports), pos.x, pos.y, isFixed: isFixed);
 
                 if (result != EntityRequestResult.Success)
+                {
+                    Logger.Warning($"Stage save load failed. Pre-place failed. Pos={pos}, BlueprintId={entityData.BlueprintId}, Result={result}", "StageSaveAdapter");
                     return false;
+                }
             }
 
             return true;
