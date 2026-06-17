@@ -54,7 +54,10 @@ namespace Lumencuit
                 InitPrePlacedBlueprint(stageData);
             }
 
+            // 세이브파일을 불러오더라도 undo/redo 기록은 복구하지 않습니다.
+            // undo 스택은 현재 그리드를 포함합니다.
             PushUndoStack();
+
             AddListener(stageSaveHandler);
             NotifyGridUpdated();
         }

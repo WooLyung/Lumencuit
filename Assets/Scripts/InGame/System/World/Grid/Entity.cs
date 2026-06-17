@@ -51,7 +51,7 @@ namespace Lumencuit
 
         public Entity Clone()
         {
-            return new Entity(MadeBy, ports);
+            return new Entity(MadeBy, ports, isFixed);
         }
     }
 }

@@ -55,6 +55,9 @@ namespace Lumencuit
             return saveData;
         }
 
+        /// <summary>
+        /// 세이브 파일이 존재한다면 월드 시스템에 반영합니다.
+        /// </summary> 
         public bool TryLoadStageData()
         {
             if (!SaveManagement.HasCurrentStage)
