@@ -788,13 +788,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: 0.24181324, y: 0.051470894, z: 0.34535503, w: 0.90532154}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 338600345}
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 23.721, y: 16.513, z: 45.252}
 --- !u!114 &410087042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -871,16 +871,16 @@ MonoBehaviour:
   prefabs:
     tile: {fileID: 6130651401286859068, guid: 8789e5a01aacd1c44afc21053f73ff6d, type: 3}
     gridCollider: {fileID: 2561611650363071091, guid: 70cf239bfe80fb64ab0db647f1bddaa3, type: 3}
-    lamp: {fileID: 3804965436788688523, guid: e7807ee096137b44d97be8c8eac967f0, type: 3}
-    lampBridge: {fileID: 3804965436788688523, guid: 0dcb6b805cc2bc74e94ce5ccf1301fb3, type: 3}
+    lamp: {fileID: 3804965436788688523, guid: cea65e33edd79274c8ed5f0257c2e4d5, type: 3}
+    lampBridge: {fileID: 3804965436788688523, guid: cfc11e9c60cc4ce49bd75f44962819e5, type: 3}
     source: {fileID: 3804965436788688523, guid: a91934c7f7759064885415d3e2d85967, type: 3}
     wire: {fileID: 3804965436788688523, guid: fa77ab57ec7377b4bbb32ab72d2344b7, type: 3}
-    signalGenerator: {fileID: 3804965436788688523, guid: 610370368001f5e4d9ee77578cf02f14, type: 3}
-    andGate: {fileID: 3804965436788688523, guid: 8bac1696f414bf54b9912b74799d2d07, type: 3}
-    notGate: {fileID: 3804965436788688523, guid: cf4de822a8c35fa4db0796a478b6cca0, type: 3}
-    orGate: {fileID: 3804965436788688523, guid: 0dfeaeff43b7adf49975a0d28a0453a3, type: 3}
-    splitGate: {fileID: 3804965436788688523, guid: 51a21f5acde660849b8914741d1718c8, type: 3}
-    xorGate: {fileID: 3804965436788688523, guid: 0a939d3a3ee49da44918513920bb6c17, type: 3}
+    signalGenerator: {fileID: 3804965436788688523, guid: d8fe33ea9b27dae4fb30dea501351035, type: 3}
+    andGate: {fileID: 3804965436788688523, guid: cb25c710726ec1b418d31ba139352a99, type: 3}
+    notGate: {fileID: 3804965436788688523, guid: c48a840324acc804d8c2f3882a9f8c32, type: 3}
+    orGate: {fileID: 3804965436788688523, guid: bf3f155976b711347aec73e7cffd08bc, type: 3}
+    splitGate: {fileID: 3804965436788688523, guid: 1ee60811b6ed28841a742d190b878886, type: 3}
+    xorGate: {fileID: 3804965436788688523, guid: 4337fb6e97bf0ad489cd5565a158a26c, type: 3}
 --- !u!1 &959619865
 GameObject:
   m_ObjectHideFlags: 0

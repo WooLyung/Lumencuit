@@ -86,7 +86,7 @@ namespace Lumencuit
             if (prefab != null)
             {
                 GameObject view = Object.Instantiate(prefab, viewRoot.Entities);
-                view.transform.position = new Vector3(e.Pos.x, e.Pos.y, -1);
+                view.transform.position = new Vector3(e.Pos.x, e.Pos.y, 0);
                 view.name = $"Entity[{e.Pos.x}][{e.Pos.y}]";
 
                 ViewObject viewObject = view.GetComponent<ViewObject>();

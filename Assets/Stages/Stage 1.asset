@@ -15,18 +15,25 @@ MonoBehaviour:
   StageId: Stage1
   Width: 5
   Height: 5
-  PrePlacedBlueprints:
-  - blueprint:
-      rid: 5301989433416876093
-    position: {x: 2, y: 2}
-    ports:
-      Left: 0
-      Right: 0
-      Up: 0
-      Down: 0
+  PrePlacedBlueprints: []
   Blueprints:
   - blueprint:
-      rid: 5301989253374804056
+      rid: 5301989610909335624
+    count: 1
+  - blueprint:
+      rid: 5301989610909335625
+    count: 1
+  - blueprint:
+      rid: 5301989610909335627
+    count: 1
+  - blueprint:
+      rid: 5301989610909335629
+    count: 1
+  - blueprint:
+      rid: 5301989610909335631
+    count: 1
+  - blueprint:
+      rid: 5301989610909335632
     count: 1
   Goals:
   - signal:
@@ -41,13 +48,31 @@ MonoBehaviour:
     - rid: 5301989220222238785
       type: {class: NoTurbidityCondition, ns: Lumencuit, asm: Assembly-CSharp}
       data: 
-    - rid: 5301989253374804056
-      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
-      data:
-        type: 0
-    - rid: 5301989433416876093
+    - rid: 5301989610909335624
       type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 2
         signal:
           mask: 2
+    - rid: 5301989610909335625
+      type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 2
+        signal:
+          mask: 4
+    - rid: 5301989610909335627
+      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 6
+    - rid: 5301989610909335629
+      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 1
+    - rid: 5301989610909335631
+      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 7
+    - rid: 5301989610909335632
+      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 0

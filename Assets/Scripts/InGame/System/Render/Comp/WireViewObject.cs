@@ -1,53 +1,64 @@
-using System.Collections;
-using System.Linq;
 using UnityEngine;
 
 namespace Lumencuit
 {
     public class WireViewObject : ViewObject
     {
-        [SerializeField] private SpriteRenderer center;
+        [SerializeField] private Transform type1;
+        [SerializeField] private Transform type2;
+        [SerializeField] private Transform leftPort;
+        [SerializeField] private Transform rightPort;
+        [SerializeField] private Transform upPort;
+        [SerializeField] private Transform downPort;
 
-        [SerializeField] private SpriteRenderer leftPort;
-        [SerializeField] private SpriteRenderer rightPort;
-        [SerializeField] private SpriteRenderer upPort;
-        [SerializeField] private SpriteRenderer downPort;
+        private Renderer renderer1;
+        private Renderer renderer2;
+        private Renderer leftRenderer;
+        private Renderer rightRenderer;
+        private Renderer upRenderer;
+        private Renderer downRenderer;
 
-        private QuantumSignal main = QuantumSignal.Null;
-        private QuantumSignal left = QuantumSignal.Null;
-        private QuantumSignal right = QuantumSignal.Null;
-        private QuantumSignal up = QuantumSignal.Null;
-        private QuantumSignal down = QuantumSignal.Null;
+        private MaterialPropertyBlock block;
 
-        private void Update()
+        private void Awake()
         {
-            var centerSignals = main.GetSignals().ToList();
-            center.color = centerSignals.Count == 0 ? Color.grey : centerSignals[RenderRegistry.N % centerSignals.Count].Color;
-            var leftSignals = left.GetSignals().ToList();
-            leftPort.color = leftSignals.Count == 0 ? Color.grey : leftSignals[RenderRegistry.N % leftSignals.Count].Color;
-            var rightSignals = right.GetSignals().ToList();
-            rightPort.color = rightSignals.Count == 0 ? Color.grey : rightSignals[RenderRegistry.N % rightSignals.Count].Color;
-            var upSignals = up.GetSignals().ToList();
-            upPort.color = upSignals.Count == 0 ? Color.grey : upSignals[RenderRegistry.N % upSignals.Count].Color;
-            var downSignals = down.GetSignals().ToList();
-            downPort.color = downSignals.Count == 0 ? Color.grey : downSignals[RenderRegistry.N % downSignals.Count].Color;
+            block = new MaterialPropertyBlock();
+
+            renderer1 = type1.GetComponent<Renderer>();
+            renderer2 = type2.GetComponent<Renderer>();
+            leftRenderer = leftPort.GetComponent<Renderer>();
+            rightRenderer = rightPort.GetComponent<Renderer>();
+            upRenderer = upPort.GetComponent<Renderer>();
+            downRenderer = downPort.GetComponent<Renderer>();
         }
 
         public override void SetSignal(QuantumSignal signal)
         {
-            main = signal;
+            renderer1.GetPropertyBlock(block);
+            block.SetColor("_BaseColor", signal.ToSignal()?.Color ?? Color.gray);
+            renderer1.SetPropertyBlock(block);
+
+            renderer2.GetPropertyBlock(block);
+            block.SetColor("_BaseColor", signal.ToSignal()?.Color ?? Color.gray);
+            renderer2.SetPropertyBlock(block);
         }
 
         public override void SetPortSignal(Vector2Int dir, QuantumSignal signal)
         {
+            Renderer targetRenderer = null;
+
             if (dir == Vector2Int.left)
-                left = signal;
+                targetRenderer = leftRenderer;
             else if (dir == Vector2Int.right)
-                right = signal;
+                targetRenderer = rightRenderer;
             else if (dir == Vector2Int.up)
-                up = signal;
+                targetRenderer = upRenderer;
             else if (dir == Vector2Int.down)
-                down = signal;
+                targetRenderer = downRenderer;
+
+            targetRenderer?.GetPropertyBlock(block);
+            block.SetColor("_BaseColor", signal.ToSignal()?.Color ?? Color.gray);
+            targetRenderer?.SetPropertyBlock(block);
         }
 
         public override void PortUpdate(Entity entity)
@@ -56,6 +67,48 @@ namespace Lumencuit
             rightPort.gameObject.SetActive(entity.RightPort != Entity.PortType.None);
             upPort.gameObject.SetActive(entity.UpPort != Entity.PortType.None);
             downPort.gameObject.SetActive(entity.DownPort != Entity.PortType.None);
+
+            if (entity.UpPort != Entity.PortType.None && entity.DownPort != Entity.PortType.None)
+            {
+                type1.gameObject.SetActive(true);
+                type2.gameObject.SetActive(false);
+                type1.rotation = Quaternion.Euler(0, 0, 0);
+            }
+
+            if (entity.LeftPort != Entity.PortType.None && entity.RightPort != Entity.PortType.None)
+            {
+                type1.gameObject.SetActive(true);
+                type2.gameObject.SetActive(false);
+                type1.rotation = Quaternion.Euler(0, 0, 90);
+            }
+
+            if (entity.LeftPort != Entity.PortType.None && entity.UpPort != Entity.PortType.None)
+            {
+                type1.gameObject.SetActive(false);
+                type2.gameObject.SetActive(true);
+                type2.rotation = Quaternion.Euler(0, 0, 0);
+            }
+
+            if (entity.LeftPort != Entity.PortType.None && entity.DownPort != Entity.PortType.None)
+            {
+                type1.gameObject.SetActive(false);
+                type2.gameObject.SetActive(true);
+                type2.rotation = Quaternion.Euler(0, 0, 90);
+            }
+
+            if (entity.RightPort != Entity.PortType.None && entity.UpPort != Entity.PortType.None)
+            {
+                type1.gameObject.SetActive(false);
+                type2.gameObject.SetActive(true);
+                type2.rotation = Quaternion.Euler(0, 0, 270);
+            }
+
+            if (entity.RightPort != Entity.PortType.None && entity.DownPort != Entity.PortType.None)
+            {
+                type1.gameObject.SetActive(false);
+                type2.gameObject.SetActive(true);
+                type2.rotation = Quaternion.Euler(0, 0, 180);
+            }
         }
     }
 }
