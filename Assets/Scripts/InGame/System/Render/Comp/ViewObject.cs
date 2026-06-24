@@ -16,5 +16,7 @@ namespace Lumencuit
             SetPortSignal(Vector2Int.up, signal);
             SetPortSignal(Vector2Int.down, signal);
         }
+
+        public abstract void Destroy();
     }
 }

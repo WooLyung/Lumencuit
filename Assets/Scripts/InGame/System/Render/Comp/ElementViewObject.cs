@@ -1,9 +1,13 @@
+using System.Collections;
 using UnityEngine;
 
 namespace Lumencuit
 {
     public class ElementViewObject : ViewObject
     {
+        private static readonly int DissolveAmountId = Shader.PropertyToID("_DissolveAmount");
+        private static float dissolveDuration = 0.2f;
+
         [SerializeField] private Transform center;
         [SerializeField] private Transform leftPort;
         [SerializeField] private Transform rightPort;
@@ -27,6 +31,12 @@ namespace Lumencuit
             rightRenderer = rightPort.GetComponent<Renderer>();
             upRenderer = upPort.GetComponent<Renderer>();
             downRenderer = downPort.GetComponent<Renderer>();
+        }
+
+        private void Start()
+        {
+            StopAllCoroutines();
+            StartCoroutine(Dissolve(0f, 1f));
         }
 
         public override void SetSignal(QuantumSignal signal)
@@ -79,6 +89,38 @@ namespace Lumencuit
                 downPort.rotation = Quaternion.Euler(0, 0, 180);
             else
                 downPort.rotation = Quaternion.Euler(0, 0, 0);
+        }
+
+        public override void Destroy()
+        {
+            StopAllCoroutines();
+            StartCoroutine(Dissolve(1f, 0f, true));
+        }
+
+        private IEnumerator Dissolve(float from, float to, bool destroy = false)
+        {
+            float elapsed = 0f;
+
+            while (elapsed < dissolveDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / dissolveDuration);
+
+                float value = Mathf.Lerp(from, to, t);
+
+                renderer.GetPropertyBlock(block);
+                block.SetFloat(DissolveAmountId, value);
+                renderer.SetPropertyBlock(block);
+
+                yield return null;
+            }
+
+            renderer.GetPropertyBlock(block);
+            block.SetFloat(DissolveAmountId, to);
+            renderer.SetPropertyBlock(block);
+
+            if (destroy)
+                Destroy(gameObject);
         }
     }
 }

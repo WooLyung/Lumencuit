@@ -87,5 +87,10 @@ namespace Lumencuit
             else
                 downPort.rotation = Quaternion.Euler(0, 0, 0);
         }
+
+        public override void Destroy()
+        {
+            Destroy(gameObject);
+        }
     }
 }

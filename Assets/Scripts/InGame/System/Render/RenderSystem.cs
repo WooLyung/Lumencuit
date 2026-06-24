@@ -102,7 +102,7 @@ namespace Lumencuit
         {
             if (views.TryGetValue(e.Pos, out View view))
             {
-                Object.Destroy(view.GameObject);
+                view.ViewObject.Destroy();
                 views.Remove(e.Pos);
             }
         }

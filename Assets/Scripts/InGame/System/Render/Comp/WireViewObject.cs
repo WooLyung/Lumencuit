@@ -110,5 +110,10 @@ namespace Lumencuit
                 type2.rotation = Quaternion.Euler(0, 0, 180);
             }
         }
+
+        public override void Destroy()
+        {
+            Destroy(gameObject);
+        }
     }
 }
