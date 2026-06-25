@@ -1,126 +1,67 @@
-using System.Collections;
 using UnityEngine;
 
 namespace Lumencuit
 {
+    /// <summary>
+    /// 작은 램프가 없고 와이어가 아닌 뷰 오브젝트입니다.
+    /// </summary>
     public class ElementViewObject : ViewObject
     {
-        private static readonly int DissolveAmountId = Shader.PropertyToID("_DissolveAmount");
-        private static float dissolveDuration = 0.2f;
+        [SerializeField] private Transform centerTransform;
+        [SerializeField] private Transform leftTransform;
+        [SerializeField] private Transform rightTransform;
+        [SerializeField] private Transform upTransform;
+        [SerializeField] private Transform downTransform;
 
-        [SerializeField] private Transform center;
-        [SerializeField] private Transform leftPort;
-        [SerializeField] private Transform rightPort;
-        [SerializeField] private Transform upPort;
-        [SerializeField] private Transform downPort;
-
-        private new Renderer renderer;
-        private Renderer leftRenderer;
-        private Renderer rightRenderer;
-        private Renderer upRenderer;
-        private Renderer downRenderer;
-
-        private MaterialPropertyBlock block;
+        private ViewPart center, left, right, up, down;
 
         private void Awake()
         {
-            block = new MaterialPropertyBlock();
-
-            renderer = center.GetComponent<Renderer>();
-            leftRenderer = leftPort.GetComponent<Renderer>();
-            rightRenderer = rightPort.GetComponent<Renderer>();
-            upRenderer = upPort.GetComponent<Renderer>();
-            downRenderer = downPort.GetComponent<Renderer>();
+            center = new ViewPart(centerTransform);
+            left = new ViewPart(leftTransform);
+            right = new ViewPart(rightTransform);
+            up = new ViewPart(upTransform);
+            down = new ViewPart(downTransform);
         }
 
         private void Start()
         {
-            StopAllCoroutines();
-            StartCoroutine(Dissolve(0f, 1f));
+            Appear(center);
         }
 
         public override void SetSignal(QuantumSignal signal)
         {
-            renderer.GetPropertyBlock(block);
-            block.SetColor("_BaseColor", signal.ToSignal()?.Color ?? Color.gray);
-            renderer.SetPropertyBlock(block);
+            ApplySignal(signal, center);
         }
 
         public override void SetPortSignal(Vector2Int dir, QuantumSignal signal)
         {
-            Renderer targetRenderer = null;
-
             if (dir == Vector2Int.left)
-                targetRenderer = leftRenderer;
+                ApplySignal(signal, left);
             else if (dir == Vector2Int.right)
-                targetRenderer = rightRenderer;
+                ApplySignal(signal, right);
             else if (dir == Vector2Int.up)
-                targetRenderer = upRenderer;
+                ApplySignal(signal, up);
             else if (dir == Vector2Int.down)
-                targetRenderer = downRenderer;
-
-            targetRenderer?.GetPropertyBlock(block);
-            block.SetColor("_BaseColor", signal.ToSignal()?.Color ?? Color.gray);
-            targetRenderer?.SetPropertyBlock(block);
+                ApplySignal(signal, down);
         }
 
         public override void PortUpdate(Entity entity)
         {
-            leftPort.gameObject.SetActive(entity.LeftPort != Entity.PortType.None);
-            if (entity.LeftPort == Entity.PortType.Output)
-                leftPort.rotation = Quaternion.Euler(0, 0, 90);
-            else
-                leftPort.rotation = Quaternion.Euler(0, 0, 270);
-
-            rightPort.gameObject.SetActive(entity.RightPort != Entity.PortType.None);
-            if (entity.RightPort == Entity.PortType.Output)
-                rightPort.rotation = Quaternion.Euler(0, 0, 270);
-            else
-                rightPort.rotation = Quaternion.Euler(0, 0, 90);
-
-            upPort.gameObject.SetActive(entity.UpPort != Entity.PortType.None);
-            if (entity.UpPort == Entity.PortType.Output)
-                upPort.rotation = Quaternion.Euler(0, 0, 0);
-            else
-                upPort.rotation = Quaternion.Euler(0, 0, 180);
-
-            downPort.gameObject.SetActive(entity.DownPort != Entity.PortType.None);
-            if (entity.DownPort == Entity.PortType.Output)
-                downPort.rotation = Quaternion.Euler(0, 0, 180);
-            else
-                downPort.rotation = Quaternion.Euler(0, 0, 0);
+            PortUpdate(left, entity.LeftPort, Quaternion.Euler(0, 0, 90), Quaternion.Euler(0, 0, 270));
+            PortUpdate(right, entity.RightPort, Quaternion.Euler(0, 0, 270), Quaternion.Euler(0, 0, 90));
+            PortUpdate(up, entity.UpPort, Quaternion.Euler(0, 0, 0), Quaternion.Euler(0, 0, 180));
+            PortUpdate(down, entity.DownPort, Quaternion.Euler(0, 0, 180), Quaternion.Euler(0, 0, 0));
         }
 
         public override void Destroy()
         {
             StopAllCoroutines();
-            StartCoroutine(Dissolve(1f, 0f, true));
-        }
-
-        private IEnumerator Dissolve(float from, float to, bool destroy = false)
-        {
-            float elapsed = 0f;
-
-            while (elapsed < dissolveDuration)
-            {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / dissolveDuration);
-
-                float value = Mathf.Lerp(from, to, t);
-
-                renderer.GetPropertyBlock(block);
-                block.SetFloat(DissolveAmountId, value);
-                renderer.SetPropertyBlock(block);
-
-                yield return null;
-            }
-
-            renderer.GetPropertyBlock(block);
-            block.SetFloat(DissolveAmountId, to);
-            renderer.SetPropertyBlock(block);
-
-            if (destroy)
-                Destroy(gameObject);
+            Disappear(left);
+            Disappear(right);
+            Disappear(up);
+            Disappear(down);
+            Disappear(center, true);
         }
     }
 }

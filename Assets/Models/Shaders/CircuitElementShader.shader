@@ -2,15 +2,12 @@ Shader "Lumencuit/CircuitElementShader"
 {
     Properties
     {
-        [MainColor] _BaseColor("Base Color", Color) = (1, 1, 1, 1)
         [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
         _Mask("Mask", 2D) = "white" {}
+        _Normal("Normal", 2D) = "white" {}
 
-        _Dissolve ("Dissolve", 2D) = "white" {}
-        _DissolveAmount("Dissolve Amount", Range(0, 1)) = 0
-        _DissolveEdgeColor("Dissolve Edge Color", Color) = (1, 1, 1, 1)
-        _DissolveEdgeWidth("Dissolve Edge Width", Range(0.001, 0.3)) = 0.08
-        _DissolveEdgeIntensity("Dissolve Edge Intensity", Range(0, 5)) = 2
+        _Progress("Progress", Range(0, 1)) = 0
+        _Signal("Signal", Int) = 0
     }
 
     SubShader
@@ -46,24 +43,33 @@ Shader "Lumencuit/CircuitElementShader"
             };
 
             CBUFFER_START(UnityPerMaterial)
-                half _DissolveAmount;
+                half _Progress;
             CBUFFER_END
+
+            float3 scalePositionOS(float3 positionOS, half progress)
+            {
+                half t = saturate(progress);
+                half eased = t * t * (3.0h - 2.0h * t);
+                half zScale = lerp(0.5h, 1.0h, eased);
+                half pivotZ = 0.2h;
+                positionOS.z = pivotZ + (positionOS.z - pivotZ) * zScale;
+                return positionOS;
+            }
 
             Varyings vert(Attributes IN)
             {
                 Varyings OUT;
-
-                half t = saturate(_DissolveAmount);
-                half eased = t * t * (3.0h - 2.0h * t);
-                float3 positionOS = lerp(IN.positionOS.xyz * 0.5f, IN.positionOS.xyz, eased);
+                
+                float3 positionOS = scalePositionOS(IN.positionOS, _Progress);
                 VertexPositionInputs positionInputs = GetVertexPositionInputs(positionOS);
                 OUT.positionHCS = positionInputs.positionCS;
+
                 return OUT;
             }
 
             half4 frag(Varyings IN) : SV_Target
             {
-                return half4(0, 0, 0, 0);
+                return 0;
             }
 
             ENDHLSL
@@ -105,6 +111,7 @@ Shader "Lumencuit/CircuitElementShader"
                 float3 normalWS : TEXCOORD2;
                 float2 uv : TEXCOORD3;
                 float4 shadowCoord : TEXCOORD4;
+                float4 screenPos : TEXCOORD5;
             };
 
             TEXTURE2D(_BaseMap);
@@ -112,26 +119,31 @@ Shader "Lumencuit/CircuitElementShader"
 
             TEXTURE2D(_Mask);
             SAMPLER(sampler_Mask);
-            
-            TEXTURE2D(_Dissolve);
-            SAMPLER(sampler_Dissolve);
 
+            TEXTURE2D(_Normal);
+            SAMPLER(sampler_Normal);
+            
             CBUFFER_START(UnityPerMaterial)
-                half4 _BaseColor;
                 float4 _BaseMap_ST;
-                half _DissolveAmount;
-                half4 _DissolveEdgeColor;
-                half _DissolveEdgeWidth;
-                half _DissolveEdgeIntensity;
+                half _Progress;
+                int _Signal;
             CBUFFER_END
+
+            float3 scalePositionOS(float3 positionOS, half progress)
+            {
+                half t = saturate(progress);
+                half eased = t * t * (3.0h - 2.0h * t);
+                half zScale = lerp(0.5h, 1.0h, eased);
+                half pivotZ = 0.2h;
+                positionOS.z = pivotZ + (positionOS.z - pivotZ) * zScale;
+                return positionOS;
+            }
 
             Varyings vert(Attributes IN)
             {
                 Varyings OUT;
-
-                half t = saturate(_DissolveAmount);
-                half eased = t * t * (3.0h - 2.0h * t);
-                float3 positionOS = lerp(IN.positionOS.xyz * 0.5f, IN.positionOS.xyz, eased);
+                 
+                float3 positionOS = scalePositionOS(IN.positionOS, _Progress);
                 VertexPositionInputs positionInputs = GetVertexPositionInputs(positionOS);
                 VertexNormalInputs normalInputs = GetVertexNormalInputs(IN.normalOS);
 
@@ -141,6 +153,7 @@ Shader "Lumencuit/CircuitElementShader"
                 OUT.normalWS = normalize(normalInputs.normalWS);
                 OUT.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
                 OUT.shadowCoord = GetShadowCoord(positionInputs);
+                OUT.screenPos = ComputeScreenPos(positionInputs.positionCS);
 
                 return OUT;
             }
@@ -148,6 +161,104 @@ Shader "Lumencuit/CircuitElementShader"
             half4 GetElementColor(Varyings IN)
             {
                 half4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv);
+                half3 normal = UnpackNormal(SAMPLE_TEXTURE2D(_Normal, sampler_Normal, IN.uv));
+
+                half3 normalWS = normalize(IN.normalWS + 0.2h * (normal - half3(0.5h, 0.5h, 0.0h)));
+                Light mainLight = GetMainLight(IN.shadowCoord);
+
+                half ndotl = saturate(dot(normalWS, mainLight.direction));
+                half3 diffuse = color.rgb * mainLight.color * ndotl * mainLight.shadowAttenuation;
+                half3 ambient = SampleSH(normalWS) * color.rgb;
+                half3 finalColor = diffuse + ambient;
+
+                return half4(finalColor, 1);
+            }
+
+            half3 SignalToColor(int signal)
+            {
+                if (signal == 0)
+                    return half3(0.005h, 0.005h, 0.005h);
+                half r = (signal & 1) != 0 ? 1.0h : 0.0h;
+                half g = (signal & 2) != 0 ? 1.0h : 0.0h;
+                half b = (signal & 4) != 0 ? 1.0h : 0.0h;
+                return half3(r, g, b);
+            }
+
+            int CountSubSignals(int signal)
+            {
+                int count = 0;
+                for (int signalValue = 0; signalValue < 8; signalValue++)
+                    if ((signal & (1 << signalValue)) != 0) 
+                        count++;
+                return count;
+            }
+
+            int GetSubSignalByIndex(int signal, int index)
+            {
+                int current = 0;
+                for (int signalValue = 0; signalValue < 8; signalValue++)
+                {
+                    if ((signal & (1 << signalValue)) != 0)
+                    {
+                        if (current == index)
+                            return signalValue;
+
+                        current++;
+                    }
+                }
+                return 0;
+            }
+
+            half4 GetSignalColor(Varyings IN)
+            {
+                half3 color = 0;
+
+                // Null Signal
+                if (_Signal == 0)
+                {
+                    color = half3(0.03h, 0.03h, 0.03h);
+                }
+                else
+                {
+                    int count = CountSubSignals(_Signal);
+
+                    // Single Signal
+                    if (count <= 1)
+                    {
+                        int signalValue = GetSubSignalByIndex(_Signal, 0);
+                        color = SignalToColor(signalValue);
+                    }
+                    else
+                    {
+                        float holdTime = 1.0;
+                        float transitionTime = 0.5;
+                        float segmentTime = holdTime + transitionTime;
+
+                        int segmentIndex = (int)floor(_Time.y / segmentTime);
+
+                        int indexA = segmentIndex % count;
+                        int indexB = (indexA + 1) % count;
+
+                        float localTime = _Time.y - floor(_Time.y / segmentTime) * segmentTime;
+
+                        int signalA = GetSubSignalByIndex(_Signal, indexA);
+                        int signalB = GetSubSignalByIndex(_Signal, indexB);
+
+                        half3 colorA = SignalToColor(signalA);
+                        half3 colorB = SignalToColor(signalB);
+
+                        half blend = 0.0h;
+
+                        if (localTime > holdTime)
+                        {
+                            float t = (localTime - holdTime) / transitionTime;
+                            t = saturate(t);
+                            blend = t * t * (3.0h - 2.0h * t);
+                        }
+
+                        color = lerp(colorA, colorB, blend);
+                    }
+                }
 
                 half3 normalWS = normalize(IN.normalWS);
                 Light mainLight = GetMainLight(IN.shadowCoord);
@@ -160,22 +271,6 @@ Shader "Lumencuit/CircuitElementShader"
                 return half4(finalColor, 1);
             }
 
-            half4 GetSignalColor(Varyings IN)
-            {
-                half3 baseColor = _BaseColor.rgb;
-
-                half3 normalWS = normalize(IN.normalWS);
-                Light mainLight = GetMainLight(IN.shadowCoord);
-
-                half ndotl = saturate(dot(normalWS, mainLight.direction));
-
-                half highlight = pow(ndotl, 3.0h) * 0.5h;
-
-                half3 color = lerp(baseColor, half3(1.0h, 1.0h, 1.0h), highlight);
-
-                return half4(color, 1);
-            }
-
             half4 frag(Varyings IN) : SV_Target
             {
                 half4 elementColor = GetElementColor(IN);
@@ -184,7 +279,7 @@ Shader "Lumencuit/CircuitElementShader"
                 half mask = SAMPLE_TEXTURE2D(_Mask, sampler_Mask, IN.uv).r;
                 half4 color = lerp(elementColor, signalColor, mask);
 
-                return half4(lerp(half3(0, 0, 0), color.rgb, _DissolveAmount), _DissolveAmount);
+                return half4(lerp(half3(0, 0, 0), color.rgb, _Progress), _Progress);
             }
 
             ENDHLSL
@@ -202,8 +297,8 @@ Shader "Lumencuit/CircuitElementShader"
 
             HLSLPROGRAM
 
-            #pragma vertex ShadowPassVertex
-            #pragma fragment ShadowPassFragment
+            #pragma vertex vert
+            #pragma fragment frag
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
@@ -212,31 +307,34 @@ Shader "Lumencuit/CircuitElementShader"
             {
                 float4 positionOS : POSITION;
                 float3 normalOS : NORMAL;
-                float2 uv : TEXCOORD0;
             };
 
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
-                float4 positionOS : TEXCOORD0;
-                float2 uv : TEXCOORD1;
             };
-
-            TEXTURE2D(_Dissolve);
-            SAMPLER(sampler_Dissolve);
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseMap_ST;
-                half _DissolveAmount;
+                half _Progress;
             CBUFFER_END
 
-            Varyings ShadowPassVertex(Attributes IN)
+            float3 scalePositionOS(float3 positionOS, half progress)
+            {
+                half t = saturate(progress);
+                half eased = t * t * (3.0h - 2.0h * t);
+                half zScale = lerp(0.5h, 1.0h, eased);
+                half xyScale = lerp(0.0h, 1.0h, eased);
+
+                half pivotZ = 0.2h;
+                return float3(positionOS.xy * xyScale, pivotZ + (positionOS.z - pivotZ) * zScale);
+            }
+
+            Varyings vert(Attributes IN)
             {
                 Varyings OUT;
-
-                half t = saturate(_DissolveAmount);
-                half eased = t * t * (3.0h - 2.0h * t);
-                float3 positionOS = lerp(IN.positionOS.xyz * 0.5f, IN.positionOS.xyz, eased);
+                
+                float3 positionOS = scalePositionOS(IN.positionOS, _Progress);
                 VertexPositionInputs positionInputs = GetVertexPositionInputs(positionOS);
                 VertexNormalInputs normalInputs = GetVertexNormalInputs(IN.normalOS);
 
@@ -248,16 +346,11 @@ Shader "Lumencuit/CircuitElementShader"
                     )
                 );
 
-                OUT.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
-                OUT.positionOS = IN.positionOS;
-
                 return OUT;
             }
 
-            half4 ShadowPassFragment(Varyings IN) : SV_TARGET
+            half4 frag(Varyings IN) : SV_TARGET
             {
-                half dissolve = -IN.positionOS.z;
-                clip(_DissolveAmount - dissolve);
                 return 0;
             }
 

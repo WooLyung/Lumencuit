@@ -47,12 +47,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 467fa035566e66f4aa724d538bda664a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Lumencuit.WireViewObject
-  type1: {fileID: 5751535470779948780}
-  type2: {fileID: 6432860305422413636}
-  leftPort: {fileID: 7503759052039369419}
-  rightPort: {fileID: 2395826729639235017}
-  upPort: {fileID: 8979400828125148184}
-  downPort: {fileID: 3673281267743630526}
+  type1Transform: {fileID: 5751535470779948780}
+  type2Transform: {fileID: 6432860305422413636}
+  leftTransform: {fileID: 7503759052039369419}
+  rightTransform: {fileID: 2395826729639235017}
+  upTransform: {fileID: 8979400828125148184}
+  downTransform: {fileID: 3673281267743630526}
 --- !u!1 &7769238654473080305
 GameObject:
   m_ObjectHideFlags: 0
@@ -162,7 +162,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 3a196c4b2bc35d7409154728ceac24e9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -248,7 +248,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 3a196c4b2bc35d7409154728ceac24e9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -294,7 +294,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2a88e94e41d469448a45e92916082023, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2a88e94e41d469448a45e92916082023, type: 3}
       propertyPath: m_LocalRotation.x
@@ -306,7 +306,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2a88e94e41d469448a45e92916082023, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2a88e94e41d469448a45e92916082023, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -318,7 +318,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2a88e94e41d469448a45e92916082023, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 180
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 2a88e94e41d469448a45e92916082023, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -506,7 +506,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 3a196c4b2bc35d7409154728ceac24e9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -592,7 +592,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 3a196c4b2bc35d7409154728ceac24e9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
