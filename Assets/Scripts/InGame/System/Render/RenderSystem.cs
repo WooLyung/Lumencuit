@@ -98,6 +98,8 @@ namespace Lumencuit
         {
             RenderGridMesh();
             RenderGridCollider();
+
+            viewRoot.transform.localPosition = new Vector3(-(worldSystem.Width - 1) * 0.5f, -(worldSystem.Height - 1) * 0.5f, 0);
         }
 
         public void OnEntityCreated(IEntityEventListener.EntityCreatedEvent e)
@@ -106,11 +108,11 @@ namespace Lumencuit
             if (prefab != null)
             {
                 GameObject view = Object.Instantiate(prefab, viewRoot.Entities);
-                view.transform.position = new Vector3(e.Pos.x, e.Pos.y, 0);
+                view.transform.localPosition = new Vector3(e.Pos.x, e.Pos.y, 0);
                 view.name = $"Entity[{e.Pos.x}][{e.Pos.y}]";
 
                 ViewObject viewObject = view.GetComponent<ViewObject>();
-                viewObject.PortUpdate(e.Entity);
+                viewObject.PortUpdate(e.Entity.GetPorts());
                 viewObject.SetSignal(QuantumSignal.Null);
                 viewObject.SetPortSignal(QuantumSignal.Null);
 
@@ -131,7 +133,7 @@ namespace Lumencuit
         {
             if (views.TryGetValue(e.Pos, out View view))
             {
-                view.ViewObject.PortUpdate(e.Entity);
+                view.ViewObject.PortUpdate(e.Entity.GetPorts());
                 view.ViewObject.SetPortSignal(QuantumSignal.Null);
             }
         }

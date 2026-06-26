@@ -50,49 +50,49 @@ namespace Lumencuit
                 ApplySignal(signal, down);
         }
 
-        public override void PortUpdate(Entity entity)
+        public override void PortUpdate(Entity.Ports ports)
         {
-            PortUpdate(left, entity.LeftPort, Quaternion.Euler(0, 0, 90), Quaternion.Euler(0, 0, 270));
-            PortUpdate(right, entity.RightPort, Quaternion.Euler(0, 0, 270), Quaternion.Euler(0, 0, 90));
-            PortUpdate(up, entity.UpPort, Quaternion.Euler(0, 0, 0), Quaternion.Euler(0, 0, 180));
-            PortUpdate(down, entity.DownPort, Quaternion.Euler(0, 0, 180), Quaternion.Euler(0, 0, 0));
+            PortUpdate(left, ports.Left, Quaternion.Euler(0, 0, 90), Quaternion.Euler(0, 0, 270));
+            PortUpdate(right, ports.Right, Quaternion.Euler(0, 0, 270), Quaternion.Euler(0, 0, 90));
+            PortUpdate(up, ports.Up, Quaternion.Euler(0, 0, 0), Quaternion.Euler(0, 0, 180));
+            PortUpdate(down, ports.Down, Quaternion.Euler(0, 0, 180), Quaternion.Euler(0, 0, 0));
 
-            if (entity.UpPort != Entity.PortType.None && entity.DownPort != Entity.PortType.None)
+            if (ports.Up != Entity.PortType.None && ports.Down != Entity.PortType.None)
             {
                 type1.Transform.gameObject.SetActive(true);
                 type2.Transform.gameObject.SetActive(false);
                 type1.Transform.rotation = Quaternion.Euler(0, 0, 180);
             }
 
-            if (entity.LeftPort != Entity.PortType.None && entity.RightPort != Entity.PortType.None)
+            if (ports.Left != Entity.PortType.None && ports.Right != Entity.PortType.None)
             {
                 type1.Transform.gameObject.SetActive(true);
                 type2.Transform.gameObject.SetActive(false);
                 type1.Transform.rotation = Quaternion.Euler(0, 0, 270);
             }
 
-            if (entity.LeftPort != Entity.PortType.None && entity.UpPort != Entity.PortType.None)
+            if (ports.Left != Entity.PortType.None && ports.Up != Entity.PortType.None)
             {
                 type1.Transform.gameObject.SetActive(false);
                 type2.Transform.gameObject.SetActive(true);
                 type2.Transform.rotation = Quaternion.Euler(0, 0, 0);
             }
 
-            if (entity.LeftPort != Entity.PortType.None && entity.DownPort != Entity.PortType.None)
+            if (ports.Left != Entity.PortType.None && ports.Down != Entity.PortType.None)
             {
                 type1.Transform.gameObject.SetActive(false);
                 type2.Transform.gameObject.SetActive(true);
                 type2.Transform.rotation = Quaternion.Euler(0, 0, 90);
             }
 
-            if (entity.RightPort != Entity.PortType.None && entity.UpPort != Entity.PortType.None)
+            if (ports.Right != Entity.PortType.None && ports.Up != Entity.PortType.None)
             {
                 type1.Transform.gameObject.SetActive(false);
                 type2.Transform.gameObject.SetActive(true);
                 type2.Transform.rotation = Quaternion.Euler(0, 0, 270);
             }
 
-            if (entity.RightPort != Entity.PortType.None && entity.DownPort != Entity.PortType.None)
+            if (ports.Right != Entity.PortType.None && ports.Down != Entity.PortType.None)
             {
                 type1.Transform.gameObject.SetActive(false);
                 type2.Transform.gameObject.SetActive(true);

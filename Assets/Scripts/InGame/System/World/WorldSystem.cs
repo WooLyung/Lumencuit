@@ -24,9 +24,6 @@ namespace Lumencuit
             worldGrid = new(stageData);
             stageSaveHandler = new(this, stageData);
             this.stageData = stageData;
-
-            // [임시] 카메라 위치 변경
-            Camera.main.transform.position = new Vector3((stageData.Width - 1) / 2f, (stageData.Height - 1) / 2f - 2.5f, Camera.main.transform.position.z);
         }
 
         public void Init()

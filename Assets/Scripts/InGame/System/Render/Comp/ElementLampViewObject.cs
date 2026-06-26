@@ -38,6 +38,11 @@ namespace Lumencuit
             ApplySignal(signal, center);
         }
 
+        public void SetLampSignal(QuantumSignal signal)
+        {
+            ApplySignal(signal, lamp);
+        }
+
         public override void SetPortSignal(Vector2Int dir, QuantumSignal signal)
         {
             if (dir == Vector2Int.left)
@@ -50,12 +55,12 @@ namespace Lumencuit
                 ApplySignal(signal, down);
         }
 
-        public override void PortUpdate(Entity entity)
+        public override void PortUpdate(Entity.Ports ports)
         {
-            PortUpdate(left, entity.LeftPort, Quaternion.Euler(0, 0, 90), Quaternion.Euler(0, 0, 270));
-            PortUpdate(right, entity.RightPort, Quaternion.Euler(0, 0, 270), Quaternion.Euler(0, 0, 90));
-            PortUpdate(up, entity.UpPort, Quaternion.Euler(0, 0, 0), Quaternion.Euler(0, 0, 180));
-            PortUpdate(down, entity.DownPort, Quaternion.Euler(0, 0, 180), Quaternion.Euler(0, 0, 0));
+            PortUpdate(left, ports.Left, Quaternion.Euler(0, 0, 90), Quaternion.Euler(0, 0, 270));
+            PortUpdate(right, ports.Right, Quaternion.Euler(0, 0, 270), Quaternion.Euler(0, 0, 90));
+            PortUpdate(up, ports.Up, Quaternion.Euler(0, 0, 0), Quaternion.Euler(0, 0, 180));
+            PortUpdate(down, ports.Down, Quaternion.Euler(0, 0, 180), Quaternion.Euler(0, 0, 0));
         }
 
         public override void Destroy()

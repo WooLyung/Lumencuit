@@ -31,7 +31,7 @@ namespace Lumencuit
 
         public abstract void SetSignal(QuantumSignal signal);
         public abstract void SetPortSignal(Vector2Int dir, QuantumSignal signal);
-        public abstract void PortUpdate(Entity entity);
+        public abstract void PortUpdate(Entity.Ports ports);
 
         public void SetPortSignal(QuantumSignal signal)
         {
