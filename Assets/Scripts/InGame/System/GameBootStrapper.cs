@@ -44,7 +44,7 @@ namespace Lumencuit
             worldSystem = new(stageData);
             simulationSystem = new(worldSystem, stageData);
             stageController = new(simulationSystem);
-            renderSystem = new(worldSystem, simulationSystem, renderRegistry.Prefabs, viewRoot, stageData);
+            renderSystem = new(worldSystem, simulationSystem, renderRegistry.Prefabs, renderRegistry.TileMesh, viewRoot, stageData);
 #if UNITY_ANDROID || UNITY_IOS
             inputSystem = new NullInputSystem(worldSystem, stageController);
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_EDITOR

@@ -10,7 +10,6 @@ namespace Lumencuit
     [Serializable]
     public sealed class RenderPrefab
     {
-        [SerializeField] private GameObject tile;
         [SerializeField] private GameObject gridCollider;
 
         [SerializeField] private GameObject lamp;
@@ -25,7 +24,6 @@ namespace Lumencuit
         [SerializeField] private GameObject splitGate;
         [SerializeField] private GameObject xorGate;
 
-        public GameObject Tile => tile;
         public GameObject GridCollider => gridCollider;
 
         public GameObject GetCircuitElement(CircuitElementType type)

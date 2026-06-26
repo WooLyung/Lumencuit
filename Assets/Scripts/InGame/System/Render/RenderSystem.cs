@@ -27,14 +27,16 @@ namespace Lumencuit
 
         private readonly WorldSystem worldSystem;
         private readonly RenderPrefab prefabs;
+        private readonly Mesh tileMesh;
         private readonly ViewRoot viewRoot;
         private readonly StageData stageData;
         private readonly Dictionary<Vector2Int, View> views = new();
 
-        public RenderSystem(WorldSystem worldSystem, SimulationSystem simulationSystem, RenderPrefab prefabs, ViewRoot viewRoot, StageData stageData)
+        public RenderSystem(WorldSystem worldSystem, SimulationSystem simulationSystem, RenderPrefab prefabs, Mesh tileMesh, ViewRoot viewRoot, StageData stageData)
         {
             this.worldSystem = worldSystem;
             this.prefabs = prefabs;
+            this.tileMesh = tileMesh;
             this.viewRoot = viewRoot;
             this.stageData = stageData;
 
@@ -59,7 +61,23 @@ namespace Lumencuit
             RenderGrid();
         }
 
-        private void RenderGrid()
+        private void RenderGridMesh()
+        {
+            List<CombineInstance> combines = new();
+
+            for (int x = 0; x < worldSystem.Width; x++)
+                for (int y = 0; y < worldSystem.Height; y++)
+                    if (worldSystem.IsEnabledTile(x, y))
+                        combines.Add(new CombineInstance { mesh = tileMesh, transform = Matrix4x4.TRS(new Vector3(x, y, 0), Quaternion.identity, Vector3.one)});
+
+            Mesh combinedMesh = new Mesh { name = "GridMesh", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+            combinedMesh.CombineMeshes(combines.ToArray(), mergeSubMeshes: true, useMatrices: true);
+            combinedMesh.RecalculateBounds();
+
+            viewRoot.GridMesh.GetComponent<MeshFilter>().sharedMesh = combinedMesh;
+        }
+
+        private void RenderGridCollider()
         {
             for (int x = 0; x < worldSystem.Width; x++)
             {
@@ -68,16 +86,18 @@ namespace Lumencuit
                     if (!worldSystem.IsEnabledTile(x, y))
                         continue;
 
-                    GameObject tile = Object.Instantiate(prefabs.Tile, viewRoot.GridMesh);
-                    tile.transform.position = new Vector3(x, y, 0);
-                    tile.name = $"Tile[{x}][{y}]";
-
                     GameObject gridCollider = Object.Instantiate(prefabs.GridCollider, viewRoot.GridColliders);
                     gridCollider.transform.position = new Vector3(x, y, 0);
                     gridCollider.name = $"GridCollider[{x}][{y}]";
                     gridCollider.GetComponent<GridTilePos>().Pos = new Vector2Int(x, y);
                 }
             }
+        }
+
+        private void RenderGrid()
+        {
+            RenderGridMesh();
+            RenderGridCollider();
         }
 
         public void OnEntityCreated(IEntityEventListener.EntityCreatedEvent e)

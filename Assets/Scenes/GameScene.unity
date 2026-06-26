@@ -675,6 +675,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 395831410}
+  - component: {fileID: 395831412}
+  - component: {fileID: 395831411}
   m_Layer: 0
   m_Name: GridMesh
   m_TagString: Untagged
@@ -697,6 +699,63 @@ Transform:
   m_Children: []
   m_Father: {fileID: 959619866}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &395831411
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 395831409}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 18a2071a13220624bb3d950466305322, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &395831412
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 395831409}
+  m_Mesh: {fileID: 0}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -869,7 +928,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Lumencuit.RenderRegistry
   prefabs:
-    tile: {fileID: 6130651401286859068, guid: 8789e5a01aacd1c44afc21053f73ff6d, type: 3}
     gridCollider: {fileID: 2561611650363071091, guid: 70cf239bfe80fb64ab0db647f1bddaa3, type: 3}
     lamp: {fileID: 3804965436788688523, guid: cea65e33edd79274c8ed5f0257c2e4d5, type: 3}
     lampBridge: {fileID: 3804965436788688523, guid: cfc11e9c60cc4ce49bd75f44962819e5, type: 3}
@@ -881,6 +939,7 @@ MonoBehaviour:
     orGate: {fileID: 3804965436788688523, guid: bf3f155976b711347aec73e7cffd08bc, type: 3}
     splitGate: {fileID: 3804965436788688523, guid: 1ee60811b6ed28841a742d190b878886, type: 3}
     xorGate: {fileID: 3804965436788688523, guid: 4337fb6e97bf0ad489cd5565a158a26c, type: 3}
+  tileMesh: {fileID: -4855243574250553854, guid: 6115c12be383ab940a1a44ad8bb2bdd2, type: 3}
 --- !u!1 &959619865
 GameObject:
   m_ObjectHideFlags: 0
