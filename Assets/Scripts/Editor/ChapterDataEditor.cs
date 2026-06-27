@@ -323,7 +323,7 @@ namespace Lumencuit.Editor
             if (!enabled)
                 return;
 
-            EditorGUI.DrawRect(rect, new Color(0.0f, 0.45f, 0.65f, 0.95f));
+            EditorGUI.DrawRect(rect, new Color(0.2f, 0.2f, 0.2f, 0.95f));
             GUI.Label(rect, label, ArrowLabelStyle);
         }
 

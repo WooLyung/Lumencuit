@@ -24,6 +24,9 @@ namespace Lumencuit
         [SerializeField] private GameObject splitGate;
         [SerializeField] private GameObject xorGate;
 
+        [SerializeField] private GameObject andBridgeGate;
+        [SerializeField] private GameObject notBridgeGate;
+
         public GameObject GridCollider => gridCollider;
 
         public GameObject GetCircuitElement(CircuitElementType type)
@@ -40,6 +43,8 @@ namespace Lumencuit
                 CircuitElementType.SplitGate => splitGate,
                 CircuitElementType.XorGate => xorGate,
                 CircuitElementType.SignalGenerator => signalGenerator,
+                CircuitElementType.AndBridgeGate => andBridgeGate,
+                CircuitElementType.NotBridgeGate => notBridgeGate,
                 _ => null
             };
         }

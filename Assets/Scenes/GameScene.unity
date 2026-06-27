@@ -535,7 +535,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: -0.21217771, y: 0, z: 0, w: 0.97723114}
-  m_LocalPosition: {x: 0, y: -2.4, z: -4.3}
+  m_LocalPosition: {x: 0, y: -3.19, z: -5.53}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -939,6 +939,8 @@ MonoBehaviour:
     orGate: {fileID: 3804965436788688523, guid: bf3f155976b711347aec73e7cffd08bc, type: 3}
     splitGate: {fileID: 3804965436788688523, guid: 1ee60811b6ed28841a742d190b878886, type: 3}
     xorGate: {fileID: 3804965436788688523, guid: 4337fb6e97bf0ad489cd5565a158a26c, type: 3}
+    andBridgeGate: {fileID: 3804965436788688523, guid: 26ef7b75ffd92764e81e7461f57a88a9, type: 3}
+    notBridgeGate: {fileID: 3804965436788688523, guid: b5112de01d7773542a39ef82d24e4605, type: 3}
   tileMesh: {fileID: -4855243574250553854, guid: 6115c12be383ab940a1a44ad8bb2bdd2, type: 3}
 --- !u!1 &959619865
 GameObject:

@@ -10,69 +10,77 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f10df99362435f4ca4d61c2fdb3cc79, type: 3}
-  m_Name: Stage 1
+  m_Name: Stage5
   m_EditorClassIdentifier: Assembly-CSharp::Lumencuit.StageData
-  StageId: Stage1
+  StageId: Stage5
   Width: 5
   Height: 5
   PrePlacedBlueprints: []
   Blueprints:
   - blueprint:
-      rid: 5301989677406880355
+      rid: 5301989726950261199
     count: 1
   - blueprint:
-      rid: 5301989610909335625
+      rid: 5301989726950261205
     count: 1
   - blueprint:
-      rid: 5301989610909335627
+      rid: 5301989726950261233
     count: 1
   - blueprint:
-      rid: 5301989610909335629
+      rid: 5301989726950261212
     count: 1
   - blueprint:
-      rid: 5301989610909335631
+      rid: 5301989726950261214
     count: 1
   - blueprint:
-      rid: 5301989610909335632
-    count: 1
+      rid: 5301989726950261215
+    count: 2
   Goals:
   - signal:
-      mask: 2
+      mask: 65
     turbidityCondition:
       rid: 5301989220222238785
     count: 1
-  enabledTiles: 01010101010101010101010101010101010101010101010101
+  - signal:
+      mask: 2
+    turbidityCondition:
+      rid: 5301989726950261216
+    count: 1
+  enabledTiles: 01010100000101010101010101010101010101010000010101
   references:
     version: 2
     RefIds:
     - rid: 5301989220222238785
       type: {class: NoTurbidityCondition, ns: Lumencuit, asm: Assembly-CSharp}
       data: 
-    - rid: 5301989610909335625
+    - rid: 5301989726950261199
       type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 2
         signal:
-          mask: 4
-    - rid: 5301989610909335627
+          mask: 130
+    - rid: 5301989726950261205
+      type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+      data:
+        type: 2
+        signal:
+          mask: 2
+    - rid: 5301989726950261212
       type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 6
-    - rid: 5301989610909335629
+    - rid: 5301989726950261214
       type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
-        type: 1
-    - rid: 5301989610909335631
-      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
-      data:
-        type: 7
-    - rid: 5301989610909335632
+        type: 8
+    - rid: 5301989726950261215
       type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
         type: 0
-    - rid: 5301989677406880355
-      type: {class: ColoredBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
+    - rid: 5301989726950261216
+      type: {class: NoTurbidityCondition, ns: Lumencuit, asm: Assembly-CSharp}
+      data: 
+    - rid: 5301989726950261233
+      type: {class: EntityBlueprint, ns: Lumencuit, asm: Assembly-CSharp}
       data:
-        type: 2
-        signal:
-          mask: 34
+        type: 5

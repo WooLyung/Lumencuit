@@ -15,7 +15,8 @@ namespace Lumencuit
         public enum CircuitElementType
         {
             Lamp, LampBridge, Source, Wire, SignalGenerator,
-            AndGate, NotGate, OrGate, SplitGate, XorGate
+            AndGate, NotGate, OrGate, SplitGate, XorGate,
+            AndBridgeGate, NotBridgeGate
         }
 
         public abstract CircuitElementType Type { get; }
@@ -67,6 +68,8 @@ namespace Lumencuit
                 CircuitElementType.SplitGate => SplitGate.Instance,
                 CircuitElementType.XorGate => XorGate.Instance,
                 CircuitElementType.SignalGenerator => SignalGenerator.Instance,
+                CircuitElementType.AndBridgeGate => AndBridgeGate.Instance,
+                CircuitElementType.NotBridgeGate => NotBridgeGate.Instance,
                 _ => null
             };
         }

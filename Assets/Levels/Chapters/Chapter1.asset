@@ -1,0 +1,187 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d72948e5d0967024a9affd1751512f38, type: 3}
+  m_Name: Chapter1
+  m_EditorClassIdentifier: Assembly-CSharp::Lumencuit.ChapterData
+  ChapterId: 
+  Width: 7
+  Height: 7
+  tiles:
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 1
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 4
+    InputDirections: 8
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 8
+  - Enabled: 1
+    StageNumber: 3
+    InputDirections: 8
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 8
+  - Enabled: 1
+    StageNumber: 2
+    InputDirections: 8
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 2
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 8
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 2
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 5
+    InputDirections: 2
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 2
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 4
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 6
+    InputDirections: 2
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 4
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 4
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 1
+    StageNumber: 7
+    InputDirections: 2
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  - Enabled: 0
+    StageNumber: 0
+    InputDirections: 0
+  StageInfos:
+  - StageNumber: 1
+    StageData: {fileID: 11400000, guid: 1270a3e070b95944194e36f2d911da56, type: 2}
+    IsHard: 0
+  - StageNumber: 2
+    StageData: {fileID: 11400000, guid: 034b2b5521bc96042bec3598b3d02373, type: 2}
+    IsHard: 0
+  - StageNumber: 3
+    StageData: {fileID: 11400000, guid: 6d279cc4c884c0143b651ec3f6dd9813, type: 2}
+    IsHard: 0
+  - StageNumber: 4
+    StageData: {fileID: 11400000, guid: d0c062c728947be45a5659fa60e33344, type: 2}
+    IsHard: 1
+  - StageNumber: 5
+    StageData: {fileID: 11400000, guid: b443b76b2fd47ba4f83ef00dcb7bba88, type: 2}
+    IsHard: 0
+  - StageNumber: 6
+    StageData: {fileID: 11400000, guid: 0b4c33db1bd81d543b88690421efcae7, type: 2}
+    IsHard: 0
+  - StageNumber: 7
+    StageData: {fileID: 11400000, guid: d8286ae371317e745b37154394efb16b, type: 2}
+    IsHard: 1

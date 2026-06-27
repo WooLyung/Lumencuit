@@ -204,12 +204,12 @@ namespace Lumencuit
                 for (int y = 0; y < chapterData.Height; y++)
                 {
                     if (!chapterData.IsEnabledTile(x, y))
-                        break;
+                        continue;
 
                     int stageNumber = chapterData.GetStageNumber(x, y);
                     if (stageNumber >= 1)
                     {
-                        ChapterData.ChapterStageInfo info = chapterData.GetStageInfo(stageNumber);
+                        ChapterStageInfo info = chapterData.GetStageInfo(stageNumber);
                         GameObject view;
 
                         if (info.IsHard)
@@ -220,6 +220,8 @@ namespace Lumencuit
                         view.name = $"Stage[{stageNumber}]";
 
                         ViewObject viewObject = view.GetComponent<ViewObject>();
+                        if (viewObject is ElementLampViewObject v2)
+                            v2.SetLampSignal(red);
                         viewObject.PortUpdate(GetPorts(x, y));
                         views[x, y] = viewObject;
                     }
