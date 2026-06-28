@@ -19,6 +19,7 @@ namespace Lumencuit
         [SerializeField] private GameObject blueprint;
 
         private InputSystem inputSystem;
+        private readonly int BlueprintWidth = 300;
 
         public void Init(WorldSystem worldSystem, InputSystem inputSystem, SimulationSystem simulationSystem, StageData stageData)
         {
@@ -32,7 +33,7 @@ namespace Lumencuit
 
         private void WriteGoals(StageData stageData)
         {
-            goals.text = "<목표>\n";
+            goals.text = $"{"Goals".Translate()}\n";
             foreach (StageGoal goal in stageData.Goals)
                 goals.text += $"- {goal.Signal} * {goal.Count}\n";
         }
@@ -55,7 +56,7 @@ namespace Lumencuit
                 }
 
                 newBlueprint.name = "Blueprint";
-                ui.RectTransform.anchoredPosition = new Vector2(300 * i++, ui.RectTransform.anchoredPosition.y);
+                ui.RectTransform.anchoredPosition = new Vector2(BlueprintWidth * i++, ui.RectTransform.anchoredPosition.y);
                 ui.Blueprint = bp.Blueprint.Clone();
                 ui.SetInGameUIAdaptor(this);
 
@@ -65,7 +66,7 @@ namespace Lumencuit
                     ui.Text.text = $"{ui.Blueprint.Type}\nx{bp.Count}";
             }
 
-            blueprintView.sizeDelta = new Vector2(300 * i, blueprintView.sizeDelta.y);
+            blueprintView.sizeDelta = new Vector2(BlueprintWidth * i, blueprintView.sizeDelta.y);
         }
 
         public void OnGridUpdated(IEntityEventListener.GridUpdatedEvent e)

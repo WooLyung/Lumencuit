@@ -1,4 +1,5 @@
 <Texts>
+    <Text key="Goals">목표</Text>
     <Text key="CircuitResult.Fail">목표와 다른 회로 구성입니다.</Text>
     <Text key="CircuitResult.IncompleteCircuit">회로가 완성되지 않았습니다.</Text>
     <Text key="CircuitResult.CantReach">도달할 수 없는 요소가 있습니다.</Text>

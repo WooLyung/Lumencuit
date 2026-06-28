@@ -1,0 +1,10 @@
+<Texts>
+    <Text key="Goals">Goals</Text>
+    <Text key="CircuitResult.Fail">The circuit does not match the goal.</Text>
+    <Text key="CircuitResult.IncompleteCircuit">The circuit is incomplete.</Text>
+    <Text key="CircuitResult.CantReach">Some elements cannot be reached.</Text>
+    <Text key="CircuitResult.HasCycle">The circuit contains a cycle.</Text>
+    <Text key="CircuitResult.MultipleSignalGenerators">There is more than one signal generator in a cycle.</Text>
+    <Text key="CircuitResult.UnplacedBlueprint">There are unused blueprints.</Text>
+    <Text key="CircuitResult.Success">All stage goals have been met.</Text>
+</Texts>
