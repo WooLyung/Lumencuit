@@ -82,19 +82,19 @@ namespace Lumencuit
         {
             CircuitResult result = e.Result;
             if (result == CircuitResult.Fail)
-                circuitResult.text = "목표와 다른 회로 구성";
+                circuitResult.text = "CircuitResult.Fail".Translate();
             else if (result == CircuitResult.IncompleteCircuit)
-                circuitResult.text = "완성되지 않은 회로";
+                circuitResult.text = "CircuitResult.IncompleteCircuit".Translate();
             else if (result == CircuitResult.CantReach)
-                circuitResult.text = "도달 불가능한 요소";
+                circuitResult.text = "CircuitResult.CantReach".Translate();
             else if (result == CircuitResult.HasCycle)
-                circuitResult.text = "사이클이 있음";
+                circuitResult.text = "CircuitResult.HasCycle".Translate();
             else if (result == CircuitResult.MultipleSignalGenerators)
-                circuitResult.text = "너무 많은 신호 생성기";
+                circuitResult.text = "CircuitResult.MultipleSignalGenerators".Translate();
             else if (result == CircuitResult.UnplacedBlueprint)
-                circuitResult.text = "설치되지 않은 청사진";
+                circuitResult.text = "CircuitResult.UnplacedBlueprint".Translate();
             else if (result == CircuitResult.Success)
-                circuitResult.text = "성공!";
+                circuitResult.text = "CircuitResult.Success".Translate();
         }
     }
 }

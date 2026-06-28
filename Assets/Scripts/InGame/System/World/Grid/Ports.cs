@@ -2,7 +2,7 @@ using System;
 
 namespace Lumencuit
 {
-public partial class Entity
+    public partial class Entity
     {
         /// <summary>
         /// 회로 요소의 네 면의 입출력 여부를 나타냅니다.

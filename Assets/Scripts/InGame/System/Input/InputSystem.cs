@@ -335,7 +335,7 @@ namespace Lumencuit
         protected void Back()
         {
             SaveManagement.ClearCurrentStage();
-            SceneManager.LoadScene("StageSelectScene");
+            SceneManager.LoadScene(SceneNames.StageSelect);
         }
     }
 }

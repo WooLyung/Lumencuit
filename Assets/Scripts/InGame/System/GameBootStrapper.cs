@@ -31,8 +31,8 @@ namespace Lumencuit
                 return;
             }
 
-            Destroy(context.gameObject);
             StageData stageData = context.SelectedStage;
+            Destroy(context.gameObject);
 
             if (stageData == null)
             {

@@ -1,4 +1,3 @@
-using UnityEngine;
 using static Lumencuit.ISimulationEventListener;
 
 namespace Lumencuit

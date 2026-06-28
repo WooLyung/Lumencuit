@@ -18,7 +18,7 @@ namespace Lumencuit
         public void StartStage(StageData stageData)
         {
             selectedStage = stageData;
-            SceneManager.LoadScene("GameScene");
+            SceneManager.LoadScene(SceneNames.Game);
         }
 
         public StageData SelectedStage => selectedStage;

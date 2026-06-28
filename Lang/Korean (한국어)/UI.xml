@@ -1,4 +1,9 @@
 <Texts>
-    <Text key="Success">성공</Text>
-    <Text key="Fail">실패 {0}</Text>
+    <Text key="CircuitResult.Fail">목표와 다른 회로 구성입니다.</Text>
+    <Text key="CircuitResult.IncompleteCircuit">회로가 완성되지 않았습니다.</Text>
+    <Text key="CircuitResult.CantReach">도달할 수 없는 요소가 있습니다.</Text>
+    <Text key="CircuitResult.HasCycle">사이클이 존재합니다.</Text>
+    <Text key="CircuitResult.MultipleSignalGenerators">한 사이클에 신호 생성기가 둘 이상입니다.</Text>
+    <Text key="CircuitResult.UnplacedBlueprint">사용하지 않은 청사진이 있습니다.</Text>
+    <Text key="CircuitResult.Success">스테이지의 목표를 모두 충족했습니다.</Text>
 </Texts>
