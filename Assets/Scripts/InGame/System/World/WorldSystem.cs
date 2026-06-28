@@ -26,6 +26,14 @@ namespace Lumencuit
             this.stageData = stageData;
         }
 
+        public IEnumerable<EntityBlueprintStack> GetBlueprints()
+        {
+            List<EntityBlueprintStack> result = new();
+            foreach (var blueprint in blueprints)
+                result.Add(blueprint.Clone());
+            return result;
+        }
+
         public void Init()
         {
             foreach (EntityBlueprintStack blueprint in stageData.Blueprints)

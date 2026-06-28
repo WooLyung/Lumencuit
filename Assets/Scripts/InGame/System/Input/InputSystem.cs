@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Lumencuit
 {
@@ -215,7 +216,7 @@ namespace Lumencuit
         /// <summary>
         /// 청사진을 선택합니다.
         /// </summary>
-        protected void SelectBlueprint(EntityBlueprint blueprint)
+        public void SelectBlueprint(EntityBlueprint blueprint)
         {
             if (stageController.IsCleared)
                 return;
@@ -329,6 +330,12 @@ namespace Lumencuit
                 worldSystem.TryCreateWire(path);
 
             path.Clear();
+        }
+
+        protected void Back()
+        {
+            SaveManagement.ClearCurrentStage();
+            SceneManager.LoadScene("StageSelectScene");
         }
     }
 }

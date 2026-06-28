@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using static Lumencuit.ISimulationEventListener;
 
 namespace Lumencuit
 {
@@ -29,35 +28,17 @@ namespace Lumencuit
         private readonly RenderPrefab prefabs;
         private readonly Mesh tileMesh;
         private readonly ViewRoot viewRoot;
-        private readonly StageData stageData;
         private readonly Dictionary<Vector2Int, View> views = new();
 
-        public RenderSystem(WorldSystem worldSystem, SimulationSystem simulationSystem, RenderPrefab prefabs, Mesh tileMesh, ViewRoot viewRoot, StageData stageData)
+        public RenderSystem(WorldSystem worldSystem, SimulationSystem simulationSystem, RenderPrefab prefabs, Mesh tileMesh, ViewRoot viewRoot)
         {
             this.worldSystem = worldSystem;
             this.prefabs = prefabs;
             this.tileMesh = tileMesh;
             this.viewRoot = viewRoot;
-            this.stageData = stageData;
 
-            worldSystem.AddListener(this);
             simulationSystem.AddListener(this);
-
-            var gui = GameObject.Find("StageData").GetComponent<TextMeshProUGUI>();
-            gui.text += "<Blueprints>\n";
-            foreach (EntityBlueprintStack entityBlueprintStack in stageData.Blueprints)
-            {
-                if (entityBlueprintStack.Blueprint is ColoredBlueprint coloredBlueprint)
-                    gui.text += $"- {coloredBlueprint.Type}[{coloredBlueprint.Signal}] * {entityBlueprintStack.Count}\n";
-                else
-                    gui.text += $"- {entityBlueprintStack.Blueprint.Type} * {entityBlueprintStack.Count}\n";
-            }
-
-
-            gui.text += "\n<Goals>\n";
-            foreach (StageGoal goal in stageData.Goals)
-                gui.text += $"- {goal.Signal} * {goal.Count}\n";
-
+            worldSystem.AddListener(this);
             RenderGrid();
         }
 
@@ -148,27 +129,6 @@ namespace Lumencuit
         {
             if (views.TryGetValue(e.Pos, out View view))
                 view.ViewObject.SetPortSignal(e.Dir, e.Signal);
-        }
-
-        public void OnCircuitResultEvent(CircuitResultEvent e)
-        {
-            CircuitResult result = e.Result;
-            var gui = GameObject.Find("CircuitResult").GetComponent<TextMeshProUGUI>();
-
-            if (result == CircuitResult.Fail)
-                gui.text = "목표와 다른 회로 구성";
-            else if (result == CircuitResult.IncompleteCircuit)
-                gui.text = "완성되지 않은 회로";
-            else if (result == CircuitResult.CantReach)
-                gui.text = "도달 불가능한 요소";
-            else if (result == CircuitResult.HasCycle)
-                gui.text = "사이클이 있음";
-            else if (result == CircuitResult.MultipleSignalGenerators)
-                gui.text = "너무 많은 신호 생성기";
-            else if (result == CircuitResult.UnplacedBlueprint)
-                gui.text = "설치되지 않은 청사진";
-            else if (result == CircuitResult.Success)
-                gui.text = "성공!";
         }
     }
 }

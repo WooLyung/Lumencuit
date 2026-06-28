@@ -11,6 +11,7 @@ namespace Lumencuit
         // 인스펙터 노출 변수
         [SerializeField] private ViewRoot viewRoot;
         [SerializeField] private RenderRegistry renderRegistry;
+        [SerializeField] private InGameUIAdaptor gameUIAdaptor;
 
         // 시스템
         private WorldSystem worldSystem;
@@ -44,7 +45,7 @@ namespace Lumencuit
             worldSystem = new(stageData);
             simulationSystem = new(worldSystem, stageData);
             stageController = new(simulationSystem);
-            renderSystem = new(worldSystem, simulationSystem, renderRegistry.Prefabs, renderRegistry.TileMesh, viewRoot, stageData);
+            renderSystem = new(worldSystem, simulationSystem, renderRegistry.Prefabs, renderRegistry.TileMesh, viewRoot);
 #if UNITY_ANDROID || UNITY_IOS
             inputSystem = new NullInputSystem(worldSystem, stageController);
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX || UNITY_EDITOR
@@ -55,6 +56,7 @@ namespace Lumencuit
 
             // 초기화
             worldSystem.Init();
+            gameUIAdaptor.Init(worldSystem, inputSystem, simulationSystem, stageData);
         }
 
         private void Start()

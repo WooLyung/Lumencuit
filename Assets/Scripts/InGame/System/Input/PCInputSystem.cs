@@ -120,24 +120,9 @@ namespace Lumencuit
             if (keyboard.xKey.wasPressedThisFrame)
                 Redo();
 
-            if (keyboard.digit1Key.wasPressedThisFrame && stageData.Blueprints.Count >= 1)
-                SelectBlueprint(stageData.Blueprints[0].Blueprint);
-            if (keyboard.digit2Key.wasPressedThisFrame && stageData.Blueprints.Count >= 2)
-                SelectBlueprint(stageData.Blueprints[1].Blueprint);
-            if (keyboard.digit3Key.wasPressedThisFrame && stageData.Blueprints.Count >= 3)
-                SelectBlueprint(stageData.Blueprints[2].Blueprint);
-            if (keyboard.digit4Key.wasPressedThisFrame && stageData.Blueprints.Count >= 4)
-                SelectBlueprint(stageData.Blueprints[3].Blueprint);
-            if (keyboard.digit5Key.wasPressedThisFrame && stageData.Blueprints.Count >= 5)
-                SelectBlueprint(stageData.Blueprints[4].Blueprint);
-            if (keyboard.digit6Key.wasPressedThisFrame && stageData.Blueprints.Count >= 6)
-                SelectBlueprint(stageData.Blueprints[5].Blueprint);
-            if (keyboard.digit7Key.wasPressedThisFrame && stageData.Blueprints.Count >= 7)
-                SelectBlueprint(stageData.Blueprints[6].Blueprint);
-            if (keyboard.digit8Key.wasPressedThisFrame && stageData.Blueprints.Count >= 8)
-                SelectBlueprint(stageData.Blueprints[7].Blueprint);
-            if (keyboard.digit9Key.wasPressedThisFrame && stageData.Blueprints.Count >= 9)
-                SelectBlueprint(stageData.Blueprints[8].Blueprint);
+            // ESC: 스테이지 선택으로 돌아가기
+            if (keyboard.escapeKey.wasPressedThisFrame)
+                Back();
         }
     }
 }
