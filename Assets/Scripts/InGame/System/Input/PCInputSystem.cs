@@ -71,16 +71,14 @@ namespace Lumencuit
         public override void Update()
         {
             base.Update();
-
-            if (stageController.IsCleared)
-                return;
-
             KeyboardUpdate();
             MouseUpdate();
         }
 
         private void MouseUpdate()
         {
+            if (stageController.IsCleared)
+                return;
             if (IsPointerBlockedByUI())
                 return;
             if (!TryGetPointerTilePos(out Vector2Int pos))
@@ -98,6 +96,13 @@ namespace Lumencuit
         {
             Keyboard keyboard = Keyboard.current;
             if (keyboard == null)
+                return;
+
+            // ESC: 스테이지 선택으로 돌아가기
+            if (keyboard.escapeKey.wasPressedThisFrame)
+                Back();
+
+            if (stageController.IsCleared)
                 return;
 
             // Q: 삭제
@@ -119,10 +124,6 @@ namespace Lumencuit
             // X: redo
             if (keyboard.xKey.wasPressedThisFrame)
                 Redo();
-
-            // ESC: 스테이지 선택으로 돌아가기
-            if (keyboard.escapeKey.wasPressedThisFrame)
-                Back();
         }
     }
 }
